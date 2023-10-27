@@ -82,23 +82,47 @@ h1{
   line-height: 1.2;
 }
 
+.bottom-center {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    text-align: center;
+        }
 
 /* Ends */
 
-#author{
-  font-family: Helvetica, Arial;
-  text-transform: uppercase;
-  font-size: 14px;
-  text-decoration: none;
-  position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  color: #888;
+.author {
+    font-family: Helvetica, Arial;
+    text-transform: uppercase;
+    font-size: 14px;
+    text-decoration: none;
+    position: fixed;
+    bottom: 25px;
+    left: 45%;
+    transform: translateX(-50%);
+    color: #888;
+    margin: 0 5px; 
+    padding: 0px 0px; 
 }
-
-#author:hover{
-  color: #111;
+.author2 {
+    font-family: Helvetica, Arial;
+    text-transform: uppercase;
+    font-size: 14px;
+    text-decoration: none;
+    position: fixed;
+    bottom: 25px;
+    left: 55%;
+    transform: translateX(-50%);
+    color: #888;
+    margin: 0 5px; 
+    padding: 0px 0px; 
+}
+.author:hover {
+    color: #111;
+}
+.author2:hover {
+    color: #111;
 }
 </style>
 
@@ -121,9 +145,11 @@ h1{
   </div>
 </a>
 
-
-<a href="https://www.linkedin.com/in/rakshita-gupta-4571a7251/" target="_blank" id="author">LinkedIn</a>
-  
+<div class="bottom-center">
+    <a href="https://www.linkedin.com/in/rakshita-gupta-4571a7251/" target="_blank" class="author">LinkedIn</a>
+    <br>
+    <a href="https://github.com/rakkicow/" target="_blank" class="author2">Github</a>
+    </div>
   
   
 </body>
