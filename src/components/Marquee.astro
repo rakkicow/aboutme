@@ -11,7 +11,7 @@ const items = [
 const loop = [...items, ...items, ...items];
 ---
 
-<section class="relative my-0 sm:-my-6 overflow-hidden border-y py-8 sm:py-10" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
+<section class="relative shrink-0 overflow-hidden border-y py-8 sm:py-10" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
   {/* JS-driven horizontal scroll — trackpad / wheel / drag all push the marquee sideways. */}
   <div
     data-marquee
@@ -35,8 +35,9 @@ const loop = [...items, ...items, ...items];
   <div class="pointer-events-none absolute inset-y-0 left-0 w-32" style="background: linear-gradient(90deg, var(--canvas), transparent);"></div>
   <div class="pointer-events-none absolute inset-y-0 right-0 w-32" style="background: linear-gradient(270deg, var(--canvas), transparent);"></div>
 
-  {/* Hint */}
-  <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-[0.3em]" style="color: var(--ink-faint);">Scroll to View · Hold to Pause</p>
+  {/* Hint — short on narrow viewports, long on wider ones */}
+  <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] uppercase tracking-[0.3em] sm:hidden" style="color: var(--ink-faint);">Scroll · Drag · Hold</p>
+  <p class="pointer-events-none absolute bottom-1 left-1/2 hidden -translate-x-1/2 whitespace-nowrap text-[9px] uppercase tracking-[0.3em] sm:block" style="color: var(--ink-faint);">Scroll or Drag to View · Hold to Pause</p>
 </section>
 
 <script>

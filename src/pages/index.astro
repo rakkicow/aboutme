@@ -11,8 +11,12 @@ import Contact from '~/components/Contact.astro';
 ---
 
 <Base>
-  <Hero />
-  <Marquee />
+  {/* Hero band — together hero + marquee fill the first viewport at any width,
+       so the marquee always parks at the bottom edge and About never peeks. */}
+  <div class="flex min-h-[100svh] flex-col">
+    <Hero />
+    <Marquee />
+  </div>
   <About />
   <Work />
   <Reel />
