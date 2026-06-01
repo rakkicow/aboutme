@@ -65,9 +65,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
     <p class="mt-10 max-w-2xl text-lg leading-relaxed sm:text-xl" style="color: var(--ink-muted);">
       Junior in <span style="color: var(--ink);">Computer Engineering</span> at
-      <span style="color: var(--ink);">Purdue</span>, with minors in Psychology,
-      Entrepreneurship, and AI. I build at the seam where hardware meets software —
-      soldered circuits, 3D-printed enclosures, and quietly opinionated interfaces.
+      <span style="color: var(--ink);">Purdue University</span> with minors in <span style="color: var(--ink);">Psychology</span> and <span style="color: var(--ink);">Entrepreneurship</span>. <span data-typewriter style="color: var(--ink);">I write code</span><span class="typewriter-caret" aria-hidden="true">|</span>.
     </p>
 
     {/* CTAs */}
@@ -82,6 +80,93 @@ import MeshGradient from '~/components/MeshGradient.astro';
         Say hi
       </a>
     </div>
+
+    <style>
+      .typewriter-caret {
+        display: inline-block;
+        margin-left: 1px;
+        color: var(--cow-pink);
+        font-weight: 300;
+        animation: tw-blink 1.05s steps(1, end) infinite;
+      }
+      @keyframes tw-blink {
+        50% { opacity: 0; }
+      }
+    </style>
+
+    <script>
+      (() => {
+        const target = document.querySelector<HTMLElement>('[data-typewriter]');
+        if (!target) return;
+
+        const phrases = [
+          'I write code',
+          'I edit videos',
+          'I take pictures',
+          'I film movies',
+          'I make apps',
+          'I like cows',
+          'I write code',
+        ];
+
+        let phraseIdx = 0;
+        let charIdx = phrases[0].length; // text starts pre-rendered, so begin at full length
+        const finalIdx = phrases.length - 1;
+        const TYPE_MS = 70;
+        const DELETE_MS = 38;
+        const HOLD_AFTER_TYPE = 1500;
+        const HOLD_BEFORE_DELETE = 600;
+
+        const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+        const set = (txt: string) => { target.textContent = txt; };
+
+        const type = async () => {
+          while (charIdx < phrases[phraseIdx].length) {
+            charIdx++;
+            set(phrases[phraseIdx].slice(0, charIdx));
+            await sleep(TYPE_MS);
+          }
+        };
+
+        const erase = async () => {
+          while (charIdx > 0) {
+            charIdx--;
+            set(phrases[phraseIdx].slice(0, charIdx));
+            await sleep(DELETE_MS);
+          }
+        };
+
+        const run = async () => {
+          // initial pause so the user reads "I write code" first
+          await sleep(HOLD_AFTER_TYPE);
+          while (phraseIdx < finalIdx) {
+            await sleep(HOLD_BEFORE_DELETE);
+            await erase();
+            phraseIdx += 1;
+            await type();
+            await sleep(HOLD_AFTER_TYPE);
+          }
+          // Settle on the final phrase — stop animating, keep caret blinking.
+        };
+
+        // Only run when the hero is in view (cheap check on mount; small page).
+        if (typeof IntersectionObserver !== 'undefined') {
+          const io = new IntersectionObserver((entries, obs) => {
+            for (const e of entries) {
+              if (e.isIntersecting) {
+                run();
+                obs.disconnect();
+                break;
+              }
+            }
+          }, { rootMargin: '0px' });
+          io.observe(target);
+        } else {
+          run();
+        }
+      })();
+    </script>
 
     {/* Meta strip */}
     <div class="mt-24 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-12">
