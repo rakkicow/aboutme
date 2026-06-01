@@ -11,7 +11,7 @@ const items = [
 const loop = [...items, ...items, ...items];
 ---
 
-<section class="relative my-0 sm:-my-10 overflow-hidden border-y py-12" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
+<section class="relative my-0 sm:-my-6 overflow-hidden border-y py-8 sm:py-10" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
   {/* JS-driven horizontal scroll — trackpad / wheel / drag all push the marquee sideways. */}
   <div
     data-marquee
@@ -36,7 +36,7 @@ const loop = [...items, ...items, ...items];
   <div class="pointer-events-none absolute inset-y-0 right-0 w-32" style="background: linear-gradient(270deg, var(--canvas), transparent);"></div>
 
   {/* Hint */}
-  <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-[0.3em]" style="color: var(--ink-faint);">scroll · drag · trackpad</p>
+  <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-[0.3em]" style="color: var(--ink-faint);">Scroll to View · Hold to Pause</p>
 </section>
 
 <script>
@@ -78,6 +78,11 @@ const loop = [...items, ...items, ...items];
 
     track.addEventListener('mouseenter', () => { paused = true; });
     track.addEventListener('mouseleave', () => { paused = false; });
+
+    // Touch: holding the marquee pauses the auto-scroll, releasing resumes.
+    track.addEventListener('touchstart', () => { paused = true; }, { passive: true });
+    track.addEventListener('touchend', () => { paused = false; }, { passive: true });
+    track.addEventListener('touchcancel', () => { paused = false; }, { passive: true });
 
     // Wheel — convert vertical (trackpad) scroll to horizontal marquee scroll.
     // Vertical page scroll is preserved when the user's gesture is clearly vertical
