@@ -84,29 +84,31 @@ const COW_SRC = '/assets/cow.png';
       const x = (e.clientX - rect.left) * dpr;
       const y = (e.clientY - rect.top) * dpr;
       const now = performance.now();
-      // Throttle slightly so we don't drown the canvas
       if (now - lastDrop < 18) return;
       lastDrop = now;
       drops.push({ x, y, t: now, r: 36 * dpr });
     });
 
-    host.addEventListener('mouseleave', () => {
-      lastDrop = 0;
-    });
+    host.addEventListener('mouseleave', () => { lastDrop = 0; });
 
-    const LIFESPAN = 2500; // ms
+    const LIFESPAN = 2500;
+
+    // Gate the RAF loop on viewport visibility — no point painting an off-screen cow
+    let onScreen = false;
+    let rafId: number | null = null;
 
     const render = () => {
+      if (!onScreen && !drops.length) {
+        rafId = null;
+        return;
+      }
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const now = performance.now();
-
-      // Drop expired drops
       while (drops.length && now - drops[0].t > LIFESPAN) drops.shift();
 
-      ctx.globalCompositeOperation = 'source-over';
       for (const d of drops) {
         const age = (now - d.t) / LIFESPAN;
-        const alpha = Math.pow(1 - age, 1.4); // ease-out
+        const alpha = Math.pow(1 - age, 1.4);
         const radius = d.r * (1 + age * 0.8);
         const grad = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, radius);
         grad.addColorStop(0, `rgba(220, 155, 181, ${alpha})`);
@@ -118,8 +120,15 @@ const COW_SRC = '/assets/cow.png';
         ctx.fill();
       }
 
-      requestAnimationFrame(render);
+      rafId = requestAnimationFrame(render);
     };
-    requestAnimationFrame(render);
+
+    const start = () => { if (rafId === null) rafId = requestAnimationFrame(render); };
+
+    const io = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      if (onScreen) start();
+    }, { rootMargin: '100px' });
+    io.observe(stage);
   });
 </script>

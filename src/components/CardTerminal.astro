@@ -110,7 +110,7 @@
     window.addEventListener('resize', updateRes);
   }
 
-  // Typing prompt loop
+  // Typing prompt loop — only runs while the terminal is on-screen
   const commands = [
     'git push origin main',
     'astro dev',
@@ -118,25 +118,53 @@
     'echo "moo 🐄"',
     'cat skills.txt',
   ];
-  let i = 0;
-  const tick = async () => {
-    const els = document.querySelectorAll<HTMLElement>('.typer');
-    for (const el of els) {
-      const cmd = commands[i % commands.length];
-      el.textContent = '';
-      for (let c = 0; c < cmd.length; c++) {
-        el.textContent += cmd[c];
-        await new Promise((r) => setTimeout(r, 70 + Math.random() * 60));
+
+  const typerEls = document.querySelectorAll<HTMLElement>('.typer');
+  if (typerEls.length) {
+    let onScreen = false;
+    let running = false;
+    let i = 0;
+
+    const wait = (ms: number) =>
+      new Promise<void>((resolve) => {
+        const start = performance.now();
+        const check = () => {
+          if (!onScreen) return resolve(); // bail early when off-screen
+          if (performance.now() - start >= ms) return resolve();
+          requestAnimationFrame(check);
+        };
+        check();
+      });
+
+    const loop = async () => {
+      if (running) return;
+      running = true;
+      while (onScreen) {
+        for (const el of typerEls) {
+          const cmd = commands[i % commands.length];
+          el.textContent = '';
+          for (let c = 0; c < cmd.length; c++) {
+            if (!onScreen) break;
+            el.textContent += cmd[c];
+            await wait(70 + Math.random() * 60);
+          }
+          await wait(1800);
+          for (let c = cmd.length; c > 0; c--) {
+            if (!onScreen) break;
+            el.textContent = cmd.slice(0, c - 1);
+            await wait(30);
+          }
+          await wait(400);
+        }
+        i++;
       }
-      await new Promise((r) => setTimeout(r, 1800));
-      for (let c = cmd.length; c > 0; c--) {
-        el.textContent = cmd.slice(0, c - 1);
-        await new Promise((r) => setTimeout(r, 30));
-      }
-      await new Promise((r) => setTimeout(r, 400));
-    }
-    i++;
-    tick();
-  };
-  if (document.querySelector('.typer')) tick();
+      running = false;
+    };
+
+    const io = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      if (onScreen) loop();
+    }, { rootMargin: '100px' });
+    io.observe(typerEls[0]);
+  }
 </script>

@@ -11,19 +11,19 @@ const items = [
 const loop = [...items, ...items, ...items];
 ---
 
-<section class="relative -my-10 overflow-hidden border-y py-8" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
+<section class="relative -my-10 overflow-hidden border-y py-12" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
   {/* JS-driven horizontal scroll — trackpad / wheel / drag all push the marquee sideways. */}
   <div
     data-marquee
-    class="no-scrollbar relative flex overflow-x-auto overflow-y-hidden whitespace-nowrap will-change-scroll"
+    class="no-scrollbar relative flex overflow-x-auto overflow-y-hidden whitespace-nowrap will-change-scroll py-2"
     style="overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
     role="region"
     aria-label="Skills marquee — scroll horizontally or drag to scrub"
   >
     {loop.map((item, i) => (
-      <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium sm:text-4xl">
+      <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium leading-[1.4] sm:text-4xl">
         <span
-          class={`font-display ${i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : ''}`}
+          class={`font-display inline-block pb-1.5 ${i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : ''}`}
           style={i % 4 !== 0 && i % 3 !== 0 ? 'color: var(--ink-soft);' : ''}
         >{item}</span>
         <span class="inline-block h-2 w-2 rounded-full bg-cow-300"></span>
@@ -53,17 +53,28 @@ const loop = [...items, ...items, ...items];
       track.scrollLeft = track.scrollWidth / 3;
     });
 
-    // Auto-scroll loop — paused on hover or active interaction
+    // Auto-scroll loop — paused on hover, active interaction, or when off-screen
     let paused = false;
+    let onScreen = false;
     let interactionUntil = 0;
+    let rafId: number | null = null;
+
     const tick = () => {
+      if (!onScreen) { rafId = null; return; }
       if (!paused && Date.now() > interactionUntil) {
         track.scrollLeft += 0.6;
         settleLoop();
       }
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+
+    const start = () => { if (rafId === null) rafId = requestAnimationFrame(tick); };
+
+    const io = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      if (onScreen) start();
+    }, { rootMargin: '50px' });
+    io.observe(track);
 
     track.addEventListener('mouseenter', () => { paused = true; });
     track.addEventListener('mouseleave', () => { paused = false; });

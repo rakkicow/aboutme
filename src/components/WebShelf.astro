@@ -2,30 +2,46 @@
 import { webShelf } from '~/data/projects';
 ---
 
-<div id="web-shelf" class="mt-20 grid items-end gap-10 lg:grid-cols-[1fr,2fr]">
-  <div class="reveal">
-    <p class="eyebrow">Web shelf</p>
-    <h3 class="h2 mt-4 max-w-[18ch]">
-      The sites <br /><span class="h-italic text-gradient-pink">behind</span> the third card.
-    </h3>
-    <p class="mt-5 max-w-md text-sm leading-relaxed" style="color: var(--ink-muted);">
-      A rotating archive of small sites I've shipped for clubs, family, and
-      friends since high school. Hover any tile to peek at the live build.
-    </p>
+<div id="web-shelf" class="mt-20">
+  <div class="grid items-end gap-10 lg:grid-cols-[1fr,2fr]">
+    <div class="reveal">
+      <p class="eyebrow">Web shelf</p>
+      <h3 class="h2 mt-4 max-w-[18ch]">
+        The sites <br /><span class="h-italic text-gradient-pink">behind</span> the third card.
+      </h3>
+      <p class="mt-5 max-w-md text-sm leading-relaxed" style="color: var(--ink-muted);">
+        A rotating archive of small sites I've shipped for clubs, family, and
+        friends. Drag, scroll, or use the arrows to peek through.
+      </p>
+    </div>
+
+    {/* Arrow controls */}
+    <div class="reveal flex items-end justify-end gap-2">
+      <button type="button" data-shelf-prev class="shelf-arrow" aria-label="Scroll shelf left">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+      <button type="button" data-shelf-next class="shelf-arrow" aria-label="Scroll shelf right">
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+      </button>
+    </div>
   </div>
 
-  <div class="reveal grid gap-5 sm:grid-cols-3">
+  {/* Horizontal scroll-snap shelf */}
+  <div
+    data-shelf-track
+    class="no-scrollbar reveal mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden scroll-smooth pb-6 pt-2"
+    style="scroll-padding-left: 0.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
+  >
     {webShelf.map((s, i) => (
       <a
         href={s.href}
         target="_blank"
         rel="noopener noreferrer"
-        class="group card-lift relative block overflow-hidden rounded-2xl border"
+        class="group card-lift relative block snap-start shrink-0 w-[78vw] sm:w-[360px] lg:w-[400px] overflow-hidden rounded-2xl border"
         style="border-color: var(--hair); background: var(--surface); box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 16px -8px rgba(15,15,16,0.16);"
       >
         {/* Mini browser window */}
-        <div class="relative aspect-[4/3] w-full overflow-hidden border-b" style="border-color: var(--hair); background: var(--canvas);">
-          {/* Window chrome */}
+        <div class="relative aspect-[16/10] w-full overflow-hidden border-b" style="border-color: var(--hair); background: var(--canvas);">
           <div class="absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 border-b px-2.5 py-1.5 backdrop-blur" style="border-color: var(--hair); background: var(--surface-soft);">
             <span class="h-2 w-2 rounded-full bg-[#FF5F57]"></span>
             <span class="h-2 w-2 rounded-full bg-[#FEBC2E]"></span>
@@ -33,17 +49,18 @@ import { webShelf } from '~/data/projects';
             <span class="ml-2 flex-1 truncate rounded-md px-2 py-0.5 text-[9px]" style="background: var(--hair); color: var(--ink-muted);">{s.liveUrl}</span>
           </div>
 
-          {/* Live iframe preview */}
-          <iframe
-            src={s.liveUrl}
-            title={`${s.name} live preview`}
-            loading="lazy"
-            sandbox="allow-scripts allow-same-origin"
-            class="absolute inset-x-0 bottom-0 h-[calc(100%-1.75rem)] w-[200%] origin-top-left scale-50 border-0 transition-transform duration-700 group-hover:scale-[0.55]"
-          ></iframe>
+          <div class="absolute inset-x-0 bottom-0 top-[28px] overflow-hidden" style="background: var(--surface);">
+            <iframe
+              src={s.liveUrl}
+              title={`${s.name} live preview`}
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin"
+              class="absolute left-0 top-0 origin-top-left border-0 transition-transform duration-700 group-hover:scale-[0.55]"
+              style="width:200%;height:200%;transform:scale(0.5);"
+            ></iframe>
+          </div>
 
-          {/* Fallback overlay */}
-          <div class="pointer-events-none absolute inset-x-0 bottom-0 top-7 z-[1] grid place-items-center text-center transition-opacity duration-700 group-hover:opacity-0" style="background: linear-gradient(135deg, var(--cow-pink-soft), var(--surface));">
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[28px] z-[1] grid place-items-center text-center transition-opacity duration-700 group-hover:opacity-0" style="background: linear-gradient(135deg, var(--cow-pink-soft), var(--surface));">
             <div>
               <p class="text-[10px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Live preview</p>
               <p class="mt-1 text-sm font-medium" style="color: var(--ink-soft);">{s.name}</p>
@@ -51,21 +68,93 @@ import { webShelf } from '~/data/projects';
             </div>
           </div>
 
-          {/* Glow on hover */}
           <span class="pointer-events-none absolute inset-x-0 bottom-0 block h-px bg-gradient-to-r from-transparent via-cow-300 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
         </div>
 
-        {/* Caption */}
-        <div class="p-5">
-          <div class="flex items-start justify-between">
+        <div class="p-4">
+          <div class="flex items-baseline justify-between">
             <span class="font-mono text-[10px]" style="color: var(--ink-faint);">{`0${i + 1}`}</span>
             <span class="font-mono text-[10px]" style="color: var(--ink-faint);">{s.year}</span>
           </div>
-          <h4 class="font-display mt-3 text-lg tracking-tight" style="color: var(--ink);">{s.name}</h4>
-          <p class="mt-1.5 text-xs uppercase tracking-[0.15em] text-cow-600 dark:text-cow-300">{s.purpose}</p>
-          <p class="mt-3 text-sm leading-relaxed" style="color: var(--ink-muted);">{s.detail}</p>
+          <h4 class="font-display mt-2 text-lg leading-tight tracking-tight" style="color: var(--ink);">{s.name}</h4>
+          <p class="mt-1 text-[10px] uppercase tracking-[0.15em] text-cow-600 dark:text-cow-300">{s.purpose}</p>
+          <p class="mt-2 text-xs leading-snug" style="color: var(--ink-muted);">{s.detail}</p>
         </div>
       </a>
     ))}
   </div>
 </div>
+
+<style>
+  .shelf-arrow {
+    display: inline-grid;
+    place-items: center;
+    height: 38px;
+    width: 38px;
+    border-radius: 999px;
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    color: var(--ink);
+    transition: transform 280ms cubic-bezier(0.16, 1, 0.3, 1), background 240ms ease, box-shadow 240ms ease;
+  }
+  .shelf-arrow:hover {
+    transform: translateY(-2px);
+    background: var(--cow-pink-soft);
+    box-shadow: 0 12px 28px -10px rgba(220, 155, 181, 0.45);
+  }
+  .shelf-arrow:active { transform: translateY(0); }
+</style>
+
+<script>
+  const track = document.querySelector<HTMLElement>('[data-shelf-track]');
+  if (track) {
+    const step = () => {
+      const card = track.querySelector<HTMLElement>('a');
+      return (card?.offsetWidth ?? 360) + 20;
+    };
+
+    document.querySelector('[data-shelf-next]')?.addEventListener('click', () => {
+      track.scrollBy({ left: step(), behavior: 'smooth' });
+    });
+    document.querySelector('[data-shelf-prev]')?.addEventListener('click', () => {
+      track.scrollBy({ left: -step(), behavior: 'smooth' });
+    });
+
+    // Wheel — vertical/diagonal trackpad gestures push the shelf horizontally,
+    // never bleed into page scroll while interacting.
+    track.addEventListener('wheel', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('iframe')) return;
+      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (horizontal !== 0) {
+        e.preventDefault();
+        track.scrollBy({ left: horizontal * 1.2, behavior: 'auto' });
+      }
+    }, { passive: false });
+
+    // Drag-to-scrub
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    track.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('iframe') || target.closest('button')) return;
+      isDown = true;
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+      track.style.cursor = 'grabbing';
+    });
+    const release = () => {
+      isDown = false;
+      track.style.cursor = '';
+    };
+    track.addEventListener('mouseleave', release);
+    track.addEventListener('mouseup', release);
+    track.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+    });
+  }
+</script>
