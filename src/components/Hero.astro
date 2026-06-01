@@ -105,13 +105,17 @@ import MeshGradient from '~/components/MeshGradient.astro';
           'I take pictures.',
           'I film movies.',
           'I make apps.',
+          'I solder circuits.',
+          'I model in 3D.',
+          'I print enclosures.',
+          'I ship sites.',
+          'I sketch first.',
+          'I love chai.',
           'I like cows.',
-          'I write code.',
         ];
 
         let phraseIdx = 0;
         let charIdx = phrases[0].length; // text starts pre-rendered, so begin at full length
-        const finalIdx = phrases.length - 1;
         const TYPE_MS = 70;
         const DELETE_MS = 38;
         const HOLD_AFTER_TYPE = 1500;
@@ -140,14 +144,13 @@ import MeshGradient from '~/components/MeshGradient.astro';
         const run = async () => {
           // initial pause so the user reads "I write code" first
           await sleep(HOLD_AFTER_TYPE);
-          while (phraseIdx < finalIdx) {
+          while (true) {
             await sleep(HOLD_BEFORE_DELETE);
             await erase();
-            phraseIdx += 1;
+            phraseIdx = (phraseIdx + 1) % phrases.length;
             await type();
             await sleep(HOLD_AFTER_TYPE);
           }
-          // Settle on the final phrase — stop animating, keep caret blinking.
         };
 
         // Only run when the hero is in view (cheap check on mount; small page).
