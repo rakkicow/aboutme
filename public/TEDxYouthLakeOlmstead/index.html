@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="shortcut icon" href="images/favicon.ico">
 
 <head>
 	<meta charset="UTF-8">
@@ -8,7 +7,8 @@
 	<meta name="description"
 		content="In the spirit of ideas worth spreading, TEDx is a program of local, self-organized events that bring people together to share a TED-like experience.">
 	<meta name="keywords" content="">
-	<meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="shortcut icon" href="images/favicon.ico">
 	<link rel="apple-touch-icon-precomposed" href="images/favicon.ico">
 
 	<link rel="stylesheet" href="css/style.css">
@@ -27,8 +27,14 @@
 
 				<h1 style="border-radius: 20px;">TEDxYouth@LakeOlmstead</h1>
 
+				<p class="countdown-label">Time Since:</p>
+
 				<div id="countdowncont" class="clearfix">
 					<ul id="countscript">
+						<li>
+							<span id="y" class="years">00</span>
+							<p>Years</p>
+						</li>
 						<li>
 							<span id="d" class="days">00</span>
 							<p>Days</p>
@@ -37,82 +43,60 @@
 							<span id="h" class="hours">00</span>
 							<p>Hours</p>
 						</li>
-						<li class="clearbox">
+						<li>
 							<span id="m" class="minutes">00</span>
 							<p>Minutes</p>
 						</li>
-						<li>
-							<span id="s" class="seconds">00</span>
-							<p>Seconds</p>
-						</li>
 					</ul>
 					<script>
-						// Set the date we're counting down to
-						var countDownDate = new Date("March 5, 2022 15:00:00").getTime();
+						// Event ended on March 5, 2022 at 9:00 PM
+						var eventEndDate = new Date("March 5, 2022 21:00:00").getTime();
 
-						// Update the count down every 1 second
-						var x = setInterval(function () {
-
-							// Get today's date and time
+						function updateCounter() {
 							var now = new Date().getTime();
+							var distance = Math.max(0, now - eventEndDate);
 
-							// Find the distance between now and the count down date
-							var distance = countDownDate - now;
-							// Time calculations for days, hours, minutes and seconds
-							var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-							var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-							var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-							var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+							var msPerMinute = 1000 * 60;
+							var msPerHour = msPerMinute * 60;
+							var msPerDay = msPerHour * 24;
+							var msPerYear = msPerDay * 365.25;
 
-							// Output the result in an element with id="d, h, m, s"
-							document.getElementById("d").innerHTML = days
-							document.getElementById("h").innerHTML = hours
-							document.getElementById("m").innerHTML = minutes
-							document.getElementById("s").innerHTML = seconds
-							// If the count down is over, write some text
-							if (distance > 0) {
-								document.getElementById("t").innerHTML = "Next Meeting:"
-							}
-							if (distance < 0) {
-								clearInterval("x");
-								document.getElementById("t").innerHTML = "Meeting is currently in session!"
-								document.getElementById("w").innerHTML = "Click here to Join"
-								document.getElementById("w").setAttribute("href", '');
-							}
-						}, 1000);
+							var years = Math.floor(distance / msPerYear);
+							var days = Math.floor((distance % msPerYear) / msPerDay);
+							var hours = Math.floor((distance % msPerDay) / msPerHour);
+							var minutes = Math.floor((distance % msPerHour) / msPerMinute);
+
+							document.getElementById("y").innerHTML = years;
+							document.getElementById("d").innerHTML = days;
+							document.getElementById("h").innerHTML = hours;
+							document.getElementById("m").innerHTML = minutes;
+						}
+
+						updateCounter();
+						setInterval(updateCounter, 1000 * 30);
 					</script>
 
 				</div>
 
-				<p></p>
 				<p>March 5th, 2022 @ <a href="https://www.augustaga.gov/1072/Julian-Smith-Casino" rel="external">the
-						Julian Smith
-						Casino</a></p>
-				<br>
-				<p><u><strong>Want to be a speaker?
-						</strong></u>
-				<p style="font-size: 36px;"> Apply <a href="https://forms.gle/K8v5DTBMrwUo2VYUA">here!</a></p><br>
+						Julian Smith Casino</a></p>
 
-				<br>
-				<p>Need some more information? Feel free to drop us an email: <br>
+				<p class="thank-you"><strong>Thanks for coming!</strong><br>
+					Your curiosity and enthusiasm made it truly special &mdash; we hope the ideas shared continue to spark new ones.
+				</p>
+
+				<p>Questions or want to stay in touch? Drop us a line:<br>
 					<a style="font-weight:500;"
 						href="mailto:tedxyouthlakeolmstead@gmail.com">tedxyouthlakeolmstead@gmail.com</a>
 				</p>
-				<!--<strong>Tél:</strong> 09.50.39.33.71 -
-					<strong>Port:</strong> 06.19.80.23.76<br><br> -->
-				</p>
-				<br>
+
 				<div id="socialmedia" class="clearfix">
 					<ul>
 						<li><a title="" href="https://www.instagram.com/tedxyouthlakeolmstead/" rel="external"><span
 									class="fa fa-instagram"></span></a></li>
 						<li><a title="" href="https://www.facebook.com/profile.php?id=100072774127422"
 								rel="external"><span class="fa fa-facebook"></span></a></li>
-						<!--	<li><a title="" href="https://plus.google.com/u/3/108768370200241634349/posts/p/pub"
-								rel="external"><span class="fa fa-youtube"></span></a></li>
-						<li><a title="" href="mailto:wnk-boutik@hotmail.com" rel="external"><span
-									class="fa fa-skype"></span></a></li>
-					</ul>-->
+					</ul>
 				</div>
 
 			</div>
@@ -128,7 +112,7 @@
 		</div>
 	</div>
 	<div>
-		<ul style="z-index:1 !important; position: relative !important;" class="circles">
+		<ul class="circles" aria-hidden="true">
 			<li></li>
 			<li></li>
 			<li></li>
