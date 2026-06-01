@@ -1,0 +1,53 @@
+---
+import { roles } from '~/data/resume';
+---
+
+<section id="experience" class="relative py-14 sm:py-20">
+  {/* Backdrop */}
+  <div class="pointer-events-none absolute inset-x-0 top-1/2 -z-20 h-[120%] -translate-y-1/2 overflow-hidden">
+    <div class="absolute left-1/2 top-1/2 h-[60rem] w-[60rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-30" style="background: radial-gradient(circle, rgba(255,168,100,0.4), transparent 60%);"></div>
+  </div>
+
+  <div class="container-x">
+    <div class="reveal mb-16 max-w-2xl">
+      <p class="eyebrow">Experience</p>
+      <h2 class="h2 mt-4">
+        Where I've <span class="text-gradient">built</span> <span class="h-italic text-gradient-pink">things</span>.
+      </h2>
+      <p class="mt-5 max-w-md text-sm" style="color: var(--ink-muted);">
+        A decade of receipts — from running CDI Official as a teen to soldering
+        phones at a repair bench to wiring up newscasts at Augusta University.
+      </p>
+    </div>
+
+    <ol class="relative space-y-12 border-l pl-8 sm:pl-12" style="border-color: var(--hair);">
+      {roles.map((r) => (
+        <li class="reveal group relative">
+          {/* Marker */}
+          <span class="absolute -left-[37px] top-3 sm:-left-[49px]">
+            <span class="marker-dot block"></span>
+          </span>
+
+          <div class="grid items-baseline gap-x-8 gap-y-2 sm:grid-cols-[1fr,2.5fr]">
+            <div>
+              <p class="font-mono text-xs" style="color: var(--ink-faint);">{r.years}</p>
+              <p class="mt-2 text-[11px] uppercase tracking-[0.2em]" style={`color: ${r.kind === 'edu' ? 'var(--cow-pink)' : r.kind === 'volunteer' ? 'var(--ember-500)' : 'var(--ember-600)'};`}>
+                {r.kind === 'edu' ? 'Education' : r.kind === 'volunteer' ? 'Volunteer' : 'Work'}
+              </p>
+              {r.location && (
+                <p class="mt-1 text-xs" style="color: var(--ink-faint);">{r.location}</p>
+              )}
+            </div>
+            <div>
+              <h3 class="font-display text-xl tracking-tight sm:text-2xl" style="color: var(--ink);">
+                {r.title}
+              </h3>
+              <p class="mt-1 text-sm font-medium" style="color: var(--ink-muted);">{r.org}</p>
+              <p class="mt-4 max-w-2xl text-[15px] leading-relaxed" style="color: var(--ink-muted);">{r.body}</p>
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
+</section>

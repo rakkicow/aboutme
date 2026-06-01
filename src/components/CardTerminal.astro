@@ -1,0 +1,142 @@
+---
+// Terminal card — cow-themed neofetch.
+// Left column: big ASCII cow (cowsay shape, no speech-bubble slashes).
+// Right column: live system info — uptime counts from Fri 2026-05-29 02:00 local.
+---
+
+<div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[28px]">
+  <div class="absolute inset-0" style="background: linear-gradient(165deg, #2E3A52 0%, #232E44 50%, #1A2235 100%);"></div>
+
+  {/* Pink + green ambient glows */}
+  <div class="absolute -top-20 -right-12 h-72 w-72 rounded-full animate-mesh-drift" style="background: radial-gradient(circle, rgba(220,155,181,0.7), transparent 60%); filter: blur(60px);"></div>
+  <div class="absolute -bottom-24 -left-10 h-72 w-72 rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(57,255,20,0.18), transparent 65%); filter: blur(80px);"></div>
+  <div class="absolute right-1/4 top-1/2 h-48 w-48 rounded-full animate-mesh-drift-3" style="background: radial-gradient(circle, rgba(184,91,130,0.45), transparent 65%); filter: blur(50px);"></div>
+
+  {/* Grid */}
+  <svg class="absolute inset-0 h-full w-full opacity-[0.08]" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <pattern id="grid-term" width="32" height="32" patternUnits="userSpaceOnUse">
+        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.5" />
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#grid-term)" />
+  </svg>
+</div>
+
+{/* Terminal window */}
+<div class="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm">
+  {/* Title bar */}
+  <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
+    <div class="flex items-center gap-1.5">
+      <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
+      <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
+      <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
+    </div>
+    <span class="font-mono text-[10px] text-cow-200">ria@rakshita.me — zsh — 80×24</span>
+    <span class="w-10"></span>
+  </div>
+
+  {/* Body */}
+  <div class="relative h-[calc(100%-2.25rem)] overflow-hidden px-3 py-2.5 font-mono text-[10px] leading-[1.45] sm:text-[11px]">
+    <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
+
+    {/* Two-column grid — cow top-left, sysinfo right */}
+    <div class="mt-1.5 grid grid-cols-[auto_1fr] gap-x-3 items-start">
+      {/* ASCII cow — aligned ears, sits at top of the column */}
+      <pre class="pl-2 sm:pl-4 leading-[1.05] text-[12px] sm:text-[13px]" style="color:#DC9BB5; text-shadow: 0 0 8px rgba(220,155,181,0.25);"> ^   ^
+ (o.o)\________
+ (___)\        )\/\
+      ||-----w |
+      ||      ||</pre>
+
+      {/* System info — pink keys, green values */}
+      <pre class="leading-[1.45]" style="text-shadow: 0 0 8px rgba(57,255,20,0.15);"><span style="color:#39FF14;">ria</span><span style="color:#7CE57C;">@</span><span style="color:#39FF14;">rakshita.me</span>
+<span style="color:#7CE57C;">─────────────────</span>
+<span style="color:#DC9BB5;">OS</span><span style="color:#7CE57C;">: macOS</span>
+<span style="color:#DC9BB5;">Host</span><span style="color:#7CE57C;">: MacBook Air M5</span>
+<span style="color:#DC9BB5;">Uptime</span><span style="color:#7CE57C;">: </span><span data-uptime style="color:#7CE57C;">…</span>
+<span style="color:#DC9BB5;">Resolution</span><span style="color:#7CE57C;">: </span><span data-resolution style="color:#7CE57C;">…</span>
+<span style="color:#DC9BB5;">Coffee</span><span style="color:#7CE57C;">: </span><span style="color:#FFB37A;">critical</span>
+<span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
+    </div>
+
+    {/* Prompt with typer */}
+    <div class="mt-2 text-cow-300">~/ <span class="text-cow-400">$</span> <span class="typer" style="color:#39FF14;"></span><span class="inline-block h-3 w-[7px] -mb-0.5 animate-caret" style="background:#39FF14;"></span></div>
+  </div>
+
+  {/* Scanline */}
+  <div class="pointer-events-none absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(57,255,20,0.04) 50%, transparent 100%); background-size: 100% 4px;"></div>
+</div>
+
+<script>
+  // Live uptime — counts up from Fri 2026-05-29 02:00:00 local time
+  const epoch = new Date(2026, 4, 29, 2, 0, 0).getTime(); // month is 0-indexed
+  const uptimeEls = document.querySelectorAll<HTMLElement>('[data-uptime]');
+  const resEls = document.querySelectorAll<HTMLElement>('[data-resolution]');
+
+  const fmtUptime = (ms: number) => {
+    if (ms < 0) return '0 mins';
+    const totalMin = Math.floor(ms / 60000);
+    const mins = totalMin % 60;
+    const totalHr = Math.floor(totalMin / 60);
+    const hrs = totalHr % 24;
+    const days = Math.floor(totalHr / 24);
+    if (days > 0) return `${days}d ${hrs}h ${mins}m`;
+    if (hrs > 0) return `${hrs}h ${mins}m`;
+    return `${mins} mins`;
+  };
+
+  const updateRes = () => {
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const phys = `${Math.round(w * dpr)}×${Math.round(h * dpr)}`;
+    const text = `${w}×${h} (${phys} @${dpr}×)`;
+    resEls.forEach((el) => (el.textContent = text));
+  };
+
+  const tickUptime = () => {
+    const now = Date.now();
+    const text = fmtUptime(now - epoch);
+    uptimeEls.forEach((el) => (el.textContent = text));
+  };
+
+  if (uptimeEls.length) {
+    tickUptime();
+    setInterval(tickUptime, 30000); // refresh every 30s
+  }
+  if (resEls.length) {
+    updateRes();
+    window.addEventListener('resize', updateRes);
+  }
+
+  // Typing prompt loop
+  const commands = [
+    'git push origin main',
+    'astro dev',
+    'open rakshita.me',
+    'echo "moo 🐄"',
+    'cat skills.txt',
+  ];
+  let i = 0;
+  const tick = async () => {
+    const els = document.querySelectorAll<HTMLElement>('.typer');
+    for (const el of els) {
+      const cmd = commands[i % commands.length];
+      el.textContent = '';
+      for (let c = 0; c < cmd.length; c++) {
+        el.textContent += cmd[c];
+        await new Promise((r) => setTimeout(r, 70 + Math.random() * 60));
+      }
+      await new Promise((r) => setTimeout(r, 1800));
+      for (let c = cmd.length; c > 0; c--) {
+        el.textContent = cmd.slice(0, c - 1);
+        await new Promise((r) => setTimeout(r, 30));
+      }
+      await new Promise((r) => setTimeout(r, 400));
+    }
+    i++;
+    tick();
+  };
+  if (document.querySelector('.typer')) tick();
+</script>

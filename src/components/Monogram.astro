@@ -1,0 +1,42 @@
+---
+// Cursive RG monogram in a thin-outlined circle — matches Ria's resume mark.
+// Uses currentColor so it auto-inverts in dark mode (black on light → white on dark).
+interface Props {
+  size?: number;
+  stroke?: number;
+  className?: string;
+  withGlow?: boolean;
+}
+
+const {
+  size = 40,
+  stroke = 1.25,
+  className = '',
+  withGlow = false,
+} = Astro.props;
+---
+
+<span
+  class={`monogram relative inline-grid place-items-center shrink-0 ${className}`}
+  style={`width:${size}px;height:${size}px;color:var(--ink);`}
+  aria-label="RG monogram"
+>
+  {withGlow && (
+    <span
+      class="pointer-events-none absolute inset-[-22%] rounded-full opacity-70"
+      style="background: conic-gradient(from 0deg, transparent, rgba(220,155,181,0.55), rgba(255,122,30,0.45), transparent 60%); filter: blur(14px); animation: spinGlow 12s linear infinite;"
+    ></span>
+  )}
+
+  <svg viewBox="0 0 100 100" class="relative h-full w-full" aria-hidden="true">
+    <circle cx="50" cy="50" r={48 - stroke / 2} fill="none" stroke="currentColor" stroke-width={stroke} />
+    <text
+      x="50"
+      y="64"
+      text-anchor="middle"
+      font-family="Allura, cursive"
+      font-size="56"
+      fill="currentColor"
+    >RG</text>
+  </svg>
+</span>

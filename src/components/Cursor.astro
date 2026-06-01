@@ -1,0 +1,54 @@
+---
+---
+
+<div
+  id="cursor"
+  class="pointer-events-none fixed left-0 top-0 z-[60] hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full md:block"
+  style="
+    background: radial-gradient(circle, rgba(255,122,30,0.18) 0%, rgba(255,122,30,0) 70%);
+    mix-blend-mode: multiply;
+    transition: width 280ms cubic-bezier(0.16, 1, 0.3, 1), height 280ms cubic-bezier(0.16, 1, 0.3, 1);
+  "
+></div>
+<div
+  id="cursor-dot"
+  class="pointer-events-none fixed left-0 top-0 z-[60] hidden h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full md:block"
+  style="background: #FF6A05; box-shadow: 0 0 12px rgba(255,106,5,0.6);"
+></div>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const dot = document.getElementById('cursor-dot');
+  if (cursor && dot && window.matchMedia('(hover: hover)').matches) {
+    let mouseX = 0, mouseY = 0;
+    let curX = 0, curY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+    });
+
+    const animate = () => {
+      curX += (mouseX - curX) * 0.14;
+      curY += (mouseY - curY) * 0.14;
+      cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+      requestAnimationFrame(animate);
+    };
+    animate();
+
+    const enlarge = () => {
+      cursor.style.width = '64px';
+      cursor.style.height = '64px';
+    };
+    const shrink = () => {
+      cursor.style.width = '32px';
+      cursor.style.height = '32px';
+    };
+
+    document.querySelectorAll('a, button, [data-cursor-hover]').forEach((el) => {
+      el.addEventListener('mouseenter', enlarge);
+      el.addEventListener('mouseleave', shrink);
+    });
+  }
+</script>

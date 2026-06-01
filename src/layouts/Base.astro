@@ -1,0 +1,177 @@
+---
+import '~/styles/global.css';
+import Nav from '~/components/Nav.astro';
+import Footer from '~/components/Footer.astro';
+import Cursor from '~/components/Cursor.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Ria Gupta — Computer Engineer',
+  description = 'Rakshita "Ria" Gupta is a Computer Engineering student at Purdue on the Software Engineering track. Hardware-meets-software builder, designer, and 3D modeler.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#FAFAFA" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}/favicon.svg`} />
+    <title>{title}</title>
+
+    {/* Inline theme bootstrap — runs before paint to avoid flash */}
+    <script is:inline>
+      (() => {
+        try {
+          const stored = localStorage.getItem('rg-theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const dark = stored ? stored === 'dark' : prefersDark;
+          if (dark) document.documentElement.classList.add('dark');
+        } catch {}
+      })();
+    </script>
+  </head>
+  <body class="relative">
+    <Cursor />
+    <Nav />
+    <main class="relative">
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      import Lenis from 'lenis';
+      import { gsap } from 'gsap';
+      import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      const lenis = new Lenis({
+        duration: 1.15,
+        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        wheelMultiplier: 1,
+        touchMultiplier: 1.5,
+      });
+
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add((time) => lenis.raf(time * 1000));
+      gsap.ticker.lagSmoothing(0);
+
+      // Reveal-on-scroll
+      const revealEls = document.querySelectorAll('.reveal');
+      revealEls.forEach((el) => {
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 88%',
+          once: true,
+          onEnter: () => el.setAttribute('data-shown', 'true'),
+        });
+      });
+
+      // Magnetic effect on data-magnetic elements
+      document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
+        const strength = Number(el.dataset.magnetic) || 0.25;
+        let rect = el.getBoundingClientRect();
+        const onMove = (e: MouseEvent) => {
+          const x = (e.clientX - rect.left - rect.width / 2) * strength;
+          const y = (e.clientY - rect.top - rect.height / 2) * strength;
+          gsap.to(el, { x, y, duration: 0.6, ease: 'power3.out' });
+        };
+        const onLeave = () => {
+          gsap.to(el, { x: 0, y: 0, duration: 0.8, ease: 'elastic.out(1, 0.4)' });
+        };
+        el.addEventListener('mouseenter', () => { rect = el.getBoundingClientRect(); });
+        el.addEventListener('mousemove', onMove);
+        el.addEventListener('mouseleave', onLeave);
+      });
+
+      // Card 3D tilt
+      document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
+        const max = 6;
+        card.addEventListener('mousemove', (e) => {
+          const r = card.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width - 0.5;
+          const py = (e.clientY - r.top) / r.height - 0.5;
+          gsap.to(card, {
+            rotateY: px * max,
+            rotateX: -py * max,
+            transformPerspective: 1200,
+            duration: 0.5,
+            ease: 'power2.out',
+          });
+        });
+        card.addEventListener('mouseleave', () => {
+          gsap.to(card, { rotateX: 0, rotateY: 0, duration: 0.8, ease: 'power3.out' });
+        });
+      });
+
+      // Nav scrolled state
+      const nav = document.querySelector<HTMLElement>('[data-nav]');
+      if (nav) {
+        ScrollTrigger.create({
+          start: 'top -40',
+          end: 'max',
+          onUpdate: (self) => {
+            nav.dataset.scrolled = self.scroll() > 40 ? 'true' : 'false';
+          },
+        });
+      }
+
+      // Parallax on decorative elements
+      document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
+        const speed = Number(el.dataset.parallax) || 0.2;
+        gsap.to(el, {
+          y: () => -window.innerHeight * speed,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+          },
+        });
+      });
+
+      // Text scramble effect (subtle — runs once on enter)
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+      const scramble = (el: HTMLElement, target: string, duration = 900) => {
+        const start = performance.now();
+        const step = () => {
+          const t = Math.min(1, (performance.now() - start) / duration);
+          const settled = Math.floor(target.length * t);
+          let out = target.slice(0, settled);
+          for (let i = settled; i < target.length; i++) {
+            const c = target[i];
+            out += c === ' ' ? ' ' : chars[Math.floor(Math.random() * chars.length)];
+          }
+          el.textContent = out;
+          if (t < 1) requestAnimationFrame(step);
+          else el.textContent = target;
+        };
+        step();
+      };
+      document.querySelectorAll<HTMLElement>('[data-scramble]').forEach((el) => {
+        const target = el.dataset.scramble || el.textContent || '';
+        el.textContent = target;
+        ScrollTrigger.create({
+          trigger: el,
+          start: 'top 90%',
+          once: true,
+          onEnter: () => scramble(el, target, 700),
+        });
+      });
+    </script>
+  </body>
+</html>

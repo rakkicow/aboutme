@@ -1,0 +1,93 @@
+---
+// CDI Official card — camera viewfinder treatment.
+// Full-bleed orange/peach gradient background, viewfinder brackets, pulsing REC dot, timecode.
+---
+
+<div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[28px]">
+  {/* Warm base */}
+  <div class="absolute inset-0" style="background: radial-gradient(120% 80% at 50% 0%, #FFE3D2 0%, #FFC8A4 60%, #FFA771 100%);"></div>
+
+  {/* Aperture blooms */}
+  <div class="absolute -right-10 -top-10 h-56 w-56 rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(255,106,5,0.55), transparent 70%); filter: blur(50px);"></div>
+  <div class="absolute -left-12 -bottom-16 h-64 w-64 rounded-full animate-mesh-drift-3" style="background: radial-gradient(circle, rgba(255,168,100,0.65), transparent 65%); filter: blur(60px);"></div>
+
+  {/* Grain */}
+  <div class="absolute inset-0 opacity-30 mix-blend-multiply" style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;);"></div>
+
+</div>
+
+{/* Viewfinder content in art slot */}
+<div class="relative aspect-[16/10] w-full overflow-hidden rounded-2xl">
+  {/* Inner dim viewport */}
+  <div class="absolute inset-2 rounded-xl bg-gradient-to-br from-ink/[0.04] to-ember-700/[0.08]"></div>
+
+  {/* Viewfinder corner brackets */}
+  {[
+    'top-3 left-3 border-t-2 border-l-2 rounded-tl',
+    'top-3 right-3 border-t-2 border-r-2 rounded-tr',
+    'bottom-3 left-3 border-b-2 border-l-2 rounded-bl',
+    'bottom-3 right-3 border-b-2 border-r-2 rounded-br',
+  ].map((cls) => (
+    <span class={`absolute ${cls} h-6 w-6 border-ember-700/70`}></span>
+  ))}
+
+  {/* Crosshair center — clean lines + center dot only */}
+  <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+    <div class="relative h-20 w-20">
+      <span class="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-ember-700/30"></span>
+      <span class="absolute top-1/2 left-0 h-px w-full -translate-y-1/2 bg-ember-700/30"></span>
+      <span class="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-ember-700/80"></span>
+    </div>
+  </div>
+
+  {/* Top-left REC indicator — blinks like a real recording light */}
+  <div class="absolute left-5 top-5 flex items-center gap-2">
+    <span class="rec-dot inline-block h-2.5 w-2.5 rounded-full" style="background:#FF2828;"></span>
+    <span class="font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-ink/80">REC</span>
+  </div>
+
+  {/* Top-right specs */}
+  <div class="absolute right-5 top-5 flex items-center gap-2 font-mono text-[10px] text-ink/60">
+    <span>4K · 24p</span>
+    <span class="text-ember-700">F2.8</span>
+  </div>
+
+  {/* Bottom-left — page-elapsed timecode */}
+  <div class="absolute bottom-5 left-5 font-mono text-[10px] tracking-widest text-ink/75">
+    <span data-camera-elapsed>00:00:00:000</span>
+  </div>
+
+  {/* Bottom-right — wall-clock time */}
+  <div class="absolute bottom-5 right-5 flex items-center gap-2 font-mono text-[10px] tracking-widest text-ink/75">
+    <span data-camera-clock>--:--:--</span>
+  </div>
+
+  {/* Soft vignette */}
+  <div class="absolute inset-0 rounded-xl" style="box-shadow: inset 0 0 80px rgba(180,64,0,0.25);"></div>
+</div>
+
+<script>
+  const elapsedEls = document.querySelectorAll<HTMLElement>('[data-camera-elapsed]');
+  const clockEls = document.querySelectorAll<HTMLElement>('[data-camera-clock]');
+  if (elapsedEls.length || clockEls.length) {
+    const start = performance.now();
+    const pad = (n: number, w = 2) => String(n).padStart(w, '0');
+
+    const tick = () => {
+      const total = performance.now() - start;
+      const ms = Math.floor(total % 1000);
+      const s = Math.floor(total / 1000) % 60;
+      const m = Math.floor(total / 60000) % 60;
+      const h = Math.floor(total / 3600000);
+      const stamp = `${pad(h)}:${pad(m)}:${pad(s)}:${pad(ms, 3)}`;
+      elapsedEls.forEach((el) => (el.textContent = stamp));
+
+      const now = new Date();
+      const clock = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      clockEls.forEach((el) => (el.textContent = clock));
+
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+</script>

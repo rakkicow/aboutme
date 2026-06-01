@@ -1,0 +1,84 @@
+---
+// Single mesh container — colors driven by CSS variables that swap with .dark.
+// No class-switching shenanigans, no risk of "wrong mesh showing".
+---
+
+<div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden mesh-root">
+  <div class="absolute inset-0 mesh-base"></div>
+
+  <div class="mesh-blob mesh-blob-1 animate-mesh-drift will-change-transform"></div>
+  <div class="mesh-blob mesh-blob-2 animate-mesh-drift-2 will-change-transform"></div>
+  <div class="mesh-blob mesh-blob-3 animate-mesh-drift-3 will-change-transform"></div>
+  <div class="mesh-blob mesh-blob-4 animate-mesh-drift will-change-transform" style="animation-delay: -8s;"></div>
+
+  {/* Grain */}
+  <div class="absolute inset-0 mesh-grain"></div>
+
+  {/* Fade into canvas at the bottom */}
+  <div class="absolute inset-x-0 bottom-0 h-40" style="background: linear-gradient(to bottom, transparent, var(--canvas));"></div>
+</div>
+
+<style>
+  /* Light mode mesh palette */
+  .mesh-root {
+    --m-base: radial-gradient(120% 80% at 50% 0%, #FFF4EE 0%, #FAFAFA 60%, #FAFAFA 100%);
+    --m-blob-1: rgba(255, 144, 67, 0.85);
+    --m-blob-2: rgba(255, 212, 184, 0.95);
+    --m-blob-3: rgba(255, 106, 5, 0.55);
+    --m-blob-4: rgba(255, 244, 238, 1);
+    --m-grain-opacity: 0.32;
+    --m-grain-blend: multiply;
+    --m-grain-fill: '0.12';
+    --m-grain-vals: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0';
+  }
+
+  /* Dark mode mesh palette */
+  :global(.dark) .mesh-root {
+    --m-base: radial-gradient(120% 80% at 50% 0%, #1A2138 0%, #0A0E1A 65%, #0A0E1A 100%);
+    --m-blob-1: rgba(255, 144, 67, 0.42);
+    --m-blob-2: rgba(220, 155, 181, 0.4);
+    --m-blob-3: rgba(184, 91, 130, 0.5);
+    --m-blob-4: rgba(34, 46, 72, 0.85);
+    --m-grain-opacity: 0.18;
+    --m-grain-blend: screen;
+  }
+
+  .mesh-base {
+    background: var(--m-base);
+  }
+
+  .mesh-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(80px);
+  }
+  .mesh-blob-1 {
+    left: -10%; top: -15%;
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle at 30% 30%, var(--m-blob-1), transparent 60%);
+  }
+  .mesh-blob-2 {
+    right: -15%; top: 5%;
+    width: 55vw; height: 55vw;
+    background: radial-gradient(circle, var(--m-blob-2), transparent 65%);
+    filter: blur(100px);
+  }
+  .mesh-blob-3 {
+    left: 25%; bottom: -25%;
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, var(--m-blob-3), transparent 70%);
+    filter: blur(120px);
+  }
+  .mesh-blob-4 {
+    right: 10%; bottom: -10%;
+    width: 40vw; height: 40vw;
+    background: radial-gradient(circle, var(--m-blob-4), transparent 70%);
+    filter: blur(60px);
+  }
+
+  .mesh-grain {
+    opacity: var(--m-grain-opacity);
+    mix-blend-mode: var(--m-grain-blend);
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.6 0 0 0 0 0.6 0 0 0 0 0.6 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+</style>

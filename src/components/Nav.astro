@@ -1,0 +1,53 @@
+---
+import Monogram from '~/components/Monogram.astro';
+import ThemeToggle from '~/components/ThemeToggle.astro';
+
+// Order matches the page flow. Contact lives in the "Get in touch" CTA.
+const links = [
+  { href: '#about', label: 'About' },
+  { href: '#work', label: 'Work' },
+  { href: '#reel', label: 'Reel' },
+  { href: '#experience', label: 'Experience' },
+];
+---
+
+<header
+  data-nav
+  data-scrolled="false"
+  class="fixed inset-x-0 top-0 z-50 transition-all duration-500 data-[scrolled=true]:py-2 py-5"
+>
+  <div class="container-x">
+    <div
+      class="flex items-center justify-between gap-3 rounded-full border px-4 py-2 backdrop-blur-xl transition-all duration-500"
+      style="border-color: var(--hair); background: var(--surface-soft); box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset, 0 8px 32px -16px rgba(15,15,16,0.25);"
+    >
+      <a href="#top" class="group flex items-center gap-2.5 px-2 py-1">
+        <Monogram size={34} stroke={1.1} className="transition-transform duration-500 group-hover:rotate-[8deg]" />
+        <span class="font-display text-base tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300" style="color: var(--ink);">Rakshita&nbsp;Gupta</span>
+      </a>
+
+      <nav class="hidden items-center gap-1 md:flex">
+        {links.map((l) => (
+          <a
+            href={l.href}
+            class="group relative rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors"
+            style="color: var(--ink-soft);"
+          >
+            <span class="relative z-10">{l.label}</span>
+            <span class="absolute inset-0 -z-0 scale-90 rounded-full bg-cow-100/60 opacity-0 transition-all duration-300 group-hover:scale-100 group-hover:opacity-100 dark:bg-cow-300/15"></span>
+          </a>
+        ))}
+      </nav>
+
+      <div class="flex items-center gap-2">
+        <ThemeToggle />
+        <a href="#contact" class="btn-primary !py-2 !px-4 !text-xs" data-magnetic="0.25">
+          Get in touch
+          <svg class="h-3 w-3" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M7 2v10M3 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </div>
+</header>

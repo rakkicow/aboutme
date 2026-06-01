@@ -1,0 +1,121 @@
+---
+import type { Project } from '~/data/projects';
+import CardBubbles from '~/components/CardBubbles.astro';
+import CardCamera from '~/components/CardCamera.astro';
+import CardTerminal from '~/components/CardTerminal.astro';
+
+interface Props {
+  project: Project;
+  index: number;
+}
+
+const { project, index } = Astro.props;
+
+// Per-theme typography + chrome
+type ThemeStyles = {
+  index: string;
+  years: string;
+  title: string;
+  tagline: string;
+  blurb: string;
+  pill: string;
+  link: string;
+  linkHover: string;
+};
+const themes: Record<Project['theme'], ThemeStyles> = {
+  bubbles: {
+    index: 'text-[#BBDDFF]',
+    years: 'text-[#BBDDFF]',
+    title: 'text-white',
+    tagline: 'text-[#D5E9FF]',
+    blurb: 'text-[#D5E9FF]',
+    pill: 'bg-[rgba(0,30,80,0.45)] border-[#A8D0FF]/40 text-[#CFE3FF] backdrop-blur-md',
+    link: 'text-[#E8F2FF]',
+    linkHover: 'hover:text-white',
+  },
+  camera: {
+    index: 'text-ink/55',
+    years: 'text-ink/55',
+    title: 'text-ink',
+    tagline: 'text-ember-700',
+    blurb: 'text-ink/75',
+    pill: 'bg-[rgba(180,64,0,0.16)] border-ember-700/30 text-ember-800 backdrop-blur',
+    link: 'text-ink/85',
+    linkHover: 'hover:text-ember-700',
+  },
+  terminal: {
+    index: 'text-cow-300/70',
+    years: 'text-cow-300/70',
+    title: 'text-white',
+    tagline: 'text-cow-300',
+    blurb: 'text-white/80',
+    pill: 'bg-[rgba(220,155,181,0.12)] border-cow-300/30 text-cow-200 backdrop-blur-md',
+    link: 'text-white',
+    linkHover: 'hover:text-cow-300',
+  },
+};
+const s = themes[project.theme];
+---
+
+<article
+  data-tilt
+  data-card-theme={project.theme}
+  class="project-card group reveal card-lift relative overflow-hidden rounded-[28px] p-7 sm:p-9"
+  style="box-shadow: var(--shadow-glow-sm);"
+>
+  {/* Themed full-bleed background */}
+  {project.theme === 'bubbles' && <CardBubbles />}
+  {project.theme === 'camera' && <CardCamera />}
+  {project.theme === 'terminal' && <CardTerminal />}
+
+  {/* Index + years */}
+  <div class={`relative flex items-start justify-between text-xs ${s.index}`}>
+    <span class="font-mono">0{index + 1}</span>
+    <span class={`text-right ${s.years}`}>{project.years}</span>
+  </div>
+
+  {/* Title block */}
+  <div class="relative mt-8">
+    <h3 class={`font-medium tracking-snug ${s.title} text-[28px] leading-[1.05] sm:text-[32px]`}>
+      {project.title}
+    </h3>
+    <p class={`mt-2 text-sm ${s.tagline}`}>{project.tagline}</p>
+  </div>
+
+  {/* Role chip */}
+  <div class="relative mt-4">
+    <span class={`pill !${s.pill}`}>{project.role}</span>
+  </div>
+
+  {/* Blurb */}
+  <p class={`relative mt-5 text-[15px] leading-relaxed ${s.blurb}`}>
+    {project.blurb}
+  </p>
+
+  {/* Stack pills */}
+  <div class="relative mt-6 flex flex-wrap gap-1.5">
+    {project.stack.map((t) => (
+      <span class={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${s.pill}`}>{t}</span>
+    ))}
+  </div>
+
+  {/* Links — skip the auto ↗ when the label already ends with an arrow glyph */}
+  <div class="relative mt-7 flex flex-wrap items-center gap-x-5 gap-y-2">
+    {project.links.map((l) => {
+      const hasOwnArrow = /[→←↑↓↗↘↙↖]$/.test(l.label.trim());
+      return (
+        <a
+          href={l.href}
+          target={l.href.startsWith('#') ? undefined : '_blank'}
+          rel={l.href.startsWith('#') ? undefined : 'noopener noreferrer'}
+          class={`group/link inline-flex items-center gap-1.5 text-sm font-medium ${s.link} transition-colors ${s.linkHover}`}
+        >
+          {l.label}
+          {!hasOwnArrow && (
+            <span class="inline-block transition-transform duration-300 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5">↗</span>
+          )}
+        </a>
+      );
+    })}
+  </div>
+</article>
