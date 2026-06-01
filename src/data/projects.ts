@@ -113,8 +113,8 @@ export const webShelf: WebShelfEntry[] = [
     purpose: 'Event hub with live countdown + media gallery',
     detail: 'jQuery-driven countdown, speaker grid, and post-event archive.',
     year: '2021',
-    liveUrl: 'https://www.youtube.com',
-    href: 'https://www.youtube.com',
+    liveUrl: 'https://rakshita.me/TEDxYouthLakeOlmstead',
+    href: 'https://rakshita.me/TEDxYouthLakeOlmstead',
   },
   {
     name: 'Modifiable Graph Nodes',
