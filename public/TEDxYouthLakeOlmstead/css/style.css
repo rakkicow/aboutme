@@ -37,20 +37,26 @@ html, body
 {
 	margin: 0;
 	padding: 0;
-	display: table;
-	overflow: hidden;
-	background: linear-gradient(-45deg, #aa4b6b, #6b6b83, #1565C0);;  
-    animation: gradient 15s ease infinite;
 	width: 100%;
-    height:100vh;
-	background-repeat: no-repeat;
-	background-size: 200%;
-	background-clip: text;
-	-webkit-background-clip: text;
-	color: transparent;
+	min-height: 100vh;
 	-webkit-font-smoothing: antialiased;
 	-webkit-text-size-adjust: 100%;
 	-ms-text-size-adjust: 100%;
+}
+
+html {
+	background: linear-gradient(-45deg, #aa4b6b, #6b6b83, #1565C0);
+	background-repeat: no-repeat;
+	background-size: 400% 400%;
+	animation: gradient 15s ease infinite;
+}
+
+body {
+	background: transparent;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow-x: hidden;
 }
 @keyframes gradient {
 	0% {
@@ -186,7 +192,7 @@ body
 	color: #FFF;
 	line-height: 32px;
 	font-weight: 300;
-	z-index:9999999;
+	z-index: 1;
 	text-rendering: optimizeLegibility;
 	vertical-align: baseline;
 }
@@ -228,25 +234,24 @@ img
 
 #outercont
 {
-	display: table-cell;
-	vertical-align: middle;
-	z-index:9999999;
+	width: 100%;
+	position: relative;
+	z-index: 2;
 }
 
 	#outercont #innercont
 	{
-		display: inline-block;
+		display: block;
 		width: 100%;
 		padding: 25px;
-		z-index:9999999;
+		text-align: center;
 	}
-	
+
 		#outercont #innercont .bodycontainer
 		{
 			margin: 0 auto;
 			width: 100%;
-			max-width: 1140px;
-			z-index:9999999;
+			max-width: 800px;
 		}
 	
 /* ==================================================
@@ -257,11 +262,33 @@ img
 {
 	padding: 40px 25px;
 	border-radius: 20px;
-	text-align: left;
 	background-color: rgba(0, 0, 0, 0.6);
 	text-align: center;
-	z-index:9999999 !important;
 }
+
+	#content .countdown-label
+	{
+		font-size: 18px;
+		color: rgba(255, 255, 255, 0.85);
+		margin-bottom: 12px;
+		letter-spacing: 0.5px;
+	}
+
+	#content .thank-you
+	{
+		font-size: 20px;
+		line-height: 30px;
+		max-width: 560px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	#content .thank-you strong
+	{
+		font-size: 22px;
+		display: inline-block;
+		margin-bottom: 6px;
+	}
 
 	#content p
 	{
@@ -284,47 +311,58 @@ img
 	}
 	
 		/** Main Header **/
-		
+
 		#content h1
 		{
 			display: inline-block;
 			color: #FFF;
 			font-size: 60px;
-			line-height: 60px;
+			line-height: 1.05;
 			font-weight: 700;
 			font-family: Helvetica;
 			letter-spacing: -0.6px;
 			margin: 0 0 25px 0;
 			padding: 10px 16px;
 			background: #E62B1E;
+			max-width: 100%;
+			word-wrap: break-word;
 		}
-	
+
 		/** Countdown Timer **/
-		
+
 		#countdowncont
 		{
 			width: 100%;
 			max-width: 600px;
-			margin: 0 auto;
-			margin-bottom: 20px;
+			margin: 0 auto 25px;
 		}
+
+			#countdowncont ul#countscript
+			{
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				margin: 0;
+				padding: 0;
+			}
 
 			#countdowncont ul#countscript li
 			{
-				float: left;
-				width: 25%;
-				padding: 0;
+				flex: 1 1 25%;
+				min-width: 90px;
+				padding: 8px 4px;
 				margin: 0;
 				list-style-type: none;
+				text-align: center;
 			}
 
 				#countdowncont ul#countscript li span
 				{
+					display: block;
 					font-size: 58px;
-					line-height: 58px;
+					line-height: 1.05;
 					font-weight: 700;
 					color: #FFF;
-					;
 				}
 
 				#countdowncont ul#countscript li p
@@ -333,7 +371,7 @@ img
 					text-transform: uppercase;
 					font-size: 16px;
 					line-height: 16px;
-					margin: 0;
+					margin: 6px 0 0;
 				}
 
 		/** Social Media **/
@@ -369,36 +407,52 @@ img
 
 @media screen and (max-width: 768px)
 {
-	
+
 	#outercont #innercont
 	{
-		padding: 25px;
+		padding: 20px;
 	}
-	
+
 	#content
 	{
-		padding: 25px;
+		padding: 28px 20px;
 	}
-	
+
 		#content h1
 		{
-			font-size: 40px;
-			line-height: 50px;
+			font-size: 38px;
+			line-height: 1.1;
 		}
-	
+
+		#content .countdown-label
+		{
+			font-size: 16px;
+		}
+
+		#content .thank-you
+		{
+			font-size: 18px;
+			line-height: 28px;
+		}
+
 		/** Countdown Timer **/
-		
+
 		#countdowncont
 		{
-			max-width: 400px;
+			max-width: 420px;
 		}
-		
+
 			#countdowncont ul#countscript li
 			{
-				width: 50%;
-				padding: 10px 0;
+				flex: 1 1 50%;
+				padding: 10px 4px;
 			}
-	
+
+				#countdowncont ul#countscript li span
+				{
+					font-size: 48px;
+				}
+
 }
 
 /* ==================================================
@@ -406,30 +460,69 @@ img
 ================================================== */
 
 @media screen and (max-width: 480px)
-{		
-	
+{
+
+	body
+	{
+		font-size: 17px;
+		line-height: 26px;
+	}
+
 	#outercont #innercont
 	{
-		padding: 15px;
+		padding: 12px;
 	}
-	
+
 	#content
 	{
-		padding: 15px;
+		padding: 22px 16px;
 	}
-	
-		/** Countdown Timer **/
-		
-		#countdowncont ul#countscript li
+
+		#content h1
 		{
-			padding: 6px 0;
+			font-size: 28px;
+			padding: 8px 12px;
 		}
 
-			#countdowncont ul#countscript li p
+		#content .countdown-label
+		{
+			font-size: 14px;
+		}
+
+		#content .thank-you
+		{
+			font-size: 16px;
+			line-height: 24px;
+		}
+
+		#content .thank-you strong
+		{
+			font-size: 18px;
+		}
+
+		/** Countdown Timer **/
+
+		#countdowncont
+		{
+			max-width: 320px;
+		}
+
+			#countdowncont ul#countscript li
 			{
-				font-size: 16px;
-				line-height: 16px;
+				padding: 8px 2px;
+				min-width: 70px;
 			}
-	
+
+				#countdowncont ul#countscript li span
+				{
+					font-size: 38px;
+				}
+
+				#countdowncont ul#countscript li p
+				{
+					font-size: 13px;
+					line-height: 14px;
+				}
+
 }
 
