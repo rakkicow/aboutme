@@ -1,0 +1,435 @@
+/* ==================================================
+   CSS Imports
+================================================== */
+
+@import url("reset.css");
+
+/* ==================================================
+   Icon Fonts
+================================================== */
+
+@import url("fonts/fontawesome/font-awesome.css");
+
+/* ==================================================
+   Google Fonts
+================================================== */
+
+@import url("http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,300italic,400,400italic,600,600italic,700,700italic");
+@import url("http://fonts.googleapis.com/css?family=Roboto+Condensed:300,300italic,400,400italic,700,700italic");
+@font-face {
+	font-family: "ProductSans";
+	src: url("fonts/Product\ Sans\ Regular.ttf");
+	}
+@import url('https://fonts.googleapis.com/css?family=Exo:400,700');
+
+/* ==================================================
+   Global Styles
+================================================== */
+
+*
+{
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+html, body
+{
+	margin: 0;
+	padding: 0;
+	display: table;
+	overflow: hidden;
+	background: linear-gradient(-45deg, #aa4b6b, #6b6b83, #1565C0);;  
+    animation: gradient 15s ease infinite;
+	width: 100%;
+    height:100vh;
+	background-repeat: no-repeat;
+	background-size: 200%;
+	background-clip: text;
+	-webkit-background-clip: text;
+	color: transparent;
+	-webkit-font-smoothing: antialiased;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+}
+@keyframes gradient {
+	0% {
+	  background-position: 0% 50%;
+	}
+	50% {
+	  background-position: 100% 50%;
+	}
+	100% {
+	  background-position: 0% 50%;
+	}
+  }
+.circles{
+	z-index: -1 !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.circles li{
+	z-index: -1 !important;
+    position: fixed;
+    display: block;
+    list-style: none;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    animation: animate 25s linear infinite;
+    bottom: -150px;
+    
+}
+
+.circles li:nth-child(1){
+    left: 25%;
+    width: 80px;
+    height: 80px;
+    animation-delay: 0s;
+}
+
+
+.circles li:nth-child(2){
+    left: 10%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 2s;
+    animation-duration: 12s;
+}
+
+.circles li:nth-child(3){
+    left: 70%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 4s;
+}
+
+.circles li:nth-child(4){
+    left: 40%;
+    width: 60px;
+    height: 60px;
+    animation-delay: 0s;
+    animation-duration: 18s;
+}
+
+.circles li:nth-child(5){
+    left: 65%;
+    width: 20px;
+    height: 20px;
+    animation-delay: 0s;
+}
+
+.circles li:nth-child(6){
+    left: 75%;
+    width: 110px;
+    height: 110px;
+    animation-delay: 3s;
+}
+
+.circles li:nth-child(7){
+    left: 35%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 7s;
+}
+
+.circles li:nth-child(8){
+    left: 50%;
+    width: 25px;
+    height: 25px;
+    animation-delay: 15s;
+    animation-duration: 45s;
+}
+
+.circles li:nth-child(9){
+    left: 20%;
+    width: 15px;
+    height: 15px;
+    animation-delay: 2s;
+    animation-duration: 35s;
+}
+
+.circles li:nth-child(10){
+    left: 85%;
+    width: 150px;
+    height: 150px;
+    animation-delay: 0s;
+    animation-duration: 11s;
+}
+
+@keyframes animate {
+
+    0%{
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+        border-radius: 0;
+    }
+
+    100%{
+        transform: translateY(-1500px) rotate(900deg);
+        opacity: 0;
+        border-radius: 100%;
+    }
+
+}
+
+
+body
+{
+	font-family: "ProductSans";
+	font-size: 20px;
+	color: #FFF;
+	line-height: 32px;
+	font-weight: 300;
+	z-index:9999999;
+	text-rendering: optimizeLegibility;
+	vertical-align: baseline;
+}
+
+::selection
+{
+	background: #E62B1E;
+	color: #FFF;
+}
+
+::-moz-selection
+{
+	background: #E62B1E;
+	color: #FFF;
+}
+
+a
+{
+	color: #E62B1E;
+	text-decoration: none;
+	z-index:9999999;
+}
+
+a:hover
+{
+	color: #FFF;
+}
+
+img
+{
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	-ms-backface-visibility: hidden;
+}
+
+/* ==================================================
+   Layout Styles
+================================================== */
+
+#outercont
+{
+	display: table-cell;
+	vertical-align: middle;
+	z-index:9999999;
+}
+
+	#outercont #innercont
+	{
+		display: inline-block;
+		width: 100%;
+		padding: 25px;
+		z-index:9999999;
+	}
+	
+		#outercont #innercont .bodycontainer
+		{
+			margin: 0 auto;
+			width: 100%;
+			max-width: 1140px;
+			z-index:9999999;
+		}
+	
+/* ==================================================
+   Sections
+================================================== */
+
+#content
+{
+	padding: 40px 25px;
+	border-radius: 20px;
+	text-align: left;
+	background-color: rgba(0, 0, 0, 0.6);
+	text-align: center;
+	z-index:9999999 !important;
+}
+
+	#content p
+	{
+		margin: 0 0 20px 0;
+	}
+	
+		#content p:last-child
+		{
+			margin-bottom: 0;
+		}
+	
+	#content strong
+	{
+		font-weight: 600;
+	}
+	
+	#content em
+	{
+		font-style: italic;
+	}
+	
+		/** Main Header **/
+		
+		#content h1
+		{
+			display: inline-block;
+			color: #FFF;
+			font-size: 60px;
+			line-height: 60px;
+			font-weight: 700;
+			font-family: Helvetica;
+			letter-spacing: -0.6px;
+			margin: 0 0 25px 0;
+			padding: 10px 16px;
+			background: #E62B1E;
+		}
+	
+		/** Countdown Timer **/
+		
+		#countdowncont
+		{
+			width: 100%;
+			max-width: 600px;
+			margin: 0 auto;
+			margin-bottom: 20px;
+		}
+
+			#countdowncont ul#countscript li
+			{
+				float: left;
+				width: 25%;
+				padding: 0;
+				margin: 0;
+				list-style-type: none;
+			}
+
+				#countdowncont ul#countscript li span
+				{
+					font-size: 58px;
+					line-height: 58px;
+					font-weight: 700;
+					color: #FFF;
+					;
+				}
+
+				#countdowncont ul#countscript li p
+				{
+					color: rgba(255, 255, 255, 0.6);
+					text-transform: uppercase;
+					font-size: 16px;
+					line-height: 16px;
+					margin: 0;
+				}
+
+		/** Social Media **/
+		
+		#socialmedia ul
+		{
+			margin: 0;
+		}
+
+			#socialmedia ul li
+			{
+				display: inline-block;
+				list-style-type: none;
+				margin: 0 12px 0 0;
+				padding: 0;
+			}
+
+				#socialmedia ul li a
+				{
+					font-size: 27px;
+				}
+				
+#copyright
+{
+	padding: 20px 0 0 0;
+	text-align: center;
+	font-size: 18px;
+}
+
+/* ==================================================
+   Responsive Media Queries - Tablets
+================================================== */
+
+@media screen and (max-width: 768px)
+{
+	
+	#outercont #innercont
+	{
+		padding: 25px;
+	}
+	
+	#content
+	{
+		padding: 25px;
+	}
+	
+		#content h1
+		{
+			font-size: 40px;
+			line-height: 50px;
+		}
+	
+		/** Countdown Timer **/
+		
+		#countdowncont
+		{
+			max-width: 400px;
+		}
+		
+			#countdowncont ul#countscript li
+			{
+				width: 50%;
+				padding: 10px 0;
+			}
+	
+}
+
+/* ==================================================
+   Responsive Media Queries - Mobiles
+================================================== */
+
+@media screen and (max-width: 480px)
+{		
+	
+	#outercont #innercont
+	{
+		padding: 15px;
+	}
+	
+	#content
+	{
+		padding: 15px;
+	}
+	
+		/** Countdown Timer **/
+		
+		#countdowncont ul#countscript li
+		{
+			padding: 6px 0;
+		}
+
+			#countdowncont ul#countscript li p
+			{
+				font-size: 16px;
+				line-height: 16px;
+			}
+	
+}
+
