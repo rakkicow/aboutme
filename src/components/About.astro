@@ -3,7 +3,7 @@ import Monogram from '~/components/Monogram.astro';
 import { bio, skills, tools, languages, coursework } from '~/data/resume';
 ---
 
-<section id="about" class="relative py-20 sm:py-28">
+<section id="about" class="relative py-12 sm:py-28">
   <div class="container-x">
     <div class="grid gap-16 lg:grid-cols-[1fr,1.4fr] lg:gap-24">
       {/* Left rail */}
@@ -86,7 +86,7 @@ import { bio, skills, tools, languages, coursework } from '~/data/resume';
           <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Tools</p>
           <div class="mt-3 flex flex-wrap gap-2">
             {tools.map((t) => (
-              <span class="pill !text-ember-700 dark:!text-cow-300" style="border-color: rgba(255,168,100,0.4);">{t}</span>
+              <span class="pill !text-ember-700 dark:!bg-[#F6E0E9] dark:!border-[#DC9BB5]/60 dark:!text-[#9A4267]" style="border-color: rgba(255,168,100,0.4);">{t}</span>
             ))}
           </div>
         </div>

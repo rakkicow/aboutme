@@ -6,10 +6,10 @@
 const COW_SRC = '/assets/cow.png';
 ---
 
-<a
-  href="#top"
+<button
+  type="button"
   class="neon-cow group relative inline-block focus:outline-none"
-  aria-label="To the top — moo!"
+  aria-label="moo!"
   data-cursor-hover
   data-neon-cow
 >
@@ -33,12 +33,17 @@ const COW_SRC = '/assets/cow.png';
       style={`-webkit-mask: url(${COW_SRC}) center / contain no-repeat; mask: url(${COW_SRC}) center / contain no-repeat;`}
     ></canvas>
   </div>
-</a>
+</button>
 
 <style>
   .neon-cow {
     color: var(--ink);
     transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
   }
   .neon-cow:hover {
     transform: translateY(-2px);
@@ -46,9 +51,15 @@ const COW_SRC = '/assets/cow.png';
   .cow-base {
     transition: background 400ms ease;
   }
-  .neon-cow:hover .cow-base {
+  .neon-cow:hover .cow-base,
+  .neon-cow[data-painting='true'] .cow-base {
     /* Subtle dim of the base so the pink trail reads clearly */
     background: var(--ink-muted);
+  }
+  /* Mobile: short-tap pulses the moo bubble */
+  .neon-cow[data-moo='true'] .moo {
+    opacity: 1;
+    transform: translateY(-100%) scale(1);
   }
 </style>
 
@@ -79,17 +90,56 @@ const COW_SRC = '/assets/cow.png';
     const drops: Drop[] = [];
 
     let lastDrop = 0;
-    host.addEventListener('mousemove', (e) => {
+
+    const addDropAt = (clientX: number, clientY: number) => {
       const rect = stage.getBoundingClientRect();
-      const x = (e.clientX - rect.left) * dpr;
-      const y = (e.clientY - rect.top) * dpr;
+      const x = (clientX - rect.left) * dpr;
+      const y = (clientY - rect.top) * dpr;
       const now = performance.now();
       if (now - lastDrop < 18) return;
       lastDrop = now;
       drops.push({ x, y, t: now, r: 36 * dpr });
-    });
+    };
 
+    host.addEventListener('mousemove', (e) => addDropAt(e.clientX, e.clientY));
     host.addEventListener('mouseleave', () => { lastDrop = 0; });
+
+    // Mobile: touch-drag paints, short tap shows the moo bubble briefly.
+    let touchStartTime = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let didDrag = false;
+
+    host.addEventListener('touchstart', (e) => {
+      const t = e.touches[0];
+      touchStartTime = performance.now();
+      touchStartX = t.clientX;
+      touchStartY = t.clientY;
+      didDrag = false;
+      host.dataset.painting = 'true';
+    }, { passive: true });
+
+    host.addEventListener('touchmove', (e) => {
+      const t = e.touches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      if (Math.hypot(dx, dy) > 6) didDrag = true;
+      addDropAt(t.clientX, t.clientY);
+    }, { passive: true });
+
+    host.addEventListener('touchend', () => {
+      delete host.dataset.painting;
+      const elapsed = performance.now() - touchStartTime;
+      if (!didDrag && elapsed < 300) {
+        host.dataset.moo = 'true';
+        setTimeout(() => { delete host.dataset.moo; }, 1100);
+      }
+      lastDrop = 0;
+    });
+    host.addEventListener('touchcancel', () => {
+      delete host.dataset.painting;
+      lastDrop = 0;
+    });
 
     const LIFESPAN = 2500;
 

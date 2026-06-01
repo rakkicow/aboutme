@@ -3,7 +3,7 @@
 
 <div
   id="cursor"
-  class="pointer-events-none fixed left-0 top-0 z-[60] hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full md:block"
+  class="cursor-fx pointer-events-none fixed left-0 top-0 z-[60] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full"
   style="
     background: radial-gradient(circle, rgba(255,122,30,0.18) 0%, rgba(255,122,30,0) 70%);
     mix-blend-mode: multiply;
@@ -12,9 +12,18 @@
 ></div>
 <div
   id="cursor-dot"
-  class="pointer-events-none fixed left-0 top-0 z-[60] hidden h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full md:block"
+  class="cursor-fx pointer-events-none fixed left-0 top-0 z-[60] h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
   style="background: #FF6A05; box-shadow: 0 0 12px rgba(255,106,5,0.6);"
 ></div>
+
+<style>
+  /* Show custom cursor on any device with a hover-capable pointer (mouse/trackpad),
+     regardless of viewport size. Hide on touch-only. */
+  .cursor-fx { display: none; }
+  @media (hover: hover) and (pointer: fine) {
+    .cursor-fx { display: block; }
+  }
+</style>
 
 <script>
   const cursor = document.getElementById('cursor');
