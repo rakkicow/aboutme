@@ -23,7 +23,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		<!-- Favicon-->
 		<link rel="shortcut icon" href="img/favicon.png">
 		<!-- Author Meta -->
-		<meta name="author" content="Aryan Gupta">
+		<meta name="author" content="Ria Gupta">
 		<!-- Meta Description -->
 		<meta name="description" content="Anyone interested in expanding their knowledge, experience, and skills in the healthcare field while meeting others of the same interest.">
 		<!-- Meta Keyword -->
@@ -114,38 +114,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				                </div>
 				               
 				                <script>
-// Set the date we're counting down to
-var countDownDate = new Date("January 29, 2024 00:00:00").getTime();
+// Count up from May 31, 2021
+var startDate = new Date("May 31, 2021 00:00:00").getTime();
 
-// Update the count down every 1 second
-var x = setInterval(function() {
+document.getElementById("t").innerHTML = "Thank You for a Good Year!";
+document.getElementById("w").innerHTML = "Click here to visit the Insta.";
+document.getElementById("w").setAttribute("href", "https://www.instagram.com/lhshosa.ga/");
+document.getElementById("w").setAttribute("target", "_blank");
 
-  // Get today's date and time
-  var now = new Date().getTime();
-    
-  // Find the distance between now and the count down date
-  var distance = countDownDate - now;
-  // Time calculations for days, hours, minutes and seconds
+setInterval(function() {
+  var distance = new Date().getTime() - startDate;
   var days = Math.floor(distance / (1000 * 60 * 60 * 24));
   var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
   var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
-  // Output the result in an element with id="d, h, m, s"
- document.getElementById("d").innerHTML = days
- document.getElementById("h").innerHTML = hours
- document.getElementById("m").innerHTML = minutes
- document.getElementById("s").innerHTML = seconds
-  // If the count down is over, write some text 
-  if (distance > 0) {
-     document.getElementById("t").innerHTML = "Next Meeting:" 
-  }
-  if (distance < 0) {
-    clearInterval("x");
-    document.getElementById("t").innerHTML = "Meeting is currently in session!"
-    document.getElementById("w").innerHTML = "Click here to Join"
-    document.getElementById("w").setAttribute ("href", '');
-  }
+  document.getElementById("d").innerHTML = days;
+  document.getElementById("h").innerHTML = hours;
+  document.getElementById("m").innerHTML = minutes;
+  document.getElementById("s").innerHTML = seconds;
 }, 1000);
 </script>
 							</div>
@@ -296,7 +282,7 @@ var x = setInterval(function() {
 					</div>
 <div class="row footer-bottom d-flex justify-content-between">
 						<p class="col-lg-8 col-sm-12 footer-text m-0 text-white">
-							Copyright ©<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://cdiofficial.com/aryan" target="_blank">Aryan Gupta</a>
+							Copyright ©<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://cdiofficial.com/aryan" target="_blank">Ria Gupta</a>
 						</p>
 						<div class="col-lg-4 col-sm-12 footer-social">
 								<a href="https://www.remind.com/join/fafb4b"><i class="fa fa-bell-o"></i></a>
