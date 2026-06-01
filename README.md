@@ -1,48 +1,58 @@
-# rakshita.me
+# Rakshita Gupta
 
-Personal site and portfolio for Rakshita "Ria" Gupta — Computer Engineering @ Purdue.
+**Computer Engineer**
 
-Live at **[rakshita.me](https://rakshita.me)**.
+(414) 526-2678 · rakgupta@purdue.edu
 
-## Stack
+---
 
-- [Astro](https://astro.build) — static site framework
-- [Tailwind CSS](https://tailwindcss.com) — styling (with `darkMode: 'class'`)
-- [GSAP](https://gsap.com) + [Lenis](https://lenis.darkroom.engineering/) — animation and smooth scrolling
-- [GitHub Pages](https://pages.github.com) — hosting, deployed via GitHub Actions
+As a junior at Purdue University, I am fervently passionate about technology and have amassed diverse work experience in fields such as cell phone repair, 3D modeling, web and mobile application development, and professional video editing. This hands-on background has instilled in me a meticulous and detail-oriented approach, enabling me to troubleshoot and problem-solve effectively. My dedication to user-friendly design, innovative 3D modeling, and content creation drives me to excel and make a significant impact in the world of technology as I continue my academic and professional journey.
 
-## Local development
+## Skills
 
-```bash
-npm install
-npm run dev       # start dev server at http://localhost:4321
-npm run build     # build to ./dist
-npm run preview   # preview the built site locally
-```
+- Video Editing and Content Creation
+- Collaboration and Project Management
+- UX/UI Design and Implementation
+- Product Development and Customization
+- Device Repair Skills, Soldering and Microelectronics
+- Customer Service, Communication and Conflict Resolution
+- Upselling Accessories or Services and Educating Customers
 
-## Project structure
+## Languages
 
-```
-.
-├── .github/workflows/   # GitHub Actions (deploy to Pages)
-├── public/              # static assets served as-is
-│   ├── CNAME            # custom domain (rakshita.me)
-│   ├── favicon.svg
-│   ├── assets/          # site images
-│   ├── plex/            # legacy plex.* page (served at /plex)
-│   └── lhshosa/         # legacy LHS HOSA page (served at /lhshosa)
-├── src/
-│   ├── components/      # Astro components
-│   ├── data/            # static content/data
-│   ├── layouts/         # page layouts
-│   ├── pages/           # routes
-│   ├── scripts/         # client-side scripts
-│   └── styles/          # global CSS
-├── astro.config.mjs
-├── tailwind.config.mjs
-└── tsconfig.json
-```
+Java · MATLAB · C/C++ · Python · HTML/CSS/JS · Dart · Swift
 
-## Deployment
+## Education
 
-Pushes to `main` trigger `.github/workflows/deploy.yml`, which builds with Astro and publishes `dist/` to GitHub Pages. The `public/CNAME` file binds the site to `rakshita.me`.
+**Bachelor of Computer Engineering**
+Minors in Psychology, Entrepreneurship, and AI
+Purdue University — *expected May 2027*
+
+**Relevant coursework:**
+
+- ECE 20875 — Python for Data Science (A+)
+- ECE 368 — Data Structures (A−)
+- ECE 264 — Advanced C Programming (A+)
+- ENGR 131/132 — Ideas to Innovation (A)
+
+## Work
+
+### Freelance Video Editor
+**CDI Official** · 2014–2023
+
+- Collaborated with Augusta University Medical Simulation Center to produce immersive simulation videos using VR headsets and 360° cameras.
+- Filmed and edited an informative video for Ultrasound-Guided Fine-Needle Aspiration Biopsy patients at AugustaENT.
+- Contributed to patient care by reducing anxiety and providing clear guidance for medical procedures, while leveraging video editing skills to convey complex medical information effectively.
+
+### Electronics Technician / Sales Associate
+**CPR Cell Phone Repair** · 2022–2023
+
+- Repaired electronic devices, including smartphones, tablets, and laptops.
+- Assisted customers with their repair needs and provided top-quality service at the front desk.
+- Collaborated with fellow technicians and team members to effectively troubleshoot and repair electronic devices.
+
+### Lead Software Designer
+**BlueBubbles** · 2020–2023
+
+- Spearheaded the development of BlueBubbles, an innovative app that bridges the communication gap between iOS and Android, enabling iMessage functionality on Android devices.
+- Actively incorporated user feedback into the design process for BlueBubbles, making iterative improvements based on real-world usage to enhance the app's functionality and user experience.
