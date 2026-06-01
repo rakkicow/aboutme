@@ -2,13 +2,13 @@
 import MeshGradient from '~/components/MeshGradient.astro';
 ---
 
-<section id="top" class="relative isolate min-h-[100svh] overflow-hidden pb-16 pt-32 sm:pb-0 sm:pt-40">
+<section id="top" class="relative isolate overflow-hidden pb-10 pt-24 sm:pb-12 sm:pt-28">
   <MeshGradient />
 
 
   <div class="container-x relative">
     {/* Status pill — green available beacon */}
-    <div class="mb-10 inline-flex">
+    <div class="mb-6 inline-flex sm:mb-8">
       <div class="group relative" data-cursor-hover>
         <span class="inline-flex items-center justify-center gap-2.5 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur" style="border-color: var(--hair); background: var(--surface-soft); color: var(--ink-soft);">
           {/* Fancy green pulse-radar beacon */}
@@ -58,18 +58,18 @@ import MeshGradient from '~/components/MeshGradient.astro';
     {/* Display */}
     <h1 class="display max-w-none pr-4" style="color: var(--ink); padding-bottom:0.12em;">
       <span class="block" data-scramble="Hi, I'm">Hi, I'm</span>
-      <span class="hero-name mt-1 block text-[clamp(4.5rem,12vw,10rem)]">
+      <span class="hero-name mt-1 block text-[clamp(3.5rem,9vw,7.5rem)]">
         <span>R</span><span>i</span><span>a</span>
       </span>
     </h1>
 
-    <p class="mt-10 max-w-2xl text-lg leading-relaxed sm:text-xl" style="color: var(--ink-muted);">
+    <p class="mt-6 max-w-2xl text-base leading-relaxed sm:mt-8 sm:text-lg" style="color: var(--ink-muted);">
       Junior in <span style="color: var(--ink);">Computer Engineering</span> at
       <span style="color: var(--ink);">Purdue University</span> with minors in <span style="color: var(--ink);">Psychology</span> and <span style="color: var(--ink);">Entrepreneurship</span>. <span data-typewriter style="color: var(--ink);">I write code.</span><span class="typewriter-caret" aria-hidden="true">|</span>
     </p>
 
     {/* CTAs */}
-    <div class="mt-12 flex flex-wrap items-center gap-4">
+    <div class="mt-8 flex flex-wrap items-center gap-4 sm:mt-10">
       <a href="#work" class="btn-primary" data-magnetic="0.18">
         See selected works
         <svg class="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -171,7 +171,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
     </script>
 
     {/* Meta strip */}
-    <div class="mt-24 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4 sm:gap-x-12">
+    <div class="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 sm:mt-14 sm:grid-cols-4 sm:gap-x-12">
       {[
         { k: 'Based', v: 'West Lafayette, IN' },
         { k: 'Grad', v: 'May 2028' },
