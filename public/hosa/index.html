@@ -27,7 +27,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 		<!-- Meta Description -->
 		<meta name="description" content="Anyone interested in expanding their knowledge, experience, and skills in the healthcare field while meeting others of the same interest.">
 		<!-- Meta Keyword -->
-		<meta name="keywords" content="lakeside, high, school, hosa, lhs, lhshosa, georgia, lhs hosa, lakeside high school, augusta, healthcare, club, ga, lakeside hosa, aryan, gupta ">
+		<meta name="keywords" content="lakeside, high, school, hosa, lhs, lhshosa, georgia, lhs hosa, lakeside high school, augusta, healthcare, club, ga, lakeside hosa, ria, gupta ">
 		<!-- meta character set -->
 		<meta charset="UTF-8">
 		<!-- Site Title -->
@@ -64,9 +64,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 									<a href="index.html">Home</a>
 									<a href="about">About</a>
 									<a href="news">News</a>
-									<a href="nths">NTHS</a>
+									<a href="files/NTHS-Application.pdf" target="_blank">NTHS</a>
 									<a href="events">Events</a>
-									<a href="memories/memories">Memories</a>
+									<a href="memories/memories.html">Memories</a>
 									<a href="contact">Contact</a>
 								</nav>
 								<div class="menu-bar"><span class="lnr lnr-menu"></span></div>
@@ -93,6 +93,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
                                 </h2>
 				        		<div class="row clock_sec d-flex flex-row justify-content-between" id="clockdiv">
 				                    <div class="clockinner">
+				                        <span id="y" class="years"></span>
+				                        <div class="smalltext">Years</div>
+				                    </div>
+				                    <div class="clockinner">
 				                        <span id="d" class="days"></span>
 				                        <div class="smalltext">Days</div>
 				                    </div>
@@ -103,11 +107,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 				                    <div class="clockinner">
 				                        <span id="m" class="minutes"></span>
 				                        <div class="smalltext">Minutes</div>
-				                    </div>
-				                    <div class="clockinner">
-				                        <span id="s" class="seconds"></span>
-				                        <div class="smalltext">Seconds</div>
-				            
+
 				                    </div>
 				                
 
@@ -123,15 +123,20 @@ document.getElementById("w").setAttribute("href", "https://www.instagram.com/lhs
 document.getElementById("w").setAttribute("target", "_blank");
 
 setInterval(function() {
-  var distance = new Date().getTime() - startDate;
-  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  var now = new Date();
+  var start = new Date(startDate);
+  var years = now.getFullYear() - start.getFullYear();
+  var anniv = new Date(start);
+  anniv.setFullYear(start.getFullYear() + years);
+  if (now < anniv) { years -= 1; anniv.setFullYear(anniv.getFullYear() - 1); }
+  var remMs = now.getTime() - anniv.getTime();
+  var days = Math.floor(remMs / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((remMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((remMs % (1000 * 60 * 60)) / (1000 * 60));
+  document.getElementById("y").innerHTML = years;
   document.getElementById("d").innerHTML = days;
   document.getElementById("h").innerHTML = hours;
   document.getElementById("m").innerHTML = minutes;
-  document.getElementById("s").innerHTML = seconds;
 }, 1000);
 </script>
 							</div>
@@ -282,7 +287,7 @@ setInterval(function() {
 					</div>
 <div class="row footer-bottom d-flex justify-content-between">
 						<p class="col-lg-8 col-sm-12 footer-text m-0 text-white">
-							Copyright ©<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://cdiofficial.com/aryan" target="_blank">Ria Gupta</a>
+							Copyright ©<script>document.write(new Date().getFullYear());</script> All rights reserved | Made with <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://rakshita.me" target="_blank">Ria Gupta</a>
 						</p>
 						<div class="col-lg-4 col-sm-12 footer-social">
 								<a href="https://www.remind.com/join/fafb4b"><i class="fa fa-bell-o"></i></a>
