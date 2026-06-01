@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    .bg { fill: #FAFAFA; }
+    .ink { fill: #0F0F10; stroke: #0F0F10; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #0A0E1A; }
+      .ink { fill: #F6F0FA; stroke: #F6F0FA; }
+    }
+  </style>
+  <circle class="bg ink" cx="50" cy="50" r="46" fill-opacity="0" stroke-width="2.5"/>
+  <text class="ink" x="50" y="66" text-anchor="middle" font-family="Allura, 'Brush Script MT', cursive" font-size="58">RG</text>
+</svg>

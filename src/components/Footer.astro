@@ -1,0 +1,46 @@
+---
+import Monogram from '~/components/Monogram.astro';
+import NeonCow from '~/components/NeonCow.astro';
+const year = new Date().getFullYear();
+---
+
+<footer class="relative mt-20 overflow-hidden border-t pb-8 pt-16" style="border-color: var(--hair); background: var(--surface);">
+
+  <div class="container-x">
+    <div class="flex flex-col items-start justify-between gap-10 lg:flex-row lg:items-end">
+      <div>
+        <div class="mb-8 flex items-center gap-3">
+          <Monogram size={48} stroke={1.1} />
+          <div>
+            <p class="font-display text-xl tracking-tight" style="color: var(--ink);">Rakshita Gupta</p>
+            <p class="mt-0.5 text-[10px] uppercase tracking-[0.25em]" style="color: var(--ink-faint);">Computer Engineer</p>
+          </div>
+        </div>
+        <h2 class="display mt-4 max-w-[14ch]" style="color: var(--ink);">
+          Let's build<br />
+          something <span class="h-italic text-gradient-pink">bright.</span>
+        </h2>
+      </div>
+      <div class="flex flex-col gap-3 text-sm" style="color: var(--ink-muted);">
+        <a href="mailto:rakgupta@purdue.edu" class="hover:text-ember-600 dark:hover:text-cow-300">rakgupta@purdue.edu</a>
+        <a href="https://www.linkedin.com/in/rakshita-gupta-4571a7251" target="_blank" rel="noopener noreferrer" class="hover:text-ember-600 dark:hover:text-cow-300">LinkedIn</a>
+        <a href="https://rakshita.me" class="hover:text-ember-600 dark:hover:text-cow-300">rakshita.me</a>
+        <span>West Lafayette, IN · Purdue '27</span>
+      </div>
+    </div>
+
+    <div class="mt-16 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+      <div class="text-xs" style="color: var(--ink-faint);">
+        <p>© {year} Rakshita Gupta. Designed and built in West Lafayette.</p>
+        <p class="mt-1">Crafted with Astro, Tailwind, GSAP, and a lot of orange.</p>
+      </div>
+      <NeonCow />
+    </div>
+  </div>
+
+  {/* Bottom mesh accent */}
+  <div class="pointer-events-none absolute -bottom-40 left-1/2 h-80 w-[1200px] -translate-x-1/2 -z-10">
+    <div class="absolute inset-0 rounded-full bg-ember-300/40 blur-[120px] dark:bg-ember-500/15"></div>
+    <div class="absolute left-1/3 top-1/2 h-64 w-64 rounded-full bg-cow-300/40 blur-[100px] dark:bg-cow-400/20"></div>
+  </div>
+</footer>

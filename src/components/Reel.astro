@@ -1,0 +1,187 @@
+---
+import { reel } from '~/data/projects';
+
+// Each tile is a real youtube-nocookie iframe embed — horizontal scroll-snap
+// carousel with arrow nav and drag-to-scroll.
+---
+
+<section id="reel" class="relative py-14 sm:py-20">
+  {/* Warm backdrop */}
+  <div class="pointer-events-none absolute inset-x-0 top-1/2 -z-20 h-[120%] -translate-y-1/2 overflow-hidden">
+    <div class="absolute left-1/2 top-0 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full opacity-30" style="background: radial-gradient(circle, rgba(255,168,100,0.4), transparent 60%);"></div>
+    <div class="absolute right-0 bottom-0 h-[28rem] w-[28rem] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(220,155,181,0.45), transparent 65%);"></div>
+  </div>
+
+  <div class="container-x">
+    <div class="reveal flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
+      <div>
+        <p class="eyebrow">Reel</p>
+        <h2 class="h2 mt-4 max-w-[20ch]">
+          Selected <span class="h-italic text-gradient-pink">video</span> work.
+        </h2>
+      </div>
+      <p class="max-w-sm text-sm" style="color: var(--ink-muted);">
+        Drag or scroll to scrub through. A growing collection of CDI Official
+        pieces — healthcare, education, and a few favorites.
+      </p>
+    </div>
+
+    {/* Arrow controls */}
+    <div class="reveal mt-10 flex items-center justify-between">
+      <div class="flex items-center gap-2 text-xs" style="color: var(--ink-faint);">
+        <span class="inline-flex h-1.5 w-1.5 rounded-full bg-cow-400"></span>
+        <span>{reel.length} videos</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          data-reel-prev
+          class="reel-arrow"
+          aria-label="Scroll videos left"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <button
+          type="button"
+          data-reel-next
+          class="reel-arrow"
+          aria-label="Scroll videos right"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
+    </div>
+
+    {/* Horizontal scroll-snap carousel */}
+    <div
+      data-reel-track
+      class="no-scrollbar reveal mt-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden scroll-smooth pb-6 pt-4"
+      style="scroll-padding-left: 1.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
+    >
+      {reel.map((v, i) => (
+        <article
+          class="snap-start shrink-0 w-[88vw] sm:w-[560px] lg:w-[640px] group relative overflow-hidden rounded-3xl border bg-black/90"
+          style="border-color: var(--hair); box-shadow: 0 24px 60px -20px rgba(15,15,16,0.35);"
+        >
+          {/* Pill */}
+          {v.pill && (
+            <span class="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
+              {v.pill}
+            </span>
+          )}
+          <span class="absolute right-4 top-4 z-10 font-mono text-[10px] text-white/60">{`0${i + 1} / 0${reel.length}`}</span>
+
+          {/* YouTube embed */}
+          <div class="relative aspect-video w-full overflow-hidden">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${v.id}?rel=0&modestbranding=1&playsinline=1`}
+              title={v.title}
+              loading="lazy"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+              referrerpolicy="strict-origin-when-cross-origin"
+              class="absolute inset-0 h-full w-full border-0"
+            ></iframe>
+          </div>
+
+          {/* Caption */}
+          <div class="p-6">
+            <h3 class="font-display text-xl font-medium tracking-tight text-white">{v.title}</h3>
+            <p class="mt-2 text-sm text-white/70">{v.caption}</p>
+          </div>
+        </article>
+      ))}
+
+      {/* "Add a video" trailing slot */}
+      <div
+        class="snap-start shrink-0 w-[88vw] sm:w-[560px] lg:w-[640px] grid aspect-[16/11] place-items-center rounded-3xl border border-dashed"
+        style="border-color: var(--hair); background: var(--surface-soft);"
+      >
+        <div class="text-center">
+          <div class="mx-auto grid h-12 w-12 place-items-center rounded-full border-2 border-dashed border-cow-400 text-cow-400">+</div>
+          <p class="mt-3 text-xs uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Next video drop</p>
+          <p class="mt-1 text-sm" style="color: var(--ink-muted);">Publish on YouTube, paste the ID in <span class="font-mono text-[11px]">projects.ts</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .reel-arrow {
+    display: inline-grid;
+    place-items: center;
+    height: 40px;
+    width: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--hair);
+    background: var(--surface);
+    color: var(--ink);
+    transition:
+      transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
+      background 240ms ease,
+      box-shadow 240ms ease;
+  }
+  .reel-arrow:hover {
+    transform: translateY(-2px);
+    background: var(--cow-pink-soft);
+    box-shadow: 0 12px 28px -10px rgba(220, 155, 181, 0.45);
+  }
+  .reel-arrow:active {
+    transform: translateY(0);
+  }
+</style>
+
+<script>
+  const track = document.querySelector<HTMLElement>('[data-reel-track]');
+  if (track) {
+    const step = () => {
+      const card = track.querySelector<HTMLElement>('article');
+      return (card?.offsetWidth ?? 400) + 24; // gap-6
+    };
+
+    document.querySelector('[data-reel-next]')?.addEventListener('click', () => {
+      track.scrollBy({ left: step(), behavior: 'smooth' });
+    });
+    document.querySelector('[data-reel-prev]')?.addEventListener('click', () => {
+      track.scrollBy({ left: -step(), behavior: 'smooth' });
+    });
+
+    // Drag-to-scroll on desktop
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    track.addEventListener('mousedown', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('iframe') || target.closest('button')) return;
+      isDown = true;
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+      track.style.cursor = 'grabbing';
+    });
+    const release = () => {
+      isDown = false;
+      track.style.cursor = '';
+    };
+    track.addEventListener('mouseleave', release);
+    track.addEventListener('mouseup', release);
+    track.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+    });
+
+    // Wheel — convert vertical/diagonal trackpad scroll into horizontal carousel
+    // movement. Prevents page scroll bleed when user is mid-scrub.
+    track.addEventListener('wheel', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('iframe')) return;
+      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (horizontal !== 0) {
+        e.preventDefault();
+        track.scrollBy({ left: horizontal * 1.2, behavior: 'auto' });
+      }
+    }, { passive: false });
+  }
+</script>

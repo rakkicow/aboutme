@@ -1,0 +1,96 @@
+---
+import Monogram from '~/components/Monogram.astro';
+import { bio, skills, tools, languages, coursework } from '~/data/resume';
+---
+
+<section id="about" class="relative py-20 sm:py-28">
+  <div class="container-x">
+    <div class="grid gap-16 lg:grid-cols-[1fr,1.4fr] lg:gap-24">
+      {/* Left rail */}
+      <div class="reveal">
+        <p class="eyebrow">About</p>
+        <h2 class="h2 mt-4 max-w-[14ch]">
+          The short <span class="h-italic text-gradient-pink">version</span>.
+        </h2>
+
+        {/* Resume-style cursive monogram */}
+        <div class="relative mt-14">
+          <Monogram size={168} stroke={1.1} withGlow />
+        </div>
+
+        {/* LinkedIn-style summary quote */}
+        <blockquote class="mt-10 max-w-xs border-l-2 pl-4 font-display text-lg italic" style="border-color: var(--cow-pink); color: var(--ink-soft);">
+          "{bio.summary}"
+        </blockquote>
+      </div>
+
+      {/* Body */}
+      <div class="reveal space-y-7 text-[17px] leading-relaxed sm:text-lg" style="color: var(--ink-muted);">
+        <p>
+          I'm Ria — a <span style="color: var(--ink);">Junior in Computer Engineering</span>
+          at Purdue with minors in <span style="color: var(--ink);">Psychology, Entrepreneurship,
+          and AI</span>. My background is a strange but useful mix: cell-phone repair,
+          3D modeling, web and mobile app development, and professional video editing.
+        </p>
+        <p>
+          That hands-on history made me meticulous about details and stubborn
+          about troubleshooting. I care about user-friendly design, innovative
+          3D modeling, and content that respects the person on the other side
+          of the screen.
+        </p>
+        <p>
+          Outside class I tinker — circuits, enclosures, small web builds for
+          family and friends. I'm at my best when I get to design something
+          end-to-end: from the schematic to the splash screen.
+        </p>
+
+        {/* Completed coursework */}
+        <div class="pt-6">
+          <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">
+            Coursework — <span class="text-cow-600 dark:text-cow-300">completed</span>
+          </p>
+          <ul class="mt-4 grid gap-2 sm:grid-cols-2">
+            {coursework.map((c) => (
+              <li class="flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm" style="border-color: var(--hair); background: var(--surface-soft);">
+                <span>
+                  <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
+                  <span class="ml-2" style="color: var(--ink-soft);">{c.name}</span>
+                </span>
+                <span class="ml-3 inline-flex items-center rounded-full bg-cow-300/20 px-2 py-0.5 font-mono text-[10px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Languages */}
+        <div class="pt-2">
+          <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Languages</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {languages.map((l) => (
+              <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs font-medium" style="border-color: var(--cow-pink); color: var(--cow-pink); background: var(--cow-pink-soft);">{l}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Skills */}
+        <div class="pt-2">
+          <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Skills</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {skills.map((s) => (
+              <span class="pill">{s}</span>
+            ))}
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Tools</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            {tools.map((t) => (
+              <span class="pill !text-ember-700 dark:!text-cow-300" style="border-color: rgba(255,168,100,0.4);">{t}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

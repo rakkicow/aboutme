@@ -1,0 +1,115 @@
+---
+const items = [
+  'Hardware', 'Software', 'Soldering', 'KiCad', 'LTspice',
+  'Premiere', 'After Effects', 'Final Cut', 'TriCaster',
+  'Astro', 'TypeScript', 'Verilog', 'C/C++', 'Python',
+  'Java', 'Swift', 'Dart', 'UX Research', '3D Modeling',
+  'Videography', 'Design Systems', '🐄',
+];
+
+// Tripled so the JS-driven auto-scroll never sees a gap
+const loop = [...items, ...items, ...items];
+---
+
+<section class="relative -my-10 overflow-hidden border-y py-8" style="border-color: var(--hair); background: var(--surface-soft); backdrop-filter: blur(8px);">
+  {/* JS-driven horizontal scroll — trackpad / wheel / drag all push the marquee sideways. */}
+  <div
+    data-marquee
+    class="no-scrollbar relative flex overflow-x-auto overflow-y-hidden whitespace-nowrap will-change-scroll"
+    style="overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
+    role="region"
+    aria-label="Skills marquee — scroll horizontally or drag to scrub"
+  >
+    {loop.map((item, i) => (
+      <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium sm:text-4xl">
+        <span
+          class={`font-display ${i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : ''}`}
+          style={i % 4 !== 0 && i % 3 !== 0 ? 'color: var(--ink-soft);' : ''}
+        >{item}</span>
+        <span class="inline-block h-2 w-2 rounded-full bg-cow-300"></span>
+      </span>
+    ))}
+  </div>
+
+  {/* Edge fades */}
+  <div class="pointer-events-none absolute inset-y-0 left-0 w-32" style="background: linear-gradient(90deg, var(--canvas), transparent);"></div>
+  <div class="pointer-events-none absolute inset-y-0 right-0 w-32" style="background: linear-gradient(270deg, var(--canvas), transparent);"></div>
+
+  {/* Hint */}
+  <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] uppercase tracking-[0.3em]" style="color: var(--ink-faint);">scroll · drag · trackpad</p>
+</section>
+
+<script>
+  const track = document.querySelector<HTMLElement>('[data-marquee]');
+  if (track) {
+    // Set initial position to the middle copy so user can scroll both directions seamlessly
+    const settleLoop = () => {
+      const third = track.scrollWidth / 3;
+      if (track.scrollLeft < third / 2) track.scrollLeft += third;
+      else if (track.scrollLeft > (track.scrollWidth - third / 2)) track.scrollLeft -= third;
+    };
+
+    requestAnimationFrame(() => {
+      track.scrollLeft = track.scrollWidth / 3;
+    });
+
+    // Auto-scroll loop — paused on hover or active interaction
+    let paused = false;
+    let interactionUntil = 0;
+    const tick = () => {
+      if (!paused && Date.now() > interactionUntil) {
+        track.scrollLeft += 0.6;
+        settleLoop();
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+
+    track.addEventListener('mouseenter', () => { paused = true; });
+    track.addEventListener('mouseleave', () => { paused = false; });
+
+    // Wheel — convert vertical (trackpad) scroll to horizontal marquee scroll.
+    // Vertical page scroll is preserved when the user's gesture is clearly vertical
+    // and they're not actively scrubbing horizontally.
+    track.addEventListener('wheel', (e) => {
+      // Take the dominant axis
+      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (horizontal !== 0) {
+        e.preventDefault();
+        track.scrollLeft += horizontal * 1.2;
+        interactionUntil = Date.now() + 900;
+        settleLoop();
+      }
+    }, { passive: false });
+
+    // Drag-to-scrub (mouse)
+    let isDown = false;
+    let startX = 0;
+    let scrollLeft = 0;
+    track.addEventListener('mousedown', (e) => {
+      isDown = true;
+      startX = e.pageX - track.offsetLeft;
+      scrollLeft = track.scrollLeft;
+      track.style.cursor = 'grabbing';
+    });
+    const release = () => {
+      if (isDown) {
+        isDown = false;
+        track.style.cursor = '';
+        interactionUntil = Date.now() + 1200;
+      }
+    };
+    track.addEventListener('mouseup', release);
+    track.addEventListener('mouseleave', release);
+    track.addEventListener('mousemove', (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - track.offsetLeft;
+      track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+      settleLoop();
+    });
+
+    // Touch swipe — native horizontal scrolling already works; just keep loop seamless
+    track.addEventListener('scroll', settleLoop);
+  }
+</script>
