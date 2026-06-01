@@ -20,15 +20,18 @@ const loop = [...items, ...items, ...items];
     role="region"
     aria-label="Skills marquee — scroll horizontally or drag to scrub"
   >
-    {loop.map((item, i) => (
-      <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium leading-[1.4] sm:text-4xl">
-        <span
-          class={`font-display inline-block pb-1.5 ${i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : ''}`}
-          style={i % 4 !== 0 && i % 3 !== 0 ? 'color: var(--ink-soft);' : ''}
-        >{item}</span>
-        <span class="inline-block h-2 w-2 rounded-full bg-cow-300"></span>
-      </span>
-    ))}
+    {loop.map((item, i) => {
+      // Skip gradient/text styling for emoji glyphs so they render in their native colors.
+      const isEmoji = /[^\x00-\x7F]/.test(item);
+      const gradient = isEmoji ? '' : i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : '';
+      const inlineStyle = isEmoji ? '' : (i % 4 !== 0 && i % 3 !== 0 ? 'color: var(--ink-soft);' : '');
+      return (
+        <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium leading-[1.4] sm:text-4xl">
+          <span class={`font-display inline-block pb-1.5 ${gradient}`} style={inlineStyle}>{item}</span>
+          <span class="inline-block h-2 w-2 rounded-full bg-cow-300"></span>
+        </span>
+      );
+    })}
   </div>
 
   {/* Edge fades */}
@@ -37,7 +40,7 @@ const loop = [...items, ...items, ...items];
 
   {/* Hint — short on narrow viewports, long on wider ones */}
   <p class="pointer-events-none absolute bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] uppercase tracking-[0.3em] sm:hidden" style="color: var(--ink-faint);">Scroll · Drag · Hold</p>
-  <p class="pointer-events-none absolute bottom-1 left-1/2 hidden -translate-x-1/2 whitespace-nowrap text-[9px] uppercase tracking-[0.3em] sm:block" style="color: var(--ink-faint);">Scroll or Drag to View · Hold to Pause</p>
+  <p class="pointer-events-none absolute bottom-1 left-1/2 hidden -translate-x-1/2 whitespace-nowrap text-[9px] uppercase tracking-[0.3em] sm:block" style="color: var(--ink-faint);">Scroll/Drag to View · Hold to Pause</p>
 </section>
 
 <script>
