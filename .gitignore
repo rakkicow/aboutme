@@ -4,3 +4,9 @@ dist
 .DS_Store
 .env
 .env.local
+
+# Claude Code local settings
+.claude/
+
+# Local-only archive of files removed from the published sites
+unused/
