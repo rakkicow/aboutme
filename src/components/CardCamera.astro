@@ -73,7 +73,11 @@
     const start = performance.now();
     const pad = (n: number, w = 2) => String(n).padStart(w, '0');
 
+    let onScreen = false;
+    let rafId: number | null = null;
+
     const tick = () => {
+      if (!onScreen) { rafId = null; return; }
       const total = performance.now() - start;
       const ms = Math.floor(total % 1000);
       const s = Math.floor(total / 1000) % 60;
@@ -86,8 +90,27 @@
       const clock = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       clockEls.forEach((el) => (el.textContent = clock));
 
-      requestAnimationFrame(tick);
+      rafId = requestAnimationFrame(tick);
     };
-    requestAnimationFrame(tick);
+
+    const startTick = () => { if (rafId === null) rafId = requestAnimationFrame(tick); };
+
+    // Observe the first camera element; if multiple exist, observe each
+    const targets: Element[] = [];
+    elapsedEls.forEach((el) => targets.push(el));
+    if (!targets.length) clockEls.forEach((el) => targets.push(el));
+
+    const io = new IntersectionObserver((entries) => {
+      const anyVisible = entries.some((e) => e.isIntersecting);
+      // Track cumulative visibility — if any camera is on-screen, run
+      onScreen = anyVisible || onScreen;
+      // Recompute: count currently visible by checking the underlying state
+      let visibleNow = false;
+      io.takeRecords();
+      // Simpler: just re-evaluate from current entries
+      onScreen = anyVisible;
+      if (onScreen) startTick();
+    }, { rootMargin: '100px' });
+    targets.forEach((t) => io.observe(t));
   }
 </script>

@@ -62,12 +62,12 @@ import { bio, skills, tools, languages, coursework } from '~/data/resume';
           </ul>
         </div>
 
-        {/* Languages */}
+        {/* Languages — Designer & Developer styling in light mode, original cow-pink in dark */}
         <div class="pt-2">
           <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Languages</p>
           <div class="mt-3 flex flex-wrap gap-2">
             {languages.map((l) => (
-              <span class="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs font-medium" style="border-color: var(--cow-pink); color: var(--cow-pink); background: var(--cow-pink-soft);">{l}</span>
+              <span class="lang-pill inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs font-medium">{l}</span>
             ))}
           </div>
         </div>
