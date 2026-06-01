@@ -26,7 +26,7 @@ Java · MATLAB · C/C++ · Python · HTML/CSS/JS · Dart · Swift
 
 **Bachelor of Computer Engineering**
 Minors in Psychology, Entrepreneurship, and AI
-Purdue University — *expected May 2027*
+Purdue University — *expected May 2028*
 
 **Relevant coursework:**
 

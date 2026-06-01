@@ -77,7 +77,7 @@ export const roles: Role[] = [
   {
     org: 'Purdue University',
     title: 'Bachelor of Computer Engineering',
-    years: 'Aug 2023 — May 2027',
+    years: 'Aug 2023 — May 2028',
     kind: 'edu',
     body: 'Minors in Psychology, Entrepreneurship, and AI. Completed coursework: ECE 264 (Advanced C, A+), ECE 20875 (Python for Data Science, A+), ECE 368 (Data Structures, A−), ENGR 131/132 (Ideas to Innovation, A).',
   },
