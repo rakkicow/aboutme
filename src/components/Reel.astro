@@ -73,13 +73,16 @@ import { reel } from '~/data/projects';
 
           {/* Click-to-play poster — full YouTube iframe is heavy (multiple MB +
               ~50–100 MB of RAM each), so we render a static thumbnail until the
-              user actually wants to watch. */}
-          <div class="relative aspect-video w-full overflow-hidden">
+              user actually wants to watch. The iframe is also torn back down
+              once the card scrolls off-screen so it doesn't sit in memory. */}
+          <div
+            class="reel-video-slot relative aspect-video w-full overflow-hidden"
+            data-yt-id={v.id}
+            data-yt-title={v.title}
+          >
             <button
               type="button"
               class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
-              data-yt-id={v.id}
-              data-yt-title={v.title}
               aria-label={`Play: ${v.title}`}
             >
               <img
@@ -151,12 +154,17 @@ import { reel } from '~/data/projects';
 </style>
 
 <script>
-  // Click-to-play: swap each YouTube poster for a real iframe on first click.
-  document.querySelectorAll<HTMLButtonElement>('.reel-poster').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.ytId;
-      const title = btn.dataset.ytTitle ?? '';
-      if (!id) return;
+  // Click to play, scroll-away to unload. The poster button stays in the DOM
+  // and the iframe sits next to it — we toggle which is visible and tear the
+  // iframe down entirely when the card leaves the viewport.
+  document.querySelectorAll<HTMLElement>('.reel-video-slot').forEach((slot) => {
+    const id = slot.dataset.ytId;
+    const title = slot.dataset.ytTitle ?? '';
+    const poster = slot.querySelector<HTMLButtonElement>('.reel-poster');
+    if (!id || !poster) return;
+
+    const mount = () => {
+      if (slot.querySelector('iframe')) return;
       const iframe = document.createElement('iframe');
       iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
       iframe.title = title;
@@ -165,8 +173,28 @@ import { reel } from '~/data/projects';
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.className = 'absolute inset-0 h-full w-full border-0';
-      btn.replaceWith(iframe);
-    });
+      slot.appendChild(iframe);
+      poster.style.display = 'none';
+    };
+
+    const unmount = () => {
+      const iframe = slot.querySelector('iframe');
+      if (!iframe) return;
+      iframe.remove();
+      poster.style.display = '';
+    };
+
+    poster.addEventListener('click', mount);
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) unmount();
+        },
+        { rootMargin: '250px' },
+      );
+      io.observe(slot);
+    }
   });
 
   const track = document.querySelector<HTMLElement>('[data-reel-track]');
