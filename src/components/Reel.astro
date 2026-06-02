@@ -58,62 +58,97 @@ import { reel } from '~/data/projects';
       class="no-scrollbar reveal mt-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden scroll-smooth pb-6 pt-4"
       style="scroll-padding-left: 1.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
     >
-      {reel.map((v, i) => (
-        <article
-          class="snap-start shrink-0 w-[88vw] sm:w-[560px] lg:w-[640px] group relative overflow-hidden rounded-3xl border bg-black/90"
-          style="border-color: var(--hair); box-shadow: 0 24px 60px -20px rgba(15,15,16,0.35);"
-        >
-          {/* Pill */}
-          {v.pill && (
-            <span class="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
-              {v.pill}
-            </span>
-          )}
-          <span class="absolute right-4 top-4 z-10 font-mono text-[10px] text-white/60">{`0${i + 1} / 0${reel.length}`}</span>
+      {reel.map((v, i) => {
+        const source = v.source ?? 'youtube';
+        const isExternal = source === 'external';
+        const thumbnail =
+          v.thumbnail ??
+          (source === 'youtube'
+            ? `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`
+            : source === 'drive'
+              ? `https://drive.google.com/thumbnail?id=${v.id}&sz=w1280`
+              : '');
+        const ytMaxres =
+          source === 'youtube' ? `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg` : undefined;
 
-          {/* Click-to-play poster — full YouTube iframe is heavy (multiple MB +
-              ~50–100 MB of RAM each), so we render a static thumbnail until the
-              user actually wants to watch. The iframe is also torn back down
-              once the card scrolls off-screen so it doesn't sit in memory. */}
-          <div
-            class="reel-video-slot relative aspect-video w-full overflow-hidden"
-            data-yt-id={v.id}
-            data-yt-title={v.title}
+        return (
+          <article
+            class="snap-start shrink-0 w-[88vw] sm:w-[560px] lg:w-[640px] group relative overflow-hidden rounded-3xl border bg-black/90"
+            style="border-color: var(--hair); box-shadow: 0 24px 60px -20px rgba(15,15,16,0.35);"
           >
-            <button
-              type="button"
-              class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
-              aria-label={`Play: ${v.title}`}
-            >
-              {/* Start with hqdefault (always exists). Once it loads we try to
-                  upgrade to maxresdefault; if maxres comes back as the 120×90
-                  placeholder, we leave hqdefault in place. */}
-              <img
-                src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                data-maxres={`https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`}
-                alt={v.title}
-                loading="lazy"
-                decoding="async"
-                class="reel-thumb absolute inset-0 h-full w-full object-cover"
-              />
-              <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
-              <span class="pointer-events-none absolute inset-0 grid place-items-center">
-                <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
-                  <svg class="ml-1 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </span>
+            {v.pill && (
+              <span class="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
+                {v.pill}
               </span>
-            </button>
-          </div>
+            )}
+            <span class="absolute right-4 top-4 z-10 font-mono text-[10px] text-white/60">{`0${i + 1} / 0${reel.length}`}</span>
 
-          {/* Caption */}
-          <div class="p-6">
-            <h3 class="font-display text-xl font-medium tracking-tight text-white">{v.title}</h3>
-            <p class="mt-2 text-sm text-white/70">{v.caption}</p>
-          </div>
-        </article>
-      ))}
+            {/* Click-to-play (or click-through) poster. YouTube + Drive mount
+                an iframe on click and tear it down on scroll-off; external
+                items navigate to v.href on click and never mount anything. */}
+            <div
+              class="reel-video-slot relative aspect-video w-full overflow-hidden"
+              data-source={source}
+              data-yt-id={v.id}
+              data-yt-title={v.title}
+            >
+              {isExternal ? (
+                <a
+                  href={v.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
+                  aria-label={`Open: ${v.title}`}
+                >
+                  <img
+                    src={thumbnail}
+                    alt={v.title}
+                    loading="lazy"
+                    decoding="async"
+                    class="reel-thumb absolute inset-0 h-full w-full object-cover"
+                  />
+                  <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
+                  <span class="pointer-events-none absolute inset-0 grid place-items-center">
+                    <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
+                      <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </span>
+                  </span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
+                  aria-label={`Play: ${v.title}`}
+                >
+                  <img
+                    src={thumbnail}
+                    data-maxres={ytMaxres}
+                    alt={v.title}
+                    loading="lazy"
+                    decoding="async"
+                    class="reel-thumb absolute inset-0 h-full w-full object-cover"
+                  />
+                  <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
+                  <span class="pointer-events-none absolute inset-0 grid place-items-center">
+                    <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
+                      <svg class="ml-1 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                  </span>
+                </button>
+              )}
+            </div>
+
+            <div class="p-6">
+              <h3 class="font-display text-xl font-medium tracking-tight text-white">{v.title}</h3>
+              <p class="mt-2 text-sm text-white/70">{v.caption}</p>
+            </div>
+          </article>
+        );
+      })}
 
       {/* "Add a video" trailing slot */}
       <div
@@ -169,19 +204,33 @@ import { reel } from '~/data/projects';
     probe.src = maxres;
   });
 
-  // Click to play, scroll-away to unload. The poster button stays in the DOM
-  // and the iframe sits next to it — we toggle which is visible and tear the
-  // iframe down entirely when the card leaves the viewport.
+  // Click to play, scroll-away to unload. The poster stays in the DOM and the
+  // iframe sits next to it — we toggle which is visible and tear the iframe
+  // down entirely when the card leaves the viewport. External-source slots
+  // skip the mount/unmount path and let the anchor's native click navigate.
   document.querySelectorAll<HTMLElement>('.reel-video-slot').forEach((slot) => {
+    const source = (slot.dataset.source ?? 'youtube') as
+      | 'youtube'
+      | 'drive'
+      | 'external';
+    if (source === 'external') return;
+
     const id = slot.dataset.ytId;
     const title = slot.dataset.ytTitle ?? '';
-    const poster = slot.querySelector<HTMLButtonElement>('.reel-poster');
+    const poster = slot.querySelector<HTMLElement>('.reel-poster');
     if (!id || !poster) return;
+
+    const buildSrc = () => {
+      if (source === 'drive') {
+        return `https://drive.google.com/file/d/${id}/preview`;
+      }
+      return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    };
 
     const mount = () => {
       if (slot.querySelector('iframe')) return;
       const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+      iframe.src = buildSrc();
       iframe.title = title;
       iframe.allow =
         'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
@@ -199,7 +248,10 @@ import { reel } from '~/data/projects';
       poster.style.display = '';
     };
 
-    poster.addEventListener('click', mount);
+    poster.addEventListener('click', (e) => {
+      e.preventDefault();
+      mount();
+    });
 
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(

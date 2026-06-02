@@ -58,9 +58,14 @@ export const featured: Project[] = [
   },
 ];
 
-// YouTube reel — channel IDs. Tiles render as live youtube-nocookie embeds.
+// Reel — mixed sources. YouTube and Drive videos play inline (click-to-play
+// poster, iframe mounts on click and unmounts on scroll-off). 'external' is a
+// click-through to another site, no iframe is ever mounted.
 export type ReelEntry = {
-  id: string;
+  id: string;                                       // platform ID (yt watch id, drive file id, vimeo id…)
+  source?: 'youtube' | 'drive' | 'external';       // defaults to 'youtube'
+  href?: string;                                    // required when source = 'external'
+  thumbnail?: string;                               // overrides the auto-derived thumbnail URL
   title: string;
   caption: string;
   pill?: string;
@@ -68,18 +73,51 @@ export type ReelEntry = {
 
 export const reel: ReelEntry[] = [
   {
+    id: '1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f',
+    source: 'drive',
+    title: 'USFNA — patient explainer',
+    caption: 'Ultrasound-guided fine-needle aspiration walkthrough for AugustaENT patients.',
+    pill: 'Healthcare',
+  },
+  {
+    id: 'LDBWADBBxIE',
+    title: 'Unlock Your Potential — HOSA PSA 2021',
+    caption: 'Lakeside HOSA 2021 PSA — concept, shoot, edit.',
+    pill: 'HOSA · 2021',
+  },
+  {
+    id: '739762304',
+    source: 'external',
+    href: 'https://augustaent.com/surgery/preparing-for-surgery/',
+    thumbnail: 'https://vumbnail.com/739762304.jpg',
+    title: 'Pediatric Surgery Prep — AugustaENT',
+    caption: 'Calming pre-surgery walkthrough for young patients. Click to visit AugustaENT.',
+    pill: 'Healthcare',
+  },
+  {
+    id: 'O_mKARkrl6w',
+    title: 'Stop the Bleed — HOSA PSA 2020',
+    caption: '5th place ILC · 1st place Georgia SLC. Lakeside HOSA 2020 PSA.',
+    pill: 'HOSA · 2020',
+  },
+  {
+    id: 'uwbs5RD84T0',
+    title: 'CIFR — promotional',
+    caption: 'Promotional piece for CIFR.',
+    pill: 'CIFR',
+  },
+  {
     id: '295pjCG2cmM',
     title: 'Simulation Introduction',
     caption: 'Augusta University Medical Simulation Center — immersive 360° / VR intro.',
     pill: 'Healthcare · VR',
   },
   {
-    id: 'uwbs5RD84T0',
-    title: 'CDI Official — selected work',
-    caption: 'A piece from the CDI Official catalog.',
+    id: 'QDxZOwXWNTQ',
+    title: 'CDI Official — Channel Trailer',
+    caption: 'CDI Official channel trailer (2020).',
     pill: 'CDI',
   },
-  // Drop in more YouTube IDs as you publicize videos on the CDI channel.
 ];
 
 export type WebShelfEntry = {
