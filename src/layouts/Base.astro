@@ -135,16 +135,26 @@ const {
         });
       });
 
-      // Nav scrolled state
+      // Nav scrolled state — passive scroll listener throttled to one rAF per
+      // frame; cheaper than ScrollTrigger.onUpdate firing every scroll tick.
       const nav = document.querySelector<HTMLElement>('[data-nav]');
       if (nav) {
-        ScrollTrigger.create({
-          start: 'top -40',
-          end: 'max',
-          onUpdate: (self) => {
-            nav.dataset.scrolled = self.scroll() > 40 ? 'true' : 'false';
+        let queued = false;
+        const sync = () => {
+          queued = false;
+          const next = window.scrollY > 40 ? 'true' : 'false';
+          if (nav.dataset.scrolled !== next) nav.dataset.scrolled = next;
+        };
+        sync();
+        window.addEventListener(
+          'scroll',
+          () => {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(sync);
           },
-        });
+          { passive: true },
+        );
       }
 
       // Parallax on decorative elements
