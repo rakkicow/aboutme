@@ -98,10 +98,12 @@ import { webShelf } from '~/data/projects';
 </style>
 
 <script>
-  // Defer each sub-site iframe until the user hovers or focuses the card.
-  // Each preview loads a full page (with its own scripts/styles), so eagerly
-  // mounting all of them on first scroll is the biggest hit on the page.
-  const cards = document.querySelectorAll<HTMLElement>('[data-iframe-slot]');
+  // Defer each sub-site iframe until the user hovers/focuses, AND tear it
+  // back down once the card scrolls off-screen — each iframe is a full
+  // sub-document worth tens to hundreds of MB. Keeping them resident after
+  // the user moves past is the main memory hog on the page.
+  const slots = document.querySelectorAll<HTMLElement>('[data-iframe-slot]');
+
   const mountIframe = (slot: HTMLElement) => {
     if (slot.dataset.mounted) return;
     slot.dataset.mounted = '1';
@@ -115,13 +117,51 @@ import { webShelf } from '~/data/projects';
     iframe.setAttribute('style', 'width:200%;height:200%;transform:scale(0.5);');
     slot.appendChild(iframe);
   };
-  cards.forEach((slot) => {
-    const card = slot.closest('a');
+
+  const unmountIframe = (slot: HTMLElement) => {
+    if (!slot.dataset.mounted) return;
+    delete slot.dataset.mounted;
+    // Wipe everything inside (just the iframe in practice) and release the
+    // document tree so the browser can GC it.
+    while (slot.firstChild) slot.removeChild(slot.firstChild);
+  };
+
+  const cardOf = (slot: HTMLElement) => slot.closest('a');
+
+  // Re-attach the on-demand mount listeners. We do this on every (un)mount
+  // because `{ once: true }` removes them after first fire — for the unmount
+  // path we want them ready again next time the card comes into view.
+  const wireMountListeners = (slot: HTMLElement) => {
+    const card = cardOf(slot);
     if (!card) return;
-    const mountOnce = () => mountIframe(slot);
-    card.addEventListener('mouseenter', mountOnce, { once: true });
-    card.addEventListener('focusin', mountOnce, { once: true });
-  });
+    const handler = () => {
+      mountIframe(slot);
+      card.removeEventListener('mouseenter', handler);
+      card.removeEventListener('focusin', handler);
+    };
+    card.addEventListener('mouseenter', handler);
+    card.addEventListener('focusin', handler);
+  };
+
+  slots.forEach(wireMountListeners);
+
+  // Unmount when the card scrolls clearly out of view (250px margin keeps
+  // hover-to-mount from immediately bouncing if the user scrolls just past).
+  if ('IntersectionObserver' in window) {
+    const offscreenIO = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const slot = entry.target as HTMLElement;
+          if (!entry.isIntersecting && slot.dataset.mounted) {
+            unmountIframe(slot);
+            wireMountListeners(slot);
+          }
+        }
+      },
+      { rootMargin: '250px' },
+    );
+    slots.forEach((slot) => offscreenIO.observe(slot));
+  }
 
   const track = document.querySelector<HTMLElement>('[data-shelf-track]');
   if (track) {
