@@ -28,23 +28,55 @@
 <script>
   const cursor = document.getElementById('cursor');
   const dot = document.getElementById('cursor-dot');
-  if (cursor && dot && window.matchMedia('(hover: hover)').matches) {
+  // Match the same media query the CSS uses so JS + display stay in sync.
+  const hasFinePointer =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (cursor && dot && hasFinePointer) {
     let mouseX = 0, mouseY = 0;
     let curX = 0, curY = 0;
+    let rafId: number | null = null;
+
+    // Animate the trailing ring only while it's still catching up. Once it
+    // settles within a sub-pixel of the target, stop the RAF loop entirely.
+    const animate = () => {
+      const dx = mouseX - curX;
+      const dy = mouseY - curY;
+      const settled = Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5;
+      if (settled) {
+        curX = mouseX;
+        curY = mouseY;
+        cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+        rafId = null;
+        return;
+      }
+      curX += dx * 0.18;
+      curY += dy * 0.18;
+      cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+      rafId = requestAnimationFrame(animate);
+    };
+
+    const kick = () => {
+      if (rafId === null) rafId = requestAnimationFrame(animate);
+    };
 
     window.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
       dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    });
+      kick();
+    }, { passive: true });
 
-    const animate = () => {
-      curX += (mouseX - curX) * 0.14;
-      curY += (mouseY - curY) * 0.14;
-      cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
-      requestAnimationFrame(animate);
-    };
-    animate();
+    // Pause RAF entirely while the tab/window isn't visible.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      } else if (!document.hidden) {
+        kick();
+      }
+    });
 
     const enlarge = () => {
       cursor.style.width = '64px';
