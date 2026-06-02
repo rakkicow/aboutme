@@ -85,14 +85,16 @@ import { reel } from '~/data/projects';
               class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
               aria-label={`Play: ${v.title}`}
             >
+              {/* Start with hqdefault (always exists). Once it loads we try to
+                  upgrade to maxresdefault; if maxres comes back as the 120×90
+                  placeholder, we leave hqdefault in place. */}
               <img
                 src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
-                srcset={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg 480w, https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg 1280w`}
-                sizes="(min-width: 1024px) 640px, (min-width: 640px) 560px, 88vw"
+                data-maxres={`https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`}
                 alt={v.title}
                 loading="lazy"
                 decoding="async"
-                class="absolute inset-0 h-full w-full object-cover"
+                class="reel-thumb absolute inset-0 h-full w-full object-cover"
               />
               <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
               <span class="pointer-events-none absolute inset-0 grid place-items-center">
@@ -154,6 +156,19 @@ import { reel } from '~/data/projects';
 </style>
 
 <script>
+  // YouTube thumbnail upgrade — try maxresdefault.jpg, fall back to hqdefault
+  // if YouTube returned the 120×90 "not available" placeholder.
+  document.querySelectorAll<HTMLImageElement>('.reel-thumb').forEach((img) => {
+    const maxres = img.dataset.maxres;
+    if (!maxres) return;
+    const probe = new Image();
+    probe.onload = () => {
+      // Real thumbnails are 1280×720; placeholders are 120×90.
+      if (probe.naturalWidth >= 480) img.src = maxres;
+    };
+    probe.src = maxres;
+  });
+
   // Click to play, scroll-away to unload. The poster button stays in the DOM
   // and the iframe sits next to it — we toggle which is visible and tear the
   // iframe down entirely when the card leaves the viewport.
