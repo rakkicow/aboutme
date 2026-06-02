@@ -57,28 +57,46 @@ const {
 
       gsap.registerPlugin(ScrollTrigger);
 
-      const lenis = new Lenis({
-        duration: 1.15,
-        easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        wheelMultiplier: 1,
-        touchMultiplier: 1.5,
-      });
+      // Lenis only on hover-capable pointers (desktop mouse/trackpad) and only when
+      // the user hasn't asked for reduced motion. On touch devices, native scroll
+      // is already smooth and Lenis is the single biggest scroll-frame cost.
+      const useLenis =
+        window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
+        !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add((time) => lenis.raf(time * 1000));
-      gsap.ticker.lagSmoothing(0);
-
-      // Reveal-on-scroll
-      const revealEls = document.querySelectorAll('.reveal');
-      revealEls.forEach((el) => {
-        ScrollTrigger.create({
-          trigger: el,
-          start: 'top 88%',
-          once: true,
-          onEnter: () => el.setAttribute('data-shown', 'true'),
+      if (useLenis) {
+        const lenis = new Lenis({
+          duration: 1.15,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          wheelMultiplier: 1,
+          touchMultiplier: 1.5,
         });
-      });
+
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+      }
+
+      // Reveal-on-scroll — IntersectionObserver is cheaper than wiring up a
+      // ScrollTrigger per element. Each fires once when it enters the viewport.
+      const revealEls = document.querySelectorAll('.reveal');
+      if (revealEls.length && 'IntersectionObserver' in window) {
+        const revealIO = new IntersectionObserver(
+          (entries, observer) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.setAttribute('data-shown', 'true');
+                observer.unobserve(entry.target);
+              }
+            }
+          },
+          { rootMargin: '0px 0px -12% 0px' },
+        );
+        revealEls.forEach((el) => revealIO.observe(el));
+      } else {
+        revealEls.forEach((el) => el.setAttribute('data-shown', 'true'));
+      }
 
       // Magnetic effect on data-magnetic elements
       document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {

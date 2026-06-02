@@ -71,17 +71,35 @@ import { reel } from '~/data/projects';
           )}
           <span class="absolute right-4 top-4 z-10 font-mono text-[10px] text-white/60">{`0${i + 1} / 0${reel.length}`}</span>
 
-          {/* YouTube embed */}
+          {/* Click-to-play poster — full YouTube iframe is heavy (multiple MB +
+              ~50–100 MB of RAM each), so we render a static thumbnail until the
+              user actually wants to watch. */}
           <div class="relative aspect-video w-full overflow-hidden">
-            <iframe
-              src={`https://www.youtube-nocookie.com/embed/${v.id}?rel=0&modestbranding=1&playsinline=1`}
-              title={v.title}
-              loading="lazy"
-              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-              referrerpolicy="strict-origin-when-cross-origin"
-              class="absolute inset-0 h-full w-full border-0"
-            ></iframe>
+            <button
+              type="button"
+              class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
+              data-yt-id={v.id}
+              data-yt-title={v.title}
+              aria-label={`Play: ${v.title}`}
+            >
+              <img
+                src={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`}
+                srcset={`https://i.ytimg.com/vi/${v.id}/hqdefault.jpg 480w, https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg 1280w`}
+                sizes="(min-width: 1024px) 640px, (min-width: 640px) 560px, 88vw"
+                alt={v.title}
+                loading="lazy"
+                decoding="async"
+                class="absolute inset-0 h-full w-full object-cover"
+              />
+              <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
+              <span class="pointer-events-none absolute inset-0 grid place-items-center">
+                <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
+                  <svg class="ml-1 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </span>
+              </span>
+            </button>
           </div>
 
           {/* Caption */}
@@ -133,6 +151,24 @@ import { reel } from '~/data/projects';
 </style>
 
 <script>
+  // Click-to-play: swap each YouTube poster for a real iframe on first click.
+  document.querySelectorAll<HTMLButtonElement>('.reel-poster').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.ytId;
+      const title = btn.dataset.ytTitle ?? '';
+      if (!id) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+      iframe.title = title;
+      iframe.allow =
+        'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      iframe.className = 'absolute inset-0 h-full w-full border-0';
+      btn.replaceWith(iframe);
+    });
+  });
+
   const track = document.querySelector<HTMLElement>('[data-reel-track]');
   if (track) {
     const step = () => {

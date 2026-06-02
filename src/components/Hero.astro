@@ -114,12 +114,26 @@ import MeshGradient from '~/components/MeshGradient.astro';
         const HOLD_AFTER_TYPE = 1500;
         const HOLD_BEFORE_DELETE = 600;
 
+        // Pause the loop entirely when Hero scrolls off-screen — wait until it
+        // returns rather than burning frames on text nobody can see.
+        let onScreen = true;
+        if (typeof IntersectionObserver !== 'undefined') {
+          const visIO = new IntersectionObserver(
+            ([entry]) => { onScreen = entry.isIntersecting; },
+            { rootMargin: '50px' },
+          );
+          visIO.observe(target);
+        }
         const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+        const waitForVisible = async () => {
+          while (!onScreen) await sleep(250);
+        };
 
         const set = (txt: string) => { target.textContent = txt; };
 
         const type = async () => {
           while (charIdx < phrases[phraseIdx].length) {
+            await waitForVisible();
             charIdx++;
             set(phrases[phraseIdx].slice(0, charIdx));
             await sleep(TYPE_MS);
@@ -128,6 +142,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
         const erase = async () => {
           while (charIdx > 0) {
+            await waitForVisible();
             charIdx--;
             set(phrases[phraseIdx].slice(0, charIdx));
             await sleep(DELETE_MS);
@@ -138,6 +153,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
           // initial pause so the user reads "I write code" first
           await sleep(HOLD_AFTER_TYPE);
           while (true) {
+            await waitForVisible();
             await sleep(HOLD_BEFORE_DELETE);
             await erase();
             phraseIdx = (phraseIdx + 1) % phrases.length;
@@ -146,21 +162,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
           }
         };
 
-        // Only run when the hero is in view (cheap check on mount; small page).
-        if (typeof IntersectionObserver !== 'undefined') {
-          const io = new IntersectionObserver((entries, obs) => {
-            for (const e of entries) {
-              if (e.isIntersecting) {
-                run();
-                obs.disconnect();
-                break;
-              }
-            }
-          }, { rootMargin: '0px' });
-          io.observe(target);
-        } else {
-          run();
-        }
+        run();
       })();
     </script>
 
