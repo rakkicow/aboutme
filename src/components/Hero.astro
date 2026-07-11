@@ -7,11 +7,10 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
 
   <div class="container-x relative">
-    {/* Status pill — green available beacon */}
+    {/* Status */}
     <div class="mb-6 inline-flex sm:mb-8">
       <div class="group relative" data-cursor-hover>
         <span class="inline-flex items-center justify-center gap-2.5 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur" style="border-color: var(--hair); background: var(--surface-soft); color: var(--ink-soft);">
-          {/* Fancy green pulse-radar beacon */}
           <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
             <defs>
               <radialGradient id="beacon-glow" cx="50%" cy="50%" r="50%">
@@ -20,31 +19,26 @@ import MeshGradient from '~/components/MeshGradient.astro';
               </radialGradient>
             </defs>
 
-            {/* Soft glow halo */}
             <circle cx="12" cy="12" r="10" fill="url(#beacon-glow)"/>
 
-            {/* Outer pulse ring — expands + fades */}
             <circle cx="12" cy="12" r="4" fill="none" stroke="#22C55E" stroke-width="1.5">
               <animate attributeName="r" values="4;11;11" dur="2.4s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="0.85;0;0" dur="2.4s" repeatCount="indefinite"/>
             </circle>
 
-            {/* Inner pulse ring — offset by 1.2s */}
             <circle cx="12" cy="12" r="4" fill="none" stroke="#22C55E" stroke-width="1.5">
               <animate attributeName="r" values="4;11;11" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
               <animate attributeName="opacity" values="0.85;0;0" dur="2.4s" begin="1.2s" repeatCount="indefinite"/>
             </circle>
 
-            {/* Core dot with breathing scale */}
             <circle cx="12" cy="12" r="3.5" fill="#16A34A">
               <animate attributeName="r" values="3.5;4;3.5" dur="1.6s" repeatCount="indefinite"/>
             </circle>
 
-            {/* Spec highlight */}
             <circle cx="10.8" cy="10.8" r="1" fill="#86EFAC" opacity="0.95"/>
           </svg>
-
-          <span>Open to Summer '26 SWE internships</span>
+          {/* Sup? */}
+          <span>Open to SWE internships</span>
         </span>
       </div>
     </div>
@@ -108,14 +102,13 @@ import MeshGradient from '~/components/MeshGradient.astro';
         ];
 
         let phraseIdx = 0;
-        let charIdx = phrases[0].length; // text starts pre-rendered, so begin at full length
+        let charIdx = phrases[0].length;
         const TYPE_MS = 70;
         const DELETE_MS = 38;
         const HOLD_AFTER_TYPE = 1500;
         const HOLD_BEFORE_DELETE = 600;
 
-        // Pause the loop entirely when Hero scrolls off-screen — wait until it
-        // returns rather than burning frames on text nobody can see.
+
         let onScreen = true;
         if (typeof IntersectionObserver !== 'undefined') {
           const visIO = new IntersectionObserver(
@@ -150,7 +143,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         };
 
         const run = async () => {
-          // initial pause so the user reads "I write code" first
+
           await sleep(HOLD_AFTER_TYPE);
           while (true) {
             await waitForVisible();
@@ -166,18 +159,34 @@ import MeshGradient from '~/components/MeshGradient.astro';
       })();
     </script>
 
-    {/* Meta strip */}
+    {/* Strip */}
     <div class="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 sm:mt-14 sm:grid-cols-4 sm:gap-x-12">
       {[
         { k: 'Based', v: 'West Lafayette, IN' },
         { k: 'Grad', v: 'May 2028' },
-        { k: 'Stack', v: 'C/C++, Python, Java, Swift' },
+        { k: 'Stack', v: 'Full :)', href: '#languages' },
         { k: 'Top skill', v: 'cow 🐄' },
       ].map((m) => (
-        <div>
-          <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
-          <p class="mt-1.5 text-sm font-medium" style="color: var(--ink-soft);">{m.v}</p>
-        </div>
+        m.href ? (
+          <a
+            href={m.href}
+            aria-label={`${m.k}: ${m.v} — jump to languages`}
+            class="group block w-fit focus:outline-none"
+          >
+            <p class="cow-ink text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
+            <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium" style="color: var(--ink-soft);">
+              <span class="cow-ink">{m.v}</span>
+              <svg class="h-3 w-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-[#DC9BB5]" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M7 2v10M3 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </p>
+          </a>
+        ) : (
+          <div>
+            <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
+            <p class="mt-1.5 text-sm font-medium" style="color: var(--ink-soft);">{m.v}</p>
+          </div>
+        )
       ))}
     </div>
   </div>

@@ -7,15 +7,15 @@ export const bio = {
   pronouns: 'she/her',
   title: 'Computer Engineer',
   headline:
-    'Junior in Computer Engineering at Purdue with minors in Psychology, Entrepreneurship, and AI',
+    'Junior in Computer Engineering at Purdue with minors in Psychology and Entrepreneurship',
   location: 'West Lafayette, Indiana',
   email: 'rakgupta@purdue.edu',
   phone: '(414) 526-2678',
   linkedin: 'https://www.linkedin.com/in/rakshita-gupta-4571a7251',
   github: 'https://github.com/',
   youtube: 'https://www.youtube.com/c/cdiofficial',
-  summary: 'A complete nerd who loves all things technology and a child at heart.',
-  longBio: `I'm Ria — a Junior in Computer Engineering at Purdue with minors in Psychology, Entrepreneurship, and AI. My background is a strange but useful mix: cell-phone repair, 3D modeling, web and mobile app development, and professional video editing.
+  summary: 'I make the moves up as I go.',
+  longBio: `I'm Ria — a Junior in Computer Engineering at Purdue with minors in Psychology and Entrepreneurship. My background is a strange but useful mix: cell-phone repair, 3D modeling, web and mobile app development, and professional video editing.
 
 That hands-on history made me meticulous about details and stubborn about troubleshooting. I care about user-friendly design, innovative 3D modeling, and content that respects the person on the other side of the screen.
 
@@ -31,36 +31,54 @@ export const coursework = [
 ];
 
 export const languages = [
-  'Java',
-  'MATLAB',
-  'C / C++',
   'Python',
-  'HTML / CSS / JS',
+  'Java',
   'Dart',
+  'Flutter',
+  'C',
+  'C++',
   'Swift',
+  'SQL',
+  'HTML',
+  'CSS',
+  'JS',
+  'Astro',
+  'MATLAB',
+  'System Verilog',
 ];
 
 export const skills = [
-  'Video Editing & Content Creation',
+  'Product Development & Prototyping',
   'Collaboration & Project Management',
   'UX/UI Design & Implementation',
-  'Product Development & Customization',
-  'Device Repair, Soldering & Microelectronics',
   'Customer Service, Communication & Conflict Resolution',
-  'Videography',
-  'Video Planning & Production',
+  'Circuit Design & PCB Layout',
+  'Device Repair, Soldering & Microelectronics',
+  'Video Editing & Content Creation', 
   '3D Modeling',
+  'Web Development',
+  'Mobile App Development',
+  'Software Testing & Debugging',
 ];
 
 export const tools = [
   'KiCad',
   'LTspice',
+  'Github/GitLab',
+  'Docker',
+  'IntelliJ IDEA',
+  'VS Code',
+  'Android Studio',
+  'Xcode',
+  'Figma',
+  'Blender',
+  'Fusion',
   'Premiere Pro',
   'After Effects',
   'Final Cut',
-  'Figma',
-  'Astro',
-  'TriCaster',
+  'Photoshop',
+  'Lightroom',
+  'Full Microsoft Suite',
 ];
 
 export type Role = {
@@ -76,10 +94,18 @@ export type Role = {
 export const roles: Role[] = [
   {
     org: 'Purdue University',
-    title: 'Bachelor of Computer Engineering',
+    title: 'Bachelor of Science in Computer Engineering',
     years: 'Aug 2023 — May 2028',
     kind: 'edu',
-    body: 'Minors in Psychology, Entrepreneurship, and AI. Completed coursework: ECE 264 (Advanced C, A+), ECE 20875 (Python for Data Science, A+), ECE 368 (Data Structures, A−), ENGR 131/132 (Ideas to Innovation, A).',
+    body: 'Minors in Psychology and Entrepreneurship.',
+  },
+  {
+    org: 'CowShopCo · Etsy',
+    title: 'Founder & Maker',
+    years: '2020 — Present',
+    location: 'Augusta, GA → West Lafayette, IN',
+    kind: 'work',
+    body: 'My Etsy shop, CowShopCo — "Print the World!" I design and 3D-print the whole catalog — earrings and custom designs now, slime charms in an earlier chapter — and run everything else myself: photography, listings, shipping, and customer service.',
   },
   {
     org: 'CPR Cell Phone Repair',
@@ -118,7 +144,7 @@ export const roles: Role[] = [
     title: 'Contributor',
     years: 'Jun 2020 — Aug 2023',
     kind: 'work',
-    body: 'Tested alpha and beta releases of the open-source iMessage-on-Android app. Contributed directly to new features and folded user feedback into iterative improvements.',
+    body: 'Developed and tested alpha and beta releases of the open-source iMessage-on-Android app. Contributed directly to new features and folded user feedback into iterative improvements.',
   },
   {
     org: 'AugustaENT',
