@@ -1,5 +1,5 @@
 ---
-import { roles } from '~/data/resume';
+import { roles, coursework } from '~/data/resume';
 ---
 
 <section id="experience" class="relative py-14 sm:py-20">
@@ -44,6 +44,18 @@ import { roles } from '~/data/resume';
               </h3>
               <p class="mt-1 text-sm font-medium" style="color: var(--ink-muted);">{r.org}</p>
               <p class="mt-4 max-w-2xl text-[15px] leading-relaxed" style="color: var(--ink-muted);">{r.body}</p>
+
+              {/* Completed coursework — compact 2×2 toast bubbles (mirrors the About section) */}
+              {r.kind === 'edu' && (
+                <ul class="mt-3 grid max-w-xs gap-1.5 sm:grid-cols-2">
+                  {coursework.map((c) => (
+                    <li class="flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5" style="border-color: var(--hair); background: var(--surface-soft);">
+                      <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
+                      <span class="inline-flex shrink-0 items-center rounded-full bg-cow-300/20 px-1.5 py-0.5 font-mono text-[9px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </li>

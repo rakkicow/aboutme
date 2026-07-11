@@ -6,11 +6,11 @@ import { bio, skills, tools, languages, coursework } from '~/data/resume';
 <section id="about" class="relative pt-12 pb-6 sm:pt-28 sm:pb-12">
   <div class="container-x">
     <div class="grid gap-16 lg:grid-cols-[1fr,1.4fr] lg:gap-24">
-      {/* Left rail */}
+      {/* zinger */}
       <div class="reveal">
-        <p class="eyebrow">About</p>
+        <p class="eyebrow">About <span class="h-script text-gradient-pink">me</span></p>
         <h2 class="h2 mt-4 max-w-[14ch]">
-          The short <span class="h-italic text-gradient-pink">version</span>.
+          long story short.
         </h2>
 
         {/* cursive monogram */}
@@ -18,36 +18,41 @@ import { bio, skills, tools, languages, coursework } from '~/data/resume';
           <Monogram size={168} stroke={1.1} withGlow />
         </div>
 
-        {/* summary quote */}
-        <blockquote class="mt-10 max-w-xs border-l-2 pl-4 font-display text-lg italic" style="border-color: var(--cow-pink); color: var(--ink-soft);">
-          "{bio.summary}"
-        </blockquote>
+        {/* Quote */}
+        <div class="mt-10 [container-type:inline-size]">
+          <blockquote class="border-l-2 pl-5 font-display italic leading-tight whitespace-nowrap text-[clamp(1.25rem,6.3cqw,3rem)]" style="border-color: var(--cow-pink); color: var(--ink-soft);">
+            "{bio.summary}"
+          </blockquote>
+        </div>
       </div>
 
       {/* Body */}
       <div class="reveal space-y-7 text-[17px] leading-relaxed sm:text-lg" style="color: var(--ink-muted);">
         <p>
           I'm Ria — a <span style="color: var(--ink);">Junior in Computer Engineering</span>
-          at Purdue with minors in <span style="color: var(--ink);">Psychology, Entrepreneurship,
-          and AI</span>. My background is a strange but useful mix: cell-phone repair,
-          3D modeling, web and mobile app development, and professional video editing.
+          at Purdue with minors in <span style="color: var(--ink);">Psychology and Entrepreneurship</span>. My background is a strange but useful mix consisting of cell phone repair,
+          professional video editing, full-stack project development, 3D modeling and printing, and customer service.
         </p>
         <p>
-          That hands-on history made me meticulous about details and stubborn
-          about troubleshooting. I care about user-friendly design, innovative
-          3D modeling, and content that respects the person on the other side
+          My hands-on history has made me meticulous about details. I care about user-friendly design, out-of-the-box thinking, and content that respects the person on the other side
           of the screen.
         </p>
         <p>
-          Outside class I tinker — circuits, enclosures, small web builds for
-          family and friends. I'm at my best when I get to design something
-          end-to-end: from the schematic to the splash screen.
+          Outside of class, I indulge myself in hobbies that sharpen my skills. My Etsy shop,
+          <a
+            href="https://www.etsy.com/shop/CDIOfficial"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline decoration-1 underline-offset-4 transition-colors hover:text-ember-600 dark:hover:text-cow-300"
+            style="color: var(--ink); text-decoration-color: var(--cow-pink);"
+          >CowShopCo</a>, is where I
+          design and 3D print custom jewelry and household items. I also work with local brands to increase their online presence through app/web development or content creation.  
         </p>
 
-        {/* Completed coursework */}
+        {/* Completed Coursework */}
         <div class="pt-6">
           <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">
-            Coursework — <span class="text-cow-600 dark:text-cow-300">completed</span>
+            <span class="text-cow-600 dark:text-cow-300">completed</span> Coursework
           </p>
           <ul class="mt-4 grid gap-2 sm:grid-cols-2">
             {coursework.map((c) => (
@@ -62,8 +67,8 @@ import { bio, skills, tools, languages, coursework } from '~/data/resume';
           </ul>
         </div>
 
-        {/* Languages — Designer & Developer styling in light mode, original cow-pink in dark */}
-        <div class="pt-2">
+        {/* Languages */}
+        <div id="languages" class="scroll-mt-28 pt-2">
           <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Languages</p>
           <div class="mt-3 flex flex-wrap gap-2">
             {languages.map((l) => (
