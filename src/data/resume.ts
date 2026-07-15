@@ -1,5 +1,5 @@
 // Source of truth for bio, courses, languages, experience.
-// Pulled from RGupta-Resume-1.1.pdf and Profile.pdf (LinkedIn export), 2026-05-29.
+// Pulled from "RGupta - ResumeProV2.0.pdf" (ATS resume), 2026-07-15.
 
 export const bio = {
   name: 'Rakshita Gupta',
@@ -7,7 +7,7 @@ export const bio = {
   pronouns: 'she/her',
   title: 'Computer Engineer',
   headline:
-    'Junior in Computer Engineering at Purdue with minors in Psychology and Entrepreneurship',
+    'Computer Engineering Technology student at Purdue with minors in Psychology, Entrepreneurship, and Computer Engineering',
   location: 'West Lafayette, Indiana',
   email: 'rakgupta@purdue.edu',
   phone: '(414) 526-2678',
@@ -15,70 +15,86 @@ export const bio = {
   github: 'https://github.com/',
   youtube: 'https://www.youtube.com/c/cdiofficial',
   summary: 'I make the moves up as I go.',
-  longBio: `I'm Ria — a Junior in Computer Engineering at Purdue with minors in Psychology and Entrepreneurship. My background is a strange but useful mix: cell-phone repair, 3D modeling, web and mobile app development, and professional video editing.
+  longBio: `I'm Ria — a Computer Engineering Technology student at Purdue with minors in Psychology, Entrepreneurship, and Computer Engineering. My background is a strange but useful mix: cell-phone repair, 3D modeling, web and mobile app development, and professional video editing.
 
 That hands-on history made me meticulous about details and stubborn about troubleshooting. I care about user-friendly design, innovative 3D modeling, and content that respects the person on the other side of the screen.
 
 Outside class I tinker — circuits, enclosures, small web builds for family and friends. I'm at my best when I get to design something end-to-end: from the schematic to the splash screen.`,
 };
 
-// Completed coursework — Ria is DONE with these, not currently in.
-export const coursework = [
+// Downloadable resumes (kept in /public). Visual = designed one-pager, Full = ATS two-pager.
+export const resumeVisualPdf = '/RGupta-Resume-Visual.pdf';
+export const resumeFullPdf = '/FullResume.pdf';
+
+// Relevant coursework. Grade omitted = course taken, grade still pending.
+export const coursework: { code: string; name: string; grade?: string }[] = [
   { code: 'ECE 20875', name: 'Python for Data Science', grade: 'A+' },
-  { code: 'ECE 264', name: 'Advanced C Programming', grade: 'A+' },
-  { code: 'ECE 368', name: 'Data Structures', grade: 'A−' },
-  { code: 'ENGR 131/132', name: 'Ideas to Innovation', grade: 'A' },
+  { code: 'ECE 26400', name: 'Advanced C Programming', grade: 'A+' },
+  { code: 'ECE 36800', name: 'Data Structures', grade: 'A−' },
+  { code: 'ECE 27000', name: 'Intro to Digital System Design' },
+  { code: 'ECE 20001', name: 'Electrical Engineering Fundamentals I' },
+  { code: 'CNIT 18000', name: 'Intro to Systems Development' },
+  { code: 'CNIT 17600', name: 'Information Technology Architectures' },
 ];
 
 export const languages = [
   'Python',
   'Java',
-  'Dart',
-  'Flutter',
   'C',
   'C++',
-  'Swift',
-  'SQL',
+  'JavaScript',
   'HTML',
   'CSS',
-  'JS',
-  'Astro',
+  'Dart',
+  'Swift',
+  'SQL',
   'MATLAB',
-  'System Verilog',
+  'SystemVerilog',
+  'VBScript',
+];
+
+export const frameworks = [
+  'Astro',
+  'Tailwind CSS',
+  'GSAP',
+  'Lenis',
+  'Bootstrap',
+  'Flutter',
 ];
 
 export const skills = [
-  'Product Development & Prototyping',
-  'Collaboration & Project Management',
-  'UX/UI Design & Implementation',
-  'Customer Service, Communication & Conflict Resolution',
   'Circuit Design & PCB Layout',
-  'Device Repair, Soldering & Microelectronics',
-  'Video Editing & Content Creation', 
-  '3D Modeling',
-  'Web Development',
-  'Mobile App Development',
+  'Soldering & Microelectronics',
+  'Device Repair',
+  'Product Development & Prototyping',
   'Software Testing & Debugging',
+  'UX/UI Design',
+  'Web & Mobile App Development',
+  '3D Modeling & 3D Printing',
 ];
 
 export const tools = [
-  'KiCad',
-  'LTspice',
-  'Github/GitLab',
+  'Git',
+  'GitHub/GitLab',
   'Docker',
-  'IntelliJ IDEA',
   'VS Code',
+  'IntelliJ IDEA',
   'Android Studio',
   'Xcode',
+  'Linux',
+  'Ollama',
+  'Claude Code',
+  'KiCad',
+  'LTspice',
   'Figma',
   'Blender',
-  'Fusion',
+  'Fusion 360',
   'Premiere Pro',
   'After Effects',
-  'Final Cut',
+  'Final Cut Pro',
   'Photoshop',
   'Lightroom',
-  'Full Microsoft Suite',
+  'Microsoft Office Suite',
 ];
 
 export type Role = {
@@ -94,65 +110,50 @@ export type Role = {
 export const roles: Role[] = [
   {
     org: 'Purdue University',
-    title: 'Bachelor of Science in Computer Engineering',
+    title: 'Bachelor of Science in Computer Engineering Technology',
     years: 'Aug 2023 — May 2028',
     kind: 'edu',
-    body: 'Minors in Psychology and Entrepreneurship.',
+    body: 'Minors in Psychology, Entrepreneurship, and Computer Engineering.',
   },
   {
     org: 'CowShopCo · Etsy',
     title: 'Founder & Maker',
-    years: '2020 — Present',
+    years: 'Apr 2020 — Present',
     location: 'Augusta, GA → West Lafayette, IN',
     kind: 'work',
-    body: 'My Etsy shop, CowShopCo — "Print the World!" I design and 3D-print the whole catalog — earrings and custom designs now, slime charms in an earlier chapter — and run everything else myself: photography, listings, shipping, and customer service.',
+    body: 'My Etsy shop, CowShopCo — "Print the World!" I design and 3D-print the whole catalog of jewelry, charms, and household items, modeled entirely in Blender and Fusion 360 — 100+ orders shipped with a 5-star rating. I run everything else myself too: photography, listings, pricing, shipping, and customer service, plus placing products in local businesses and fairs on commission.',
   },
   {
-    org: 'CPR Cell Phone Repair',
-    title: 'Electronics Technician / Sales Associate',
-    years: 'Sept 2022 — Aug 2023',
-    location: 'Augusta, GA',
+    org: 'Freelance',
+    title: 'Legal Automation Consultant',
+    years: 'Jun 2026 — Jul 2026',
+    location: 'Remote',
     kind: 'work',
-    body: 'Diagnosed and repaired smartphones, tablets, and laptops at the bench. Ran the front desk, handled customer service, and collaborated with technicians on tougher boards.',
+    body: 'Built a VBScript tool that extracts complex tables from HIPAA-compliant Word documents into Excel, with an interface that lets legal professionals review the structured data and append recommendations — cutting hours of manual entry. All of it developed and tested locally under a strict NDA, inside the client\'s locked-down environment.',
   },
   {
-    org: 'Augusta University — TVC Lab',
-    title: 'Television & Cinema Production Intern',
-    years: 'Aug 2022 — Jan 2023',
-    location: 'Augusta, GA',
+    org: 'GERI Summer Residential Camp, Purdue University',
+    title: 'Summer Camp Counselor',
+    years: 'Jul 2025',
+    location: 'West Lafayette, IN',
     kind: 'work',
-    body: 'With Dr. Timothy Williams at the Television and Cinema Production Lab: set up and operated TriCaster for newscast broadcast, edited digital signage and studio advertisements, and supported the Broadcast Media Production classes.',
-  },
-  {
-    org: 'Dairy Queen',
-    title: 'Chill & Grill Crew',
-    years: 'May 2022 — Sept 2022',
-    location: 'Augusta, GA',
-    kind: 'work',
-    body: 'Summer crew — high-pace counter and register, food prep, milkshakes, Blizzards. Customer-service muscle and "ship it under pressure" instincts.',
-  },
-  {
-    org: 'AugustaENT',
-    title: 'Freelance Video Producer',
-    years: 'Jun 2022',
-    location: 'Augusta, GA',
-    kind: 'work',
-    body: 'Produced a child-friendly explainer covering the full pediatric surgical journey — anesthesia, prep, recovery — designed to demystify the process and reduce patient anxiety.',
+    body: 'Mentored 12 gifted students (mostly 9th–12th grade girls) and managed an entire residence-hall floor at a two-week academic camp of 300+ campers. Taught daily personal and life-skills classes and served as the live-in first point of contact for conflict resolution.',
   },
   {
     org: 'BlueBubbles',
-    title: 'Contributor',
+    title: 'UI/UX Design Contributor',
     years: 'Jun 2020 — Aug 2023',
+    location: 'Remote',
     kind: 'work',
-    body: 'Developed and tested alpha and beta releases of the open-source iMessage-on-Android app. Contributed directly to new features and folded user feedback into iterative improvements.',
+    body: 'Contributed UI/UX design to the open-source Flutter/Dart app that brings iMessage to Android — 100K+ downloads and a 4.6-star Google Play rating. Streamlined the core chat interface and helped design the theming engine that became a headline feature, working with the 5-person core team and feedback from a 13,000+ member Discord community.',
   },
   {
-    org: 'AugustaENT',
-    title: 'Freelance Video Producer',
-    years: 'Dec 2020',
+    org: 'CPR Cell Phone Repair',
+    title: 'Electronics Technician & Sales Associate',
+    years: 'Sept 2022 — Aug 2023',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Filmed and edited an Ultrasound-Guided Fine-Needle Aspiration Biopsy explainer for new patients — calming, accurate, and credited with measurably easing patient nerves.',
+    body: 'Completed ~200 repairs a month across smartphones, tablets, laptops, and game consoles — screens, batteries, board-level soldering — with lead responsibility for software-based repairs. Ranked top of the shop in service speed and customer satisfaction, and upsold 150+ screen protectors plus 3–5 full device sales monthly.',
   },
   {
     org: 'CDI Official',
@@ -160,7 +161,23 @@ export const roles: Role[] = [
     years: 'Nov 2014 — Jun 2023',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Founded a marketing studio offering video editing & production, web design, SEO, social, and email marketing for small businesses. Almost a decade of client work before college.',
+    body: 'Founded a media production studio delivering 50+ professionally edited videos plus apps, websites, event videography, and photography — including healthcare clients under NDA. Produced 360°/VR simulation videos for the Augusta University Medical Simulation Center, later adapted into interactive VR training apps for medical students, and filmed clinical procedure explainers for AugustaENT patients credited with measurably easing patient anxiety.',
+  },
+  {
+    org: 'Augusta University — TVC Lab',
+    title: 'Television & Cinema Production Intern',
+    years: 'Aug 2022 — Jan 2023',
+    location: 'Augusta, GA',
+    kind: 'work',
+    body: 'Supported studio instruction and recording sessions for TV production courses — camera and set configuration, TriCaster live-production workflows. Managed equipment check-in/out for the lab, created digital signage for its displays, and contributed to a JagNews weekly broadcast segment.',
+  },
+  {
+    org: 'Dairy Queen',
+    title: 'Crew Member',
+    years: 'May 2022 — Sept 2022',
+    location: 'Augusta, GA',
+    kind: 'work',
+    body: 'Summer crew — high-volume counter, register, and food-prep stations during peak service. Customer-service muscle and "ship it under pressure" instincts.',
   },
   {
     org: 'Piedmont Augusta',
