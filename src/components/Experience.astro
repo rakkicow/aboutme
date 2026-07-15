@@ -51,7 +51,11 @@ import { roles, coursework } from '~/data/resume';
                   {coursework.map((c) => (
                     <li class="flex items-center justify-between gap-2 rounded-lg border px-2.5 py-1.5" style="border-color: var(--hair); background: var(--surface-soft);">
                       <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
-                      <span class="inline-flex shrink-0 items-center rounded-full bg-cow-300/20 px-1.5 py-0.5 font-mono text-[9px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+                      {c.grade ? (
+                        <span class="inline-flex shrink-0 items-center rounded-full bg-cow-300/20 px-1.5 py-0.5 font-mono text-[9px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+                      ) : (
+                        <span class="inline-flex shrink-0 items-center rounded-full border px-1.5 py-0.5 font-mono text-[9px]" style="border-color: var(--hair); color: var(--ink-faint);" title="grade pending">…</span>
+                      )}
                     </li>
                   ))}
                 </ul>
