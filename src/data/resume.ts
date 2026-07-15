@@ -23,8 +23,9 @@ Outside class I tinker — circuits, enclosures, small web builds for family and
 };
 
 // Downloadable resumes (kept in /public). Visual = designed one-pager, Full = ATS two-pager.
-export const resumeVisualPdf = '/RGupta-Resume-Visual.pdf';
-export const resumeFullPdf = '/FullResume.pdf';
+// Filenames contain spaces, so the URLs are pre-encoded.
+export const resumeVisualPdf = '/RGupta%20-%20ResumeVis.pdf';
+export const resumeFullPdf = '/RGupta%20-%20ResumeFull.pdf';
 
 // Relevant coursework. Grade omitted = course taken, grade still pending.
 export const coursework: { code: string; name: string; grade?: string }[] = [
