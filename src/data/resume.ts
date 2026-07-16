@@ -29,10 +29,10 @@ export const resumeFullPdf = '/RGupta%20-%20ResumeFull.pdf';
 
 // Relevant coursework. Grade omitted = course taken, grade still pending.
 export const coursework: { code: string; name: string; grade?: string }[] = [
-  { code: 'ECE 20875', name: 'Python for Data Science', grade: 'A+' },
-  { code: 'ECE 26400', name: 'Advanced C Programming', grade: 'A+' },
   { code: 'ECE 36800', name: 'Data Structures', grade: 'A−' },
+  { code: 'ECE 26400', name: 'Advanced C Programming', grade: 'A+' },
   { code: 'ECE 27000', name: 'Intro to Digital System Design' },
+  { code: 'ECE 20875', name: 'Python for Data Science', grade: 'A+' },
   { code: 'ECE 20001', name: 'Electrical Engineering Fundamentals I' },
   { code: 'CNIT 18000', name: 'Intro to Systems Development' },
   { code: 'CNIT 17600', name: 'Information Technology Architectures' },
