@@ -76,6 +76,9 @@ const {
         lenis.on('scroll', ScrollTrigger.update);
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
+
+        // Modals (e.g. the web shelf) pause page scroll while open.
+        (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
       }
 
       // Reveal-on-scroll — IntersectionObserver is cheaper than wiring up a

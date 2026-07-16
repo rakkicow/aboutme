@@ -368,6 +368,34 @@
     color: transparent;
   }
 
+  /* Animated variants — same palettes, endlessly scrolling. First and last
+     stop match so the repeating tile loops seamlessly (0% → 150% of a 300%
+     tile shifts exactly one tile width). */
+  .text-gradient-animated {
+    background: linear-gradient(90deg, #B44000, #FF6A05, #FF7A1E, #DC9BB5, #B44000);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: text-gradient-scroll 4s linear infinite;
+  }
+
+  .text-gradient-pink-animated {
+    background: linear-gradient(90deg, #9A4267, #B85B82, #DC9BB5, #FF7A1E, #9A4267);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: text-gradient-scroll 4s linear infinite;
+  }
+
+  @keyframes text-gradient-scroll {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 150% 50%; }
+  }
+
   /* Hero "Ria" — bold display, per-letter color shift on hover */
   .hero-name {
     display: inline-flex;
