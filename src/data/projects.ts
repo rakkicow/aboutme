@@ -20,7 +20,7 @@ export const featured: Project[] = [
     years: '2020 — 2023',
     blurb:
       'BlueBubbles is an open-source, cross-platform app that brings iMessage to Android. It is a Flutter client paired with a macOS server that relays your messages, with support for reactions, replies, effects, and a deep custom theming engine. 100K+ downloads and a 4.6★ rating on Google Play.',
-    stack: ['Design Systems', 'UX Research', 'Open Source', 'Cross-platform', 'Alpha/Beta QA'],
+    stack: ['UI/UX Design', 'Flutter/Dart', 'Open Source', 'Theming Engine', 'Community Feedback'],
     links: [
       { label: 'bluebubbles.app', href: 'https://bluebubbles.app' },
       { label: 'GitHub', href: 'https://github.com/BlueBubblesApp' },
