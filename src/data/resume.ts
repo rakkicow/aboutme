@@ -36,6 +36,7 @@ export const coursework: { code: string; name: string; grade?: string }[] = [
   { code: 'ECE 20001', name: 'Electrical Engineering Fundamentals I' },
   { code: 'CNIT 18000', name: 'Intro to Systems Development' },
   { code: 'CNIT 17600', name: 'Information Technology Architectures' },
+  { code: 'ENGR 131/132', name: 'Ideas to Innovation', grade: 'A' },
 ];
 
 export const languages = [
