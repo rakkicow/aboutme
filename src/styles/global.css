@@ -378,7 +378,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    animation: text-gradient-scroll 4s linear infinite;
+    animation: text-gradient-scroll 1.4s linear infinite;
   }
 
   .text-gradient-pink-animated {
@@ -388,7 +388,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
-    animation: text-gradient-scroll 4s linear infinite;
+    animation: text-gradient-scroll 1.4s linear infinite;
   }
 
   /* Negative sweep = the color bands travel to the right */

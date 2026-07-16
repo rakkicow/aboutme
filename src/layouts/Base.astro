@@ -71,6 +71,8 @@ const {
           smoothWheel: true,
           wheelMultiplier: 1,
           touchMultiplier: 1.5,
+          // The reel deck owns wheel gestures over it (flips cards, not the page)
+          prevent: (node: Element) => !!(node.closest && node.closest('[data-reel-deck]')),
         });
 
         lenis.on('scroll', ScrollTrigger.update);

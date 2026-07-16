@@ -3,12 +3,6 @@ import { reel } from '~/data/projects';
 ---
 
 <section id="reel" class="relative pt-4 pb-6 sm:pt-10 sm:pb-12">
-  {/* Warm backdrop */}
-  <div class="pointer-events-none absolute inset-x-0 top-1/2 -z-20 h-[120%] -translate-y-1/2 overflow-hidden">
-    <div class="absolute left-1/2 top-0 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full opacity-30" style="background: radial-gradient(circle, rgba(255,168,100,0.4), transparent 60%);"></div>
-    <div class="absolute right-0 bottom-0 h-[28rem] w-[28rem] rounded-full opacity-40" style="background: radial-gradient(circle, rgba(220,155,181,0.45), transparent 65%);"></div>
-  </div>
-
   <div class="container-x">
     <div class="reveal flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
       <div>
@@ -18,16 +12,12 @@ import { reel } from '~/data/projects';
         </h2>
       </div>
       <p class="max-w-sm text-sm" style="color: var(--ink-muted);">
-        Experience my CDI Official era: featuring healthcare campaigns, educational content, and a few personal favorites.
+        Experience my CDI Official era: featuring healthcare campaigns, educational content, and a few personal favorites. Swipe or use arrow keys.
       </p>
     </div>
 
     {/* Arrow controls */}
-    <div class="reveal mt-10 flex items-center justify-between">
-      <div class="flex items-center gap-2 text-xs" style="color: var(--ink-faint);">
-        <span class="inline-flex h-1.5 w-1.5 rounded-full bg-cow-400"></span>
-        <span>{reel.length} videos</span>
-      </div>
+    <div class="reveal mt-10 flex items-center justify-end">
       <div class="flex items-center gap-2">
         <button
           type="button"
@@ -48,12 +38,8 @@ import { reel } from '~/data/projects';
       </div>
     </div>
 
-    {/* Horizontal scroll-snap carousel */}
-    <div
-      data-reel-track
-      class="no-scrollbar reveal mt-6 flex snap-x snap-mandatory gap-6 overflow-x-auto overflow-y-hidden scroll-smooth pb-6 pt-4"
-      style="scroll-padding-left: 1.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
-    >
+    {/* Card deck — flash-card style: the front card physically tucks to the back */}
+    <div data-reel-deck class="reel-deck reveal mx-auto mt-8 w-full max-w-[640px]">
       {reel.map((v, i) => {
         const source = v.source ?? 'youtube';
         const isExternal = source === 'external';
@@ -69,7 +55,7 @@ import { reel } from '~/data/projects';
 
         return (
           <article
-            class="snap-start shrink-0 w-[88vw] sm:w-[560px] lg:w-[640px] group relative overflow-hidden rounded-3xl border bg-black/90"
+            class="reel-card group w-full overflow-hidden rounded-3xl border bg-black/90"
             style="border-color: var(--hair); box-shadow: 0 24px 60px -20px rgba(15,15,16,0.35);"
           >
             {v.pill && (
@@ -77,7 +63,6 @@ import { reel } from '~/data/projects';
                 {v.pill}
               </span>
             )}
-            <span class="absolute right-4 top-4 z-10 font-mono text-[10px] text-white/60">{`0${i + 1} / 0${reel.length}`}</span>
 
             {/* Click-to-play (or click-through) poster. YouTube + Drive mount
                 an iframe on click and tear it down on scroll-off; external
@@ -105,7 +90,7 @@ import { reel } from '~/data/projects';
                   />
                   <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
                   <span class="pointer-events-none absolute inset-0 grid place-items-center">
-                    <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
+                    <span class="reel-play">
                       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
@@ -128,9 +113,9 @@ import { reel } from '~/data/projects';
                   />
                   <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
                   <span class="pointer-events-none absolute inset-0 grid place-items-center">
-                    <span class="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-black shadow-[0_12px_40px_-8px_rgba(0,0,0,0.6)] transition-transform duration-300 group-hover/poster:scale-110">
-                      <svg class="ml-1 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M8 5v14l11-7z" />
+                    <span class="reel-play">
+                      <svg class="h-8 w-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M9.5 6.5v11l8.5-5.5z" />
                       </svg>
                     </span>
                   </span>
@@ -140,6 +125,13 @@ import { reel } from '~/data/projects';
 
             <div class="p-6">
               <h3 class="font-display text-xl font-medium tracking-tight text-white">{v.title}</h3>
+              {v.stats && (
+                <div class="mt-3 flex flex-wrap gap-2">
+                  {v.stats.map((s) => (
+                    <span class="reel-stat">{s}</span>
+                  ))}
+                </div>
+              )}
               <p class="mt-2 text-sm text-white/70">{v.caption}</p>
             </div>
           </article>
@@ -172,6 +164,233 @@ import { reel } from '~/data/projects';
   }
   .reel-arrow:active {
     transform: translateY(0);
+  }
+
+  /* ── 3D flash-card deck ──────────────────────────────────────────
+     TikTok-style: the front card lifts toward the viewer in the swipe
+     direction, then recedes into depth behind the stack while the card
+     underneath physically draws forward to take its place. */
+  .reel-deck {
+    position: relative;
+    perspective: 1200px;
+  }
+  .reel-deck :global(.reel-card) {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
+    transform-origin: center center;
+    transition:
+      transform 680ms cubic-bezier(0.3, 1.15, 0.35, 1),
+      opacity 500ms ease,
+      filter 500ms ease;
+    will-change: transform;
+    /* Horizontal swipes drag the card; vertical swipes still scroll the page */
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .reel-deck :global(.reel-card img) {
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
+  }
+  .reel-deck :global(.deck-pos-0) {
+    transform: translate3d(0, 0, 0);
+    opacity: 1;
+    z-index: 30;
+    filter: brightness(1);
+  }
+  .reel-deck :global(.deck-pos-1) {
+    transform: translate3d(0, -20px, -70px);
+    opacity: 1;
+    z-index: 20;
+    filter: brightness(0.6);
+    cursor: pointer;
+  }
+  .reel-deck :global(.deck-pos-2) {
+    transform: translate3d(0, -38px, -140px);
+    opacity: 1;
+    z-index: 10;
+    filter: brightness(0.38);
+    cursor: pointer;
+  }
+  .reel-deck :global(.deck-rest) {
+    transform: translate3d(0, -38px, -140px);
+    opacity: 0;
+    z-index: 0;
+    filter: brightness(0.38);
+    pointer-events: none;
+  }
+  /* Cycling — one continuous arc: the card lifts toward the viewer, sweeps
+     around the corner, and recedes into the back of the deck (z-index flips
+     halfway so it slots behind). Quizlet flash-card feel. */
+  .reel-deck :global(.deck-cycling-right),
+  .reel-deck :global(.deck-cycling-left),
+  .reel-deck :global(.deck-cycling-up) {
+    animation-duration: 760ms;
+    animation-timing-function: cubic-bezier(0.42, 0.02, 0.22, 1);
+    animation-fill-mode: both;
+  }
+  .reel-deck :global(.deck-cycling-right) {
+    animation-name: deck-cycle-right;
+  }
+  .reel-deck :global(.deck-cycling-left) {
+    animation-name: deck-cycle-left;
+  }
+  .reel-deck :global(.deck-cycling-up) {
+    animation-name: deck-cycle-up;
+  }
+  .reel-deck :global(.deck-uncycling) {
+    animation: deck-uncycle 760ms cubic-bezier(0.42, 0.02, 0.22, 1) both;
+  }
+  .reel-deck :global(.deck-instant) {
+    transition: none !important;
+  }
+</style>
+
+<style is:global>
+  @keyframes deck-cycle-right {
+    0% {
+      transform: translate3d(0, 0, 0);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    45% {
+      transform: translate3d(44%, -16%, 80px) rotateY(14deg) rotateZ(5deg);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    55% {
+      z-index: 0;
+    }
+    100% {
+      transform: translate3d(0, -38px, -140px);
+      z-index: 0;
+      filter: brightness(0.38);
+    }
+  }
+  @keyframes deck-cycle-left {
+    0% {
+      transform: translate3d(0, 0, 0);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    45% {
+      transform: translate3d(-44%, -16%, 80px) rotateY(-14deg) rotateZ(-5deg);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    55% {
+      z-index: 0;
+    }
+    100% {
+      transform: translate3d(0, -38px, -140px);
+      z-index: 0;
+      filter: brightness(0.38);
+    }
+  }
+  @keyframes deck-cycle-up {
+    0% {
+      transform: translate3d(0, 0, 0);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    45% {
+      transform: translate3d(8%, -52%, 80px) rotateX(9deg) rotateZ(3deg);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    55% {
+      z-index: 0;
+    }
+    100% {
+      transform: translate3d(0, -38px, -140px);
+      z-index: 0;
+      filter: brightness(0.38);
+    }
+  }
+  @keyframes deck-uncycle {
+    0% {
+      transform: translate3d(0, -38px, -140px);
+      opacity: 0;
+      z-index: 40;
+      filter: brightness(0.38);
+    }
+    18% {
+      opacity: 1;
+    }
+    50% {
+      transform: translate3d(42%, -18%, 80px) rotateY(12deg) rotateZ(4deg);
+      z-index: 40;
+      filter: brightness(1);
+    }
+    100% {
+      transform: translate3d(0, 0, 0);
+      z-index: 40;
+      filter: brightness(1);
+    }
+  }
+
+  /* ── Play / open button — hidden until the card is hovered, orange glow ── */
+  :global(.reel-play) {
+    display: grid;
+    place-items: center;
+    height: 64px;
+    width: 64px;
+    border-radius: 999px;
+    background: rgba(12, 12, 18, 0.55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    border: 2px solid rgba(255, 122, 30, 0.9);
+    opacity: 0;
+    transform: scale(0.82);
+    transition:
+      opacity 300ms ease,
+      transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: reel-play-glow 2.2s ease-in-out infinite;
+  }
+  :global(.deck-pos-0:hover .reel-play) {
+    opacity: 1;
+    transform: scale(1);
+  }
+  :global(.reel-poster:hover .reel-play) {
+    transform: scale(1.08);
+  }
+  @keyframes reel-play-glow {
+    0%, 100% {
+      box-shadow:
+        0 0 18px rgba(255, 122, 30, 0.35),
+        0 0 0 0 rgba(255, 122, 30, 0.35);
+    }
+    50% {
+      box-shadow:
+        0 0 32px rgba(255, 122, 30, 0.7),
+        0 0 0 7px rgba(255, 122, 30, 0.12);
+    }
+  }
+  /* Touch devices can't hover — keep the affordance visible */
+  @media (hover: none) {
+    :global(.reel-play) {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  /* ── Award chips ── */
+  :global(.reel-stat) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: #ffb37a;
+    background: rgba(255, 122, 30, 0.14);
+    border: 1px solid rgba(255, 122, 30, 0.5);
+    box-shadow: 0 0 14px rgba(255, 122, 30, 0.25);
   }
 </style>
 
@@ -238,6 +457,9 @@ import { reel } from '~/data/projects';
       mount();
     });
 
+    // The deck fires this when the card leaves the front position.
+    slot.addEventListener('reel:unmount', unmount);
+
     if ('IntersectionObserver' in window) {
       const io = new IntersectionObserver(
         ([entry]) => {
@@ -249,55 +471,234 @@ import { reel } from '~/data/projects';
     }
   });
 
-  const track = document.querySelector<HTMLElement>('[data-reel-track]');
-  if (track) {
-    const step = () => {
-      const card = track.querySelector<HTMLElement>('article');
-      return (card?.offsetWidth ?? 400) + 24; // gap-6
+  // ── Flash-card deck ──────────────────────────────────────────────
+  // Arrows (or tapping a card behind) cycle the deck. The front card
+  // physically drops, tilts, and glides up behind the stack.
+  const deck = document.querySelector<HTMLElement>('[data-reel-deck]');
+  if (deck) {
+    const cards = [...deck.querySelectorAll<HTMLElement>('.reel-card')];
+    let order = cards.map((_, i) => i);
+    let busy = false;
+
+    const POS = [
+      'deck-pos-0',
+      'deck-pos-1',
+      'deck-pos-2',
+      'deck-rest',
+      'deck-cycling-up',
+      'deck-cycling-left',
+      'deck-cycling-right',
+      'deck-uncycling',
+      'deck-instant',
+    ];
+    const setPos = (card: HTMLElement, cls: string) => {
+      card.classList.remove(...POS);
+      card.classList.add(cls);
+    };
+    const posClass = (pos: number) =>
+      pos === 0 ? 'deck-pos-0' : pos === 1 ? 'deck-pos-1' : pos === 2 ? 'deck-pos-2' : 'deck-rest';
+
+    const assign = (except?: HTMLElement) => {
+      order.forEach((cardIdx, pos) => {
+        if (cards[cardIdx] === except) return;
+        setPos(cards[cardIdx], posClass(pos));
+      });
     };
 
-    document.querySelector('[data-reel-next]')?.addEventListener('click', () => {
-      track.scrollBy({ left: step(), behavior: 'smooth' });
-    });
-    document.querySelector('[data-reel-prev]')?.addEventListener('click', () => {
-      track.scrollBy({ left: -step(), behavior: 'smooth' });
-    });
-
-    // Drag-to-scroll on desktop
-    let isDown = false;
-    let startX = 0;
-    let scrollLeft = 0;
-    track.addEventListener('mousedown', (e) => {
-      const target = e.target as HTMLElement;
-      if (target.closest('iframe') || target.closest('button')) return;
-      isDown = true;
-      startX = e.pageX - track.offsetLeft;
-      scrollLeft = track.scrollLeft;
-      track.style.cursor = 'grabbing';
-    });
-    const release = () => {
-      isDown = false;
-      track.style.cursor = '';
+    // Deck height = tallest card + room for the stacked peek
+    const sizeDeck = () => {
+      const h = Math.max(...cards.map((c) => c.offsetHeight));
+      deck.style.height = `${h + 40}px`;
     };
-    track.addEventListener('mouseleave', release);
-    track.addEventListener('mouseup', release);
-    track.addEventListener('mousemove', (e) => {
-      if (!isDown) return;
-      e.preventDefault();
-      const x = e.pageX - track.offsetLeft;
-      track.scrollLeft = scrollLeft - (x - startX) * 1.4;
+
+    const unmountBehind = () => {
+      cards.forEach((card, i) => {
+        if (i === order[0]) return;
+        card.querySelector('.reel-video-slot')?.dispatchEvent(new Event('reel:unmount'));
+      });
+    };
+
+    // Cycle the front card to the back in ONE fluid keyframe arc (via the
+    // corner) while the stack draws forward underneath it at the same time.
+    const settle = (card: HTMLElement, cls: string) => {
+      let done = false;
+      const finish = () => {
+        if (done) return;
+        done = true;
+        card.classList.remove(cls);
+        assign();
+        busy = false;
+      };
+      card.addEventListener('animationend', finish, { once: true });
+      window.setTimeout(finish, 950); // safety net if the animation is interrupted
+    };
+
+    const tuck = (cycleClass: string) => {
+      if (busy) return;
+      busy = true;
+      const front = cards[order[0]];
+      front.style.transition = '';
+      front.style.transform = '';
+      front.style.opacity = '';
+      order.push(order.shift()!);
+      assign(front); // the card underneath draws forward immediately
+      front.classList.remove(...POS);
+      front.classList.add(cycleClass);
+      unmountBehind();
+      settle(front, cycleClass);
+    };
+    const next = () => tuck('deck-cycling-up');
+
+    const prev = () => {
+      if (busy) return;
+      busy = true;
+      const incoming = cards[order[order.length - 1]];
+      order.unshift(order.pop()!);
+      assign(incoming); // the current front recedes while the card arcs back in
+      incoming.classList.remove(...POS);
+      incoming.classList.add('deck-uncycling');
+      unmountBehind();
+      settle(incoming, 'deck-uncycling');
+    };
+
+    // Clicking a card that isn't in front advances the deck instead of playing
+    cards.forEach((card, i) => {
+      card.addEventListener(
+        'click',
+        (e) => {
+          if (order[0] === i) return;
+          e.preventDefault();
+          e.stopPropagation();
+          next();
+        },
+        true,
+      );
     });
 
-    // Wheel — convert vertical/diagonal trackpad scroll into horizontal carousel
-    // movement. Prevents page scroll bleed when user is mid-scrub.
-    track.addEventListener('wheel', (e) => {
+    document.querySelector('[data-reel-next]')?.addEventListener('click', next);
+    document.querySelector('[data-reel-prev]')?.addEventListener('click', prev);
+
+    // ── Drag-to-flick ────────────────────────────────────────────
+    // The front card follows the pointer; release past the threshold
+    // flings it off in the drag direction and tucks it to the back,
+    // otherwise it springs back. Small drags still count as clicks.
+    const DRAG_START = 8;
+    const FLING_AT = 90;
+    let drag: { card: HTMLElement; x: number; y: number; dx: number; dy: number; live: boolean } | null = null;
+    let suppressClick = false;
+
+    deck.addEventListener('pointerdown', (e) => {
+      if (busy || drag) return;
+      const card = cards[order[0]];
       const target = e.target as HTMLElement;
-      if (target.closest('iframe')) return;
-      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (horizontal !== 0) {
-        e.preventDefault();
-        track.scrollBy({ left: horizontal * 1.2, behavior: 'auto' });
+      if (!card.contains(target) || target.closest('iframe')) return;
+      drag = { card, x: e.clientX, y: e.clientY, dx: 0, dy: 0, live: false };
+      card.setPointerCapture(e.pointerId);
+    });
+
+    deck.addEventListener('pointermove', (e) => {
+      if (!drag) return;
+      drag.dx = e.clientX - drag.x;
+      drag.dy = e.clientY - drag.y;
+      if (!drag.live && Math.hypot(drag.dx, drag.dy) > DRAG_START) {
+        drag.live = true;
+        drag.card.style.transition = 'none';
       }
-    }, { passive: false });
+      if (drag.live) {
+        e.preventDefault();
+        drag.card.style.transform = `translate(${drag.dx}px, ${drag.dy}px) rotate(${drag.dx * 0.05}deg)`;
+      }
+    });
+
+    const endDrag = () => {
+      if (!drag) return;
+      const { card, dx, dy, live } = drag;
+      drag = null;
+      if (!live) return; // plain click — poster handles it
+      suppressClick = true;
+      window.setTimeout(() => (suppressClick = false), 80);
+
+      const dist = Math.hypot(dx, dy);
+      if (dist > FLING_AT) {
+        // Cycle in the swipe direction; swiping down brings the previous card back
+        card.style.transition = '';
+        card.style.transform = '';
+        if (Math.abs(dx) > Math.abs(dy)) {
+          tuck(dx < 0 ? 'deck-cycling-left' : 'deck-cycling-right');
+        } else if (dy < 0) {
+          tuck('deck-cycling-up');
+        } else {
+          prev();
+        }
+      } else {
+        // Spring back to the front slot
+        card.style.transition = '';
+        card.style.transform = '';
+      }
+    };
+    deck.addEventListener('pointerup', endDrag);
+    deck.addEventListener('pointercancel', endDrag);
+    // Native image ghost-drag would fight the pointer drag — flatten it
+    deck.addEventListener('dragstart', (e) => e.preventDefault());
+
+    // Desktop: scrolling over the deck flips through it TikTok-style — one
+    // card per gesture. Scroll down / swipe left = next (card lifts away),
+    // scroll up / swipe right = previous card returns.
+    let wheelCooling = false;
+    let wheelAcc = 0;
+    deck.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation(); // keep it away from the page's smooth-scroller
+        if (wheelCooling || busy) return;
+        const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
+        wheelAcc += horizontal ? e.deltaX : e.deltaY;
+        if (Math.abs(wheelAcc) > 50) {
+          const positive = wheelAcc > 0;
+          wheelAcc = 0;
+          wheelCooling = true;
+          window.setTimeout(() => (wheelCooling = false), 800);
+          if (positive) tuck(horizontal ? 'deck-cycling-left' : 'deck-cycling-up');
+          else prev();
+        }
+      },
+      { passive: false },
+    );
+
+    // Arrow keys flip the deck while it's on screen
+    let deckVisible = false;
+    new IntersectionObserver(([entry]) => (deckVisible = entry.isIntersecting), {
+      threshold: 0.25,
+    }).observe(deck);
+    window.addEventListener('keydown', (e) => {
+      if (!deckVisible) return;
+      const t = e.target as HTMLElement;
+      if (t.closest?.('input, textarea, [contenteditable]')) return;
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        tuck('deck-cycling-left');
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prev();
+      }
+    });
+
+    // A drag that ends on the poster must not trigger its click-to-play
+    deck.addEventListener(
+      'click',
+      (e) => {
+        if (suppressClick) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      },
+      true,
+    );
+
+    assign();
+    sizeDeck();
+    window.addEventListener('resize', sizeDeck);
+    window.addEventListener('load', sizeDeck);
   }
 </script>
