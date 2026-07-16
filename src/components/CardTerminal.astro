@@ -23,8 +23,9 @@
   </svg>
 </div>
 
-{/* Terminal window */}
-<div class="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm">
+{/* Terminal window — 16/10 minimum, grows with content on narrow cards */}
+<div class="w-full" style="container-type: inline-size;">
+<div class="term-window relative flex w-full flex-col overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm">
   {/* Title bar */}
   <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
     <div class="flex items-center gap-1.5">
@@ -32,20 +33,20 @@
       <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
       <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
     </div>
-    <span class="font-mono text-[10px] text-cow-200">ria@rakshita.me — zsh — 80×24</span>
+    <span class="font-mono text-[10px] text-cow-200">ria@rakshita.me<span class="term-title-extra"> — zsh — 80×24</span></span>
     <span class="w-10"></span>
   </div>
 
   {/* Body */}
-  <div class="relative h-[calc(100%-2.25rem)] overflow-hidden px-3 py-2.5 font-mono text-[10px] leading-[1.45] sm:text-[11px]">
+  <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45]">
     <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
 
     {/* Two-column grid — cow centered in the left column, sysinfo right */}
-    <div class="mt-1.5 grid grid-cols-[11rem_1fr] gap-x-3 items-center sm:grid-cols-[13rem_1fr]">
+    <div class="term-grid mt-1.5 grid grid-cols-[max-content_1fr] gap-x-3 items-center">
       {/* ASCII cow — pre is centered horizontally and vertically inside the
           left column. Monospace + preserved whitespace keeps the lines
           aligned to each other. */}
-      <pre class="justify-self-center leading-[1.1] text-[11px] sm:text-[12px]" style="color:#DC9BB5; text-shadow: 0 0 8px rgba(220,155,181,0.25);">
+      <pre class="term-cow justify-self-center px-2 leading-[1.1]" style="color:#DC9BB5; text-shadow: 0 0 8px rgba(220,155,181,0.25);">
 \|/          (__)    
      `\------(oo)
        ||    (__)
@@ -71,6 +72,32 @@
   {/* Scanline */}
   <div class="pointer-events-none absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(57,255,20,0.04) 50%, transparent 100%); background-size: 100% 4px;"></div>
 </div>
+</div>
+
+<style>
+  /* Terminal text tracks the card width (container query) so the neofetch
+     output never overflows the window in the 3-column grid. */
+  .term-window {
+    min-height: 62.5cqw;
+  }
+  .term-body {
+    font-size: clamp(7.5px, 2.3cqw, 11px);
+  }
+  .term-cow {
+    font-size: 1.08em;
+  }
+  /* Narrow cards: stack the cow above the sysinfo and trim the title bar */
+  @container (max-width: 400px) {
+    .term-grid {
+      grid-template-columns: 1fr;
+      row-gap: 6px;
+      justify-items: start;
+    }
+    .term-title-extra {
+      display: none;
+    }
+  }
+</style>
 
 <script>
   // Live uptime — counts up from Fri 2026-05-29 02:00:00 local time
@@ -94,8 +121,7 @@
     const w = window.innerWidth;
     const h = window.innerHeight;
     const dpr = window.devicePixelRatio || 1;
-    const phys = `${Math.round(w * dpr)}×${Math.round(h * dpr)}`;
-    const text = `${w}×${h} (${phys} @${dpr}×)`;
+    const text = `${w}×${h} @${dpr}×`;
     resEls.forEach((el) => (el.textContent = text));
   };
 

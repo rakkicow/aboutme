@@ -24,7 +24,8 @@ import { roles, coursework } from '~/data/resume';
       {roles.map((r) => (
         <li class="reveal group relative">
           {/* Marker */}
-          <span class="absolute -left-[37px] top-3 sm:-left-[49px]">
+          {/* Offsets center the 6px dot on the 1px timeline: border + pl + half dot − half line */}
+          <span class="absolute -left-[35.5px] top-3 sm:-left-[51.5px]">
             <span class="marker-dot block"></span>
           </span>
 

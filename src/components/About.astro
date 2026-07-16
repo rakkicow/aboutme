@@ -59,7 +59,8 @@ import { bio, skills, tools, languages, frameworks, coursework } from '~/data/re
               <li class="flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm" style="border-color: var(--hair); background: var(--surface-soft);">
                 <span>
                   <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
-                  <span class="ml-2" style="color: var(--ink-soft);">{c.name}</span>
+                  <span class="ml-2 sm:hidden" style="color: var(--ink-soft);">{c.short ?? c.name}</span>
+                  <span class="ml-2 hidden sm:inline" style="color: var(--ink-soft);">{c.name}</span>
                 </span>
                 {c.grade ? (
                   <span class="ml-3 inline-flex items-center rounded-full bg-cow-300/20 px-2 py-0.5 font-mono text-[10px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
