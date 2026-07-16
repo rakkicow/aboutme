@@ -391,9 +391,10 @@
     animation: text-gradient-scroll 4s linear infinite;
   }
 
+  /* Negative sweep = the color bands travel to the right */
   @keyframes text-gradient-scroll {
     0% { background-position: 0% 50%; }
-    100% { background-position: 150% 50%; }
+    100% { background-position: -150% 50%; }
   }
 
   /* Hero "Ria" — bold display, per-letter color shift on hover */
