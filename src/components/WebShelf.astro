@@ -215,11 +215,18 @@ import { webShelf } from '~/data/projects';
   const modal = document.querySelector<HTMLDialogElement>('[data-shelf-modal]');
   if (modal) {
     const lenis = () => (window as unknown as { __lenis?: { stop(): void; start(): void } }).__lenis;
+    // The dialog paints in the top layer, above everything outside it — so the
+    // custom cursor must live INSIDE the dialog while it's open to stay visible.
+    const cursorFx = ['cursor', 'cursor-dot']
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el)
+      .map((el) => ({ el, home: el.parentElement }));
     const openModal = (e: Event) => {
       e.preventDefault();
       modal.showModal();
       document.body.style.overflow = 'hidden';
       lenis()?.stop();
+      cursorFx.forEach(({ el }) => modal.appendChild(el));
     };
     document.querySelectorAll<HTMLAnchorElement>('a[href="#web-shelf"]').forEach((a) => {
       a.addEventListener('click', openModal);
@@ -231,6 +238,7 @@ import { webShelf } from '~/data/projects';
     modal.addEventListener('close', () => {
       document.body.style.overflow = '';
       lenis()?.start();
+      cursorFx.forEach(({ el, home }) => home?.appendChild(el));
     });
   }
 
