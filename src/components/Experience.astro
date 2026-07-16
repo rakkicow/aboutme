@@ -43,11 +43,16 @@ import { roles, coursework } from '~/data/resume';
                 {r.title}
               </h3>
               <p class="mt-1 text-sm font-medium" style="color: var(--ink-muted);">{r.org}</p>
-              <ul class="mt-4 max-w-2xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed marker:text-cow-600 dark:marker:text-cow-300" style="color: var(--ink-muted);">
-                {r.bullets.map((b) => (
-                  <li>{b}</li>
-                ))}
-              </ul>
+              {r.body && (
+                <p class="mt-4 max-w-2xl text-[15px] leading-relaxed" style="color: var(--ink-muted);">{r.body}</p>
+              )}
+              {r.bullets && (
+                <ul class="mt-4 max-w-2xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed marker:text-cow-600 dark:marker:text-cow-300" style="color: var(--ink-muted);">
+                  {r.bullets.map((b) => (
+                    <li>{b}</li>
+                  ))}
+                </ul>
+              )}
 
               {/* Completed coursework — compact 2×2 toast bubbles (mirrors the About section) */}
               {r.kind === 'edu' && (
