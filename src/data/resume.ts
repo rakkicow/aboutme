@@ -106,7 +106,9 @@ export type Role = {
   kind: 'edu' | 'work' | 'volunteer';
   location?: string;
   // Bullet wording mirrors the ATS resume PDF exactly — keep them in sync.
-  bullets: string[];
+  bullets?: string[];
+  // Prose for roles that aren't on the resume.
+  body?: string;
 };
 
 // Newest first. Education first (for the timeline header), then work.
@@ -214,8 +216,6 @@ export const roles: Role[] = [
     years: 'May 2019 — Jul 2019',
     location: 'Augusta, GA',
     kind: 'volunteer',
-    bullets: [
-      'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms — first close look at the inner-workings of clinical operations.',
-    ],
+    body: 'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms — first close look at the inner-workings of clinical operations.',
   },
 ];
