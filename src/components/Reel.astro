@@ -332,7 +332,7 @@ import { reel } from '~/data/projects';
   }
 
   /* ── Play / open button — hidden until the card is hovered, orange glow ── */
-  :global(.reel-play) {
+  .reel-play {
     display: grid;
     place-items: center;
     height: 64px;
@@ -350,11 +350,11 @@ import { reel } from '~/data/projects';
       transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
     animation: reel-play-glow 2.2s ease-in-out infinite;
   }
-  :global(.deck-pos-0:hover .reel-play) {
+  .deck-pos-0:hover .reel-play {
     opacity: 1;
     transform: scale(1);
   }
-  :global(.reel-poster:hover .reel-play) {
+  .reel-poster:hover .reel-play {
     transform: scale(1.08);
   }
   @keyframes reel-play-glow {
@@ -371,14 +371,14 @@ import { reel } from '~/data/projects';
   }
   /* Touch devices can't hover — keep the affordance visible */
   @media (hover: none) {
-    :global(.reel-play) {
+    .reel-play {
       opacity: 1;
       transform: scale(1);
     }
   }
 
   /* ── Award chips ── */
-  :global(.reel-stat) {
+  .reel-stat {
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
