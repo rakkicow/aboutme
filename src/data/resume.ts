@@ -130,7 +130,7 @@ export const roles: Role[] = [
     years: 'Jun 2026 — Jul 2026',
     location: 'Remote',
     kind: 'work',
-    body: 'Built a VBScript tool that extracts complex tables from HIPAA-compliant Word documents into Excel, with an interface that lets legal professionals review the structured data and append recommendations — cutting hours of manual entry. All of it developed and tested locally under a strict NDA, inside the client\'s locked-down environment.',
+    body: 'Built a VBScript tool that extracts complex tables from HIPAA-compliance report Word documents into Excel, with an interface that lets legal professionals review the structured data and append recommendations — cutting hours of manual entry. All of it developed and tested locally under a strict NDA, inside the client\'s locked-down environment.',
   },
   {
     org: 'GERI Summer Residential Camp, Purdue University',
