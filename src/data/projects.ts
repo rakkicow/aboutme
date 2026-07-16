@@ -34,7 +34,7 @@ export const featured: Project[] = [
     role: 'Founder',
     years: '2014 — 2023',
     blurb:
-      'Founded a small marketing studio that ran for almost a decade — one stop shop for video editing & production, web design, event coverage, SEO, social media engagement, and app design. Highlights include immersive 360°/VR simulations for medical students with the Augusta University Simulation Center and professional videos for AugustaENT for sur',
+      'CDI Official was my one-stop media production studio, founded as a teen and run for almost a decade. It delivered 50+ professionally edited videos plus apps, websites, event videography, and photography that built clients\' brand identities — including healthcare clients under NDA. Highlights: immersive 360°/VR simulations for the Augusta University Medical Simulation Center, later adapted into VR training apps for medical students, and patient explainers for AugustaENT credited with measurably easing patient anxiety.',
     stack: ['Final Cut', 'Premiere', 'After Effects', 'PhotoShop', 'Photography', 'Videography', 'Video Planning & Production', 'VR / 360°', 'Design', 'App Development'],
     links: [
       { label: 'YouTube channel', href: 'https://www.youtube.com/c/cdiofficial' },
