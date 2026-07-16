@@ -200,8 +200,7 @@
   const updateRes = () => {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const dpr = window.devicePixelRatio || 1;
-    const text = `${w}×${h} @${dpr}×`;
+    const text = `${w}×${h}`;
     resEls.forEach((el) => (el.textContent = text));
   };
 
