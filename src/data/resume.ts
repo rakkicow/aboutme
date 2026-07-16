@@ -105,7 +105,8 @@ export type Role = {
   years: string;
   kind: 'edu' | 'work' | 'volunteer';
   location?: string;
-  body: string;
+  // Bullet wording mirrors the ATS resume PDF exactly — keep them in sync.
+  bullets: string[];
 };
 
 // Newest first. Education first (for the timeline header), then work.
@@ -115,7 +116,7 @@ export const roles: Role[] = [
     title: 'Bachelor of Science in Computer Engineering Technology',
     years: 'Aug 2023 — May 2028',
     kind: 'edu',
-    body: 'Minors in Psychology, Entrepreneurship, and Computer Engineering.',
+    bullets: ['Minors: Psychology, Entrepreneurship, and Computer Engineering.'],
   },
   {
     org: 'CowShopCo · Etsy',
@@ -123,7 +124,10 @@ export const roles: Role[] = [
     years: 'Apr 2020 — Present',
     location: 'Augusta, GA → West Lafayette, IN',
     kind: 'work',
-    body: 'My Etsy shop, CowShopCo — "Print the World!" I design and 3D-print the whole catalog of jewelry, charms, and household items, modeled entirely in Blender and Fusion 360 — 100+ orders shipped with a 5-star rating. I run everything else myself too: photography, listings, pricing, shipping, and customer service, plus placing products in local businesses and fairs on commission.',
+    bullets: [
+      'Designed, 3D-printed, and sold an original product catalog consisting of jewelry, charms, and household items. Modeled entirely in Blender and Fusion 360; 100+ orders shipped with a 5-star Etsy rating.',
+      'Ran the business end-to-end (product photography, listings, pricing, shipping, and customer service) and place products in local businesses and fairs on commission.',
+    ],
   },
   {
     org: 'Freelance',
@@ -131,7 +135,11 @@ export const roles: Role[] = [
     years: 'Jun 2026 — Jul 2026',
     location: 'Remote',
     kind: 'work',
-    body: 'Built a VBScript tool that extracts complex tables from HIPAA-compliance report Word documents into Excel, with an interface that lets legal professionals review the structured data and append recommendations — cutting hours of manual entry. All of it developed and tested locally under a strict NDA, inside the client\'s locked-down environment.',
+    bullets: [
+      'Developed a Visual Basic Script (VBS) tool to automate the extraction and conversion of complex tables from HIPAA-compliance report Word documents into Excel spreadsheets.',
+      'Designed an intuitive interface enabling legal professionals to efficiently review structured data and seamlessly append company recommendations, significantly reducing manual data entry time.',
+      "Operated under a strict NDA with a locked-down, access-restricted document that could not be shared with any external or cloud services, building and testing the entire automation locally within the client's secure environment.",
+    ],
   },
   {
     org: 'GERI Summer Residential Camp, Purdue University',
@@ -139,23 +147,33 @@ export const roles: Role[] = [
     years: 'Jul 2025',
     location: 'West Lafayette, IN',
     kind: 'work',
-    body: 'Mentored 12 gifted students (mostly 9th–12th grade girls) and managed an entire residence-hall floor at a two-week academic camp of 300+ campers. Taught daily personal and life-skills classes and served as the live-in first point of contact for conflict resolution.',
+    bullets: [
+      'Directly mentored 12 gifted students, consisting of 9th–12th grade girls, and managed an entire residence-hall floor at a two-week academic summer camp of 300+ campers.',
+      'Taught daily personal and life-skills classes and served as a live-in first point of contact for conflict resolution across the camp.',
+    ],
   },
   {
-    org: 'BlueBubbles',
+    org: 'BlueBubbles (Open-Source)',
     title: 'UI/UX Design Contributor',
     years: 'Jun 2020 — Aug 2023',
     location: 'Remote',
     kind: 'work',
-    body: 'Contributed UI/UX design to the open-source Flutter/Dart app that brings iMessage to Android — 100K+ downloads and a 4.6-star Google Play rating. Streamlined the core chat interface and helped design the theming engine that became a headline feature, working with the 5-person core team and feedback from a 13,000+ member Discord community.',
+    bullets: [
+      'Contributed UI/UX design to BlueBubbles, an open-source Flutter/Dart application bringing iMessage to Android, with 100K+ downloads and a 4.6-star rating on Google Play.',
+      "Streamlined the core chat interface and helped design the app's robust theming engine, which became a headline feature.",
+      'Worked directly with the 5-person core developer team, iterating on feedback from a 13,000+ member Discord community and GitHub beta testers.',
+    ],
   },
   {
     org: 'CPR Cell Phone Repair',
     title: 'Electronics Technician & Sales Associate',
-    years: 'Sept 2022 — Aug 2023',
+    years: 'Sep 2022 — Aug 2023',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Completed ~200 repairs a month across smartphones, tablets, laptops, and game consoles — screens, batteries, board-level soldering — with lead responsibility for software-based repairs. Ranked top of the shop in service speed and customer satisfaction, and upsold 150+ screen protectors plus 3–5 full device sales monthly.',
+    bullets: [
+      'Completed ~200 repairs per month across smartphones, tablets, laptops, and game consoles, consisting of screen and battery replacements, board-level soldering, and lead responsibility for software-based repairs.',
+      'Ranked top of the shop in service speed and customer satisfaction, earning the highest tips among technicians; upsold 150+ screen protectors and 3–5 full device sales monthly.',
+    ],
   },
   {
     org: 'CDI Official',
@@ -163,23 +181,32 @@ export const roles: Role[] = [
     years: 'Nov 2014 — Jun 2023',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Founded a media production studio delivering 50+ professionally edited videos plus apps, websites, event videography, and photography — including healthcare clients under NDA. Produced 360°/VR simulation videos for the Augusta University Medical Simulation Center, later adapted into interactive VR training apps for medical students, and filmed clinical procedure explainers for AugustaENT patients credited with measurably easing patient anxiety.',
+    bullets: [
+      "Founded a media production studio delivering 50+ professionally edited videos plus apps, websites, event videography, and photography that built clients' brand identities and online presence, including healthcare clients under NDA.",
+      'Produced immersive 360°/VR simulation videos for the Augusta University Medical Simulation Center, later adapted by the department into interactive VR training apps for medical students.',
+      'Filmed and edited clinical procedure explainers for AugustaENT patients (e.g., Ultrasound-Guided Fine-Needle Aspiration Biopsy, pediatric surgery prep), credited with measurably easing patient anxiety.',
+    ],
   },
   {
-    org: 'Augusta University — TVC Lab',
+    org: 'Augusta University TVC Lab',
     title: 'Television & Cinema Production Intern',
     years: 'Aug 2022 — Jan 2023',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Supported studio instruction and recording sessions for TV production courses — camera and set configuration, TriCaster live-production workflows. Managed equipment check-in/out for the lab, created digital signage for its displays, and contributed to a JagNews weekly broadcast segment.',
+    bullets: [
+      'Supported studio instruction and recording sessions for TV production courses, including camera and set configuration and TriCaster live-production workflows.',
+      "Managed equipment check-in/out for the TVC Lab and created digital signage for the lab's displays; contributed to a JagNews weekly broadcast segment.",
+    ],
   },
   {
     org: 'Dairy Queen',
     title: 'Crew Member',
-    years: 'May 2022 — Sept 2022',
+    years: 'May 2022 — Sep 2022',
     location: 'Augusta, GA',
     kind: 'work',
-    body: 'Summer crew — high-volume counter, register, and food-prep stations during peak service. Customer-service muscle and "ship it under pressure" instincts.',
+    bullets: [
+      'Worked high-volume counter, register, and food-prep stations during peak summer service, delivering fast, courteous customer service under pressure.',
+    ],
   },
   {
     org: 'Piedmont Augusta',
@@ -187,6 +214,8 @@ export const roles: Role[] = [
     years: 'May 2019 — Jul 2019',
     location: 'Augusta, GA',
     kind: 'volunteer',
-    body: 'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms — first close look at the inner-workings of clinical operations.',
+    bullets: [
+      'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms — first close look at the inner-workings of clinical operations.',
+    ],
   },
 ];
