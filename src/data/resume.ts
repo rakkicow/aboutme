@@ -216,6 +216,9 @@ export const roles: Role[] = [
     years: 'May 2019 — Jul 2019',
     location: 'Augusta, GA',
     kind: 'volunteer',
-    body: 'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms — first close look at the inner-workings of clinical operations.',
+    bullets: [
+      'Helped lab personnel with benchwork and test delivery, plus rounding patient rooms.',
+      'Got firsthand experience of the inner-workings of clinical operations.',
+    ],
   },
 ];
