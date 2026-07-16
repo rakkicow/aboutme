@@ -110,7 +110,7 @@ export const reel: ReelEntry[] = [
     id: '295pjCG2cmM',
     title: 'Simulation Introduction',
     caption: 'Augusta University Medical Simulation Center — immersive 360° / VR intro.',
-    pill: 'Healthcare · VR',
+    pill: 'Healthcare',
   },
   {
     id: 'QDxZOwXWNTQ',
