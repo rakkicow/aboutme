@@ -38,8 +38,6 @@ export const featured: Project[] = [
     stack: ['Final Cut', 'Premiere', 'After Effects', 'PhotoShop', 'Photography', 'Videography', 'Video Planning & Production', 'VR / 360°', 'Design', 'App Development'],
     links: [
       { label: 'YouTube channel', href: 'https://www.youtube.com/c/cdiofficial' },
-      { label: 'AugustaENT — surgery prep', href: 'https://augustaent.com/surgery/preparing-for-surgery/' },
-      { label: 'USFNA explainer (Drive)', href: 'https://drive.google.com/file/d/1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f/view?usp=sharing' },
       { label: 'Reel ↓', href: '#reel' },
     ],
     theme: 'camera',
@@ -58,9 +56,7 @@ export const featured: Project[] = [
   },
 ];
 
-// Reel — mixed sources. YouTube and Drive videos play inline (click-to-play
-// poster, iframe mounts on click and unmounts on scroll-off). 'external' is a
-// click-through to another site, no iframe is ever mounted.
+
 export type ReelEntry = {
   id: string;                                       // platform ID (yt watch id, drive file id, vimeo id…)
   source?: 'youtube' | 'drive' | 'external';       // defaults to 'youtube'
@@ -69,20 +65,22 @@ export type ReelEntry = {
   title: string;
   caption: string;
   pill?: string;
+  stats?: string[];                                 // award/placement chips shown above the caption
 };
 
 export const reel: ReelEntry[] = [
   {
     id: '1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f',
     source: 'drive',
-    title: 'USFNA — patient explainer',
-    caption: 'Ultrasound-guided fine-needle aspiration walkthrough for AugustaENT patients.',
+    thumbnail: '/assets/usfna-poster.jpg',
+    title: 'AugustaENT — Ultrasound-Guided Fine-Needle Aspiration',
+    caption: 'Guided USFNA walkthrough for new AugustaENT patients',
     pill: 'Healthcare',
   },
   {
     id: 'LDBWADBBxIE',
     title: 'Unlock Your Potential — HOSA PSA 2021',
-    caption: 'Lakeside HOSA 2021 PSA — concept, shoot, edit.',
+    caption: 'submission for the 2021 HOSA PSA competition',
     pill: 'HOSA · 2021',
   },
   {
@@ -91,32 +89,33 @@ export const reel: ReelEntry[] = [
     href: 'https://augustaent.com/surgery/preparing-for-surgery/',
     thumbnail: 'https://vumbnail.com/739762304.jpg',
     title: 'Pediatric Surgery Prep — AugustaENT',
-    caption: 'Calming pre-surgery walkthrough for young patients. Click to visit AugustaENT.',
+    caption: 'calming pre-surgery guide for kids undergoing surgery',
     pill: 'Healthcare',
   },
   {
     id: 'O_mKARkrl6w',
     title: 'Stop the Bleed — HOSA PSA 2020',
-    caption: '5th place ILC · 1st place Georgia SLC. Lakeside HOSA 2020 PSA.',
+    caption: 'Submission for the 2020 HOSA PSA competition',
+    stats: ['5th place — HOSA ILC', '1st place — Georgia SLC'],
     pill: 'HOSA · 2020',
   },
   {
     id: 'uwbs5RD84T0',
-    title: 'CIFR — promotional',
-    caption: 'Promotional piece for CIFR.',
+    title: 'CIFR Promotional',
+    caption: 'promotional video for Community Initiative First Response (CIFR), a student-led, simulation-based emergency response training program',
     pill: 'CIFR',
   },
   {
     id: '295pjCG2cmM',
-    title: 'Simulation Introduction',
-    caption: 'Augusta University Medical Simulation Center — immersive 360° / VR intro.',
+    title: 'AU Medical Simulation Introduction',
+    caption: 'created for the Augusta University Medical Simulation Center. training material for medical students on the simualtion manequins',
     pill: 'Healthcare',
   },
   {
     id: 'QDxZOwXWNTQ',
-    title: 'CDI Official — Channel Trailer',
-    caption: 'CDI Official channel trailer (2020).',
-    pill: 'CDI',
+    title: 'Channel Trailer',
+    caption: 'official channel trailer (2020)',
+    pill: 'CDI Official',
   },
 ];
 
