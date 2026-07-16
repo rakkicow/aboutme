@@ -1,5 +1,6 @@
 ---
-// My Works!
+// BlueBubbles card — a mini iMessage conversation walking through the app's
+// features, with clickable "Sent with Confetti" / "Sent with Slam" effects.
 ---
 
 <div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[28px]">
@@ -23,40 +24,297 @@
   <div class="absolute inset-0 rounded-[28px]" style="box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.2);"></div>
 </div>
 
-{/* Bubbles */}
+{/* Conversation */}
 <div class="relative aspect-[16/10] w-full overflow-hidden rounded-2xl">
-  {/* Incoming */}
-  <div class="absolute left-5 top-6 max-w-[60%]">
-    <div
-      class="rounded-3xl rounded-bl-md px-4 py-2.5 text-[13px] font-semibold text-ink shadow-[0_12px_32px_-8px_rgba(0,30,80,0.4)]"
-      style="background: #FFFFFF;"
-    >
-      <span>iMessage on Android?</span>
-    </div>
-  </div>
+  <div class="absolute inset-0 flex flex-col justify-evenly px-4 py-3 text-[12px] font-semibold">
+    <div class="flex justify-start"><span class="bb-bubble bb-in">iMessage on Android?</span></div>
+    <div class="flex justify-end"><span class="bb-bubble bb-out">Yep!</span></div>
 
-  {/* Outgoing */}
-  <div class="absolute right-5 top-24 max-w-[60%]">
-    <div
-      class="rounded-3xl rounded-br-md px-4 py-2.5 text-[13px] font-semibold text-white shadow-[0_12px_32px_-8px_rgba(0,30,80,0.55)]"
-      style="background: linear-gradient(180deg, #3B8BFF 0%, #1E7AFF 100%);"
-    >
-      <span>Yup, ofc!</span>
-    </div>
-  </div>
+    <div class="flex justify-start"><span class="bb-bubble bb-in">Can I theme it?</span></div>
+    <div class="flex justify-end"><span class="bb-bubble bb-out bb-rainbow">Ofc!</span></div>
 
-
-  {/* Typing Indicator */}
-  <div class="absolute left-10 bottom-6 max-w-[35%]">
-    <div
-      class="rounded-3xl rounded-bl-md px-4 py-2.5 shadow-[0_8px_24px_-6px_rgba(0,30,80,0.4)]"
-      style="background: #FFFFFF;"
-    >
-      <span class="flex items-center gap-1">
-        <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-ink/45" style="animation-delay:0ms"></span>
-        <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-ink/45" style="animation-delay:140ms"></span>
-        <span class="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-ink/45" style="animation-delay:280ms"></span>
+    <div class="flex justify-start">
+      <span class="bb-bubble bb-in bb-has-tapback">
+        Reactions?
+        {/* Heart tapback, pinned to the bubble's top-right corner */}
+        <span class="bb-tapback" aria-hidden="true">
+          <svg class="bb-tapback-heart" viewBox="0 0 24 24">
+            <defs>
+              <linearGradient id="bb-heart-grad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#ffc4dd" />
+                <stop offset="100%" stop-color="#ff77ad" />
+              </linearGradient>
+            </defs>
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="url(#bb-heart-grad)" />
+          </svg>
+        </span>
       </span>
+    </div>
+
+    {/* Reply thread: quoted bubble, connector line, and the reply stay one tight unit */}
+    <div>
+      <div class="flex justify-start"><span class="bb-bubble bb-in">Replies?</span></div>
+      <div class="-mt-2 flex items-start justify-between">
+        <svg class="bb-reply-line" viewBox="0 0 60 28" aria-hidden="true">
+          {/* One continuous quarter-circle bend, like an iMessage thread line */}
+          <path d="M4 1 A22 22 0 0 0 26 23 H36" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        <span class="bb-bubble bb-out self-end">For sure!</span>
+      </div>
+    </div>
+
+    <div class="flex justify-start"><span class="bb-bubble bb-in">Effects?</span></div>
+    <div class="flex flex-col items-end">
+      <button type="button" class="bb-bubble bb-out" data-bb-slam aria-label="Replay slam effect">Definitely!</button>
+      <button type="button" class="bb-caption" data-bb-slam>
+        <svg class="bb-replay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+        </svg>
+        Sent with Slam
+      </button>
+    </div>
+
+    <div class="flex flex-col items-start">
+      <button type="button" class="bb-bubble bb-in" data-bb-confetti aria-label="Replay confetti effect">Woah!</button>
+      <button type="button" class="bb-caption" data-bb-confetti>
+        <svg class="bb-replay-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+        </svg>
+        Sent with Confetti
+      </button>
     </div>
   </div>
 </div>
+
+<style is:global>
+  .bb-bubble {
+    width: fit-content;
+    padding: 6px 12px;
+    border-radius: 18px;
+    font: inherit;
+    line-height: 1.35;
+    cursor: default;
+    text-align: left;
+  }
+  .bb-in {
+    background: #ffffff;
+    color: #16233b;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 12px 32px -8px rgba(0, 30, 80, 0.4);
+  }
+  .bb-out {
+    background: linear-gradient(180deg, #3b8bff 0%, #1e7aff 100%);
+    color: #ffffff;
+    border-bottom-right-radius: 5px;
+    box-shadow: 0 12px 32px -8px rgba(0, 30, 80, 0.55);
+  }
+  .bb-rainbow {
+    /* First and last stop match so the repeating tile loops seamlessly */
+    background: linear-gradient(90deg, #ff5e5e, #ff9f43, #ffd166, #4ade80, #38bdf8, #a855f7, #ff5e5e);
+    background-size: 300% 100%;
+    /* 0% → 150% shifts exactly one tile width, so the wave cycles forever in one direction */
+    animation: bb-rainbow-shift 3s linear infinite;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 12px 32px -8px rgba(60, 10, 120, 0.55);
+  }
+  @keyframes bb-rainbow-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 150% 50%; }
+  }
+  button.bb-bubble {
+    cursor: pointer;
+  }
+  .bb-caption {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 3px;
+    padding: 0 6px;
+    background: none;
+    border: none;
+    font-size: 10px;
+    font-weight: 500;
+    color: #cfe4ff;
+    opacity: 0.9;
+    cursor: pointer;
+  }
+  .bb-caption:hover {
+    opacity: 1;
+  }
+  .bb-replay-icon {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+  }
+  /* Reply thread line, dropping from the quoted bubble toward the reply */
+  .bb-reply-line {
+    width: 60px;
+    height: 28px;
+    margin-left: 18px;
+    flex-shrink: 0;
+  }
+
+  /* Heart tapback badge, iMessage style */
+  .bb-has-tapback {
+    position: relative;
+  }
+  .bb-tapback {
+    position: absolute;
+    top: -13px;
+    right: -11px;
+    display: grid;
+    place-items: center;
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #3b8bff 0%, #1e7aff 100%);
+    box-shadow: 0 4px 10px rgba(0, 30, 80, 0.35);
+  }
+  .bb-tapback::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    right: -2px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #1e7aff;
+  }
+  .bb-tapback-heart {
+    width: 13px;
+    height: 13px;
+  }
+
+  @keyframes bb-slam-bubble {
+    0% { transform: scale(2.6); opacity: 0.25; }
+    55% { transform: scale(0.9); opacity: 1; }
+    75% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+  .bb-slamming {
+    animation: bb-slam-bubble 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    transform-origin: left bottom;
+  }
+  .bb-out.bb-slamming {
+    transform-origin: right bottom;
+  }
+  @keyframes bb-card-shake {
+    0%, 100% { translate: 0 0; }
+    20% { translate: -4px 3px; }
+    40% { translate: 4px -3px; }
+    60% { translate: -3px -2px; }
+    80% { translate: 3px 2px; }
+  }
+  .bb-shake {
+    animation: bb-card-shake 0.4s ease;
+  }
+</style>
+
+<script>
+  // Full-viewport confetti, iMessage style. No libraries — one throwaway canvas.
+  const confettiBurst = () => {
+    if (document.querySelector('[data-bb-confetti-canvas]')) return;
+    const canvas = document.createElement('canvas');
+    canvas.setAttribute('data-bb-confetti-canvas', '');
+    Object.assign(canvas.style, {
+      position: 'fixed',
+      inset: '0',
+      width: '100vw',
+      height: '100vh',
+      pointerEvents: 'none',
+      zIndex: '9999',
+    });
+    document.body.appendChild(canvas);
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = innerWidth * dpr;
+    canvas.height = innerHeight * dpr;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return canvas.remove();
+    ctx.scale(dpr, dpr);
+
+    const colors = ['#FF7AB6', '#FFD166', '#7CFFCB', '#5E9FFF', '#B693FF', '#FF9043', '#FFFFFF'];
+    const parts = Array.from({ length: 180 }, () => ({
+      x: Math.random() * innerWidth,
+      y: -20 - Math.random() * innerHeight * 0.6,
+      w: 6 + Math.random() * 6,
+      h: 8 + Math.random() * 8,
+      vx: -1 + Math.random() * 2,
+      vy: 2.2 + Math.random() * 3.2,
+      rot: Math.random() * Math.PI,
+      vr: -0.15 + Math.random() * 0.3,
+      sway: Math.random() * Math.PI * 2,
+      color: colors[(Math.random() * colors.length) | 0],
+    }));
+
+    const DURATION = 4200;
+    const t0 = performance.now();
+    const frame = (t: number) => {
+      const elapsed = t - t0;
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ctx.globalAlpha = Math.max(0, Math.min(1, (DURATION - elapsed) / 600));
+      for (const p of parts) {
+        p.sway += 0.05;
+        p.x += p.vx + Math.sin(p.sway) * 0.8;
+        p.y += p.vy;
+        p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      }
+      if (elapsed < DURATION) requestAnimationFrame(frame);
+      else canvas.remove();
+    };
+    requestAnimationFrame(frame);
+  };
+
+  const slam = (trigger: Element) => {
+    const bubble = trigger.closest('.flex')?.querySelector<HTMLElement>('.bb-bubble') ?? null;
+    const card = trigger.closest<HTMLElement>('article');
+    if (bubble) {
+      bubble.classList.remove('bb-slamming');
+      void bubble.offsetWidth; // restart the animation on repeat clicks
+      bubble.classList.add('bb-slamming');
+
+      // Shockwave: ripple the neighboring bubbles outward from the slam.
+      // WAAPI instead of a class so it composes with the rainbow bubble's CSS animation.
+      const origin = bubble.getBoundingClientRect();
+      const cx = origin.left + origin.width / 2;
+      const cy = origin.top + origin.height / 2;
+      (card ?? document).querySelectorAll<HTMLElement>('.bb-bubble').forEach((b) => {
+        if (b === bubble) return;
+        const r = b.getBoundingClientRect();
+        const d = Math.hypot(r.left + r.width / 2 - cx, r.top + r.height / 2 - cy);
+        const amp = Math.max(1.5, 5 - d / 90);
+        b.animate(
+          [
+            { transform: 'translateY(0) scale(1)' },
+            { transform: `translateY(${amp}px) scale(0.985)`, offset: 0.35 },
+            { transform: `translateY(${-amp * 0.5}px) scale(1.005)`, offset: 0.7 },
+            { transform: 'translateY(0) scale(1)' },
+          ],
+          // 250ms ≈ when the slam lands; farther bubbles ripple later
+          { duration: 450, delay: 250 + d * 0.4, easing: 'ease' },
+        );
+      });
+    }
+    if (card) {
+      card.classList.remove('bb-shake');
+      void card.offsetWidth;
+      card.classList.add('bb-shake');
+      setTimeout(() => card.classList.remove('bb-shake'), 450);
+    }
+  };
+
+  document.querySelectorAll('[data-bb-confetti]').forEach((el) => {
+    el.addEventListener('click', confettiBurst);
+  });
+  document.querySelectorAll('[data-bb-slam]').forEach((el) => {
+    el.addEventListener('click', () => slam(el));
+  });
+</script>

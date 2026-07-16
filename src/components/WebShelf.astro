@@ -2,36 +2,49 @@
 import { webShelf } from '~/data/projects';
 ---
 
-<div id="web-shelf" class="mt-20">
-  <div class="grid items-end gap-10 lg:grid-cols-[1fr,2fr]">
-    <div class="reveal">
-      <p class="eyebrow">Web shelf</p>
-      <h3 class="h2 mt-4 max-w-[18ch]">
-        The sites <br /><span class="h-italic text-gradient-pink">behind</span> the third card.
-      </h3>
-      <p class="mt-5 max-w-md text-sm leading-relaxed" style="color: var(--ink-muted);">
-        A rotating archive of small sites I've shipped for clubs, family, and
-        friends. Drag, scroll, or use the arrows to peek through.
-      </p>
+<dialog
+  id="web-shelf"
+  data-shelf-modal
+  aria-label="Web shelf"
+>
+  {/* Backdrop — clicking it closes the shelf */}
+  <div data-shelf-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
+
+  {/* Panel */}
+  <div class="relative max-h-full w-full max-w-5xl overflow-y-auto rounded-[28px] border p-6 sm:p-10" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
+    <button type="button" data-shelf-close class="shelf-arrow absolute right-5 top-5 z-10" aria-label="Close shelf">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+    </button>
+
+    <div class="grid items-end gap-6 lg:grid-cols-[1fr,auto]">
+      <div>
+        <p class="eyebrow">Web shelf</p>
+        <h3 class="h2 mt-4 max-w-[18ch]">
+          It was all by <span class="h-italic text-gradient-pink-animated">design</span>.
+        </h3>
+        <p class="mt-5 max-w-md text-sm leading-relaxed" style="color: var(--ink-muted);">
+          A rotating archive of small sites I've shipped for clubs, family, and
+          friends. Drag, scroll, or use the arrows to peek through.
+        </p>
+      </div>
+
+      {/* Arrow controls */}
+      <div class="flex items-end justify-end gap-2">
+        <button type="button" data-shelf-prev class="shelf-arrow" aria-label="Scroll shelf left">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <button type="button" data-shelf-next class="shelf-arrow" aria-label="Scroll shelf right">
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+      </div>
     </div>
 
-    {/* Arrow controls */}
-    <div class="reveal flex items-end justify-end gap-2">
-      <button type="button" data-shelf-prev class="shelf-arrow" aria-label="Scroll shelf left">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-      </button>
-      <button type="button" data-shelf-next class="shelf-arrow" aria-label="Scroll shelf right">
-        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-      </button>
-    </div>
-  </div>
-
-  {/* Horizontal scroll-snap shelf */}
-  <div
-    data-shelf-track
-    class="no-scrollbar reveal mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden scroll-smooth pb-6 pt-2"
-    style="scroll-padding-left: 0.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
-  >
+    {/* Horizontal scroll-snap shelf */}
+    <div
+      data-shelf-track
+      class="no-scrollbar mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden scroll-smooth pb-2 pt-2"
+      style="scroll-padding-left: 0.5rem; overscroll-behavior-x: contain; overscroll-behavior-y: auto;"
+    >
     {webShelf.map((s, i) => (
       <a
         href={s.href}
@@ -74,10 +87,42 @@ import { webShelf } from '~/data/projects';
         </div>
       </a>
     ))}
+    </div>
   </div>
-</div>
+</dialog>
 
 <style>
+  /* Native <dialog> in the top layer — immune to ancestor transforms, always
+     centered in the viewport. The dialog is a full-bleed transparent flex
+     container; the blur layer inside it doubles as the click-to-close target. */
+  dialog[data-shelf-modal] {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    overscroll-behavior: contain;
+  }
+  dialog[data-shelf-modal][open] {
+    display: flex;
+  }
+  dialog[data-shelf-modal]::backdrop {
+    background: transparent;
+  }
+  @media (min-width: 640px) {
+    dialog[data-shelf-modal] {
+      padding: 2rem;
+    }
+  }
+
   .shelf-arrow {
     display: inline-grid;
     place-items: center;
@@ -161,6 +206,32 @@ import { webShelf } from '~/data/projects';
       { rootMargin: '250px' },
     );
     slots.forEach((slot) => offscreenIO.observe(slot));
+  }
+
+  // Modal open/close — "See the shelf →" (any #web-shelf link) opens it;
+  // the X, the blur backdrop, or Escape (native dialog behavior) closes it.
+  // While open, page scroll is paused (Lenis stopped + body overflow hidden)
+  // so wheel gestures only move the shelf itself.
+  const modal = document.querySelector<HTMLDialogElement>('[data-shelf-modal]');
+  if (modal) {
+    const lenis = () => (window as unknown as { __lenis?: { stop(): void; start(): void } }).__lenis;
+    const openModal = (e: Event) => {
+      e.preventDefault();
+      modal.showModal();
+      document.body.style.overflow = 'hidden';
+      lenis()?.stop();
+    };
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#web-shelf"]').forEach((a) => {
+      a.addEventListener('click', openModal);
+    });
+    modal.querySelectorAll('[data-shelf-close]').forEach((el) => {
+      el.addEventListener('click', () => modal.close());
+    });
+    // Fires on modal.close() and on Escape alike.
+    modal.addEventListener('close', () => {
+      document.body.style.overflow = '';
+      lenis()?.start();
+    });
   }
 
   const track = document.querySelector<HTMLElement>('[data-shelf-track]');
