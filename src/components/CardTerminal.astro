@@ -65,6 +65,13 @@
 <span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
     </div>
 
+    {/* Now playing — stays hidden until the Spotify worker responds */}
+    <div class="np-row mt-2" data-np-row>
+      <span class="shrink-0" data-np-label style="color:#DC9BB5;">Playing</span><span class="shrink-0" style="color:#7CE57C;">:&nbsp;</span>
+      <span class="np-wave" data-np-wave aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
+      <a class="np-text" data-np-link href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" style="color:#7CE57C;"><span data-np-text>…</span></a>
+    </div>
+
     {/* Prompt with typer */}
     <div class="mt-2 text-cow-300">~/ <span class="text-cow-400">$</span> <span class="typer" style="color:#39FF14;"></span><span class="inline-block h-3 w-[7px] -mb-0.5 animate-caret" style="background:#39FF14;"></span></div>
   </div>
@@ -96,6 +103,79 @@
     .term-title-extra {
       display: none;
     }
+  }
+
+  /* Now playing row — hidden until the worker answers with a track */
+  .np-row {
+    display: none;
+    align-items: center;
+    min-width: 0;
+  }
+  .np-row.np-on {
+    display: flex;
+  }
+  .np-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .np-text:hover {
+    color: #39ff14 !important;
+  }
+  /* Tiny equalizer, Dynamic Island style — five center-anchored bars, each
+     looping its own organic pattern so it reads like music, not a wave */
+  .np-wave {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 1.05em;
+    margin-right: 0.55em;
+    flex-shrink: 0;
+  }
+  .np-wave span {
+    width: 2px;
+    border-radius: 2px;
+    background: #39ff14;
+    box-shadow: 0 0 6px rgba(57, 255, 20, 0.45);
+  }
+  .np-wave span:nth-child(1) { animation: np-eq1 1.05s ease-in-out infinite; }
+  .np-wave span:nth-child(2) { animation: np-eq2 1.3s ease-in-out infinite; }
+  .np-wave span:nth-child(3) { animation: np-eq3 0.9s ease-in-out infinite; }
+  .np-wave span:nth-child(4) { animation: np-eq4 1.45s ease-in-out infinite; }
+  .np-wave span:nth-child(5) { animation: np-eq5 1.15s ease-in-out infinite; }
+  @keyframes np-eq1 {
+    0%, 100% { height: 35%; }
+    30% { height: 85%; }
+    55% { height: 45%; }
+    80% { height: 95%; }
+  }
+  @keyframes np-eq2 {
+    0%, 100% { height: 80%; }
+    25% { height: 40%; }
+    50% { height: 100%; }
+    75% { height: 30%; }
+  }
+  @keyframes np-eq3 {
+    0%, 100% { height: 55%; }
+    35% { height: 100%; }
+    65% { height: 25%; }
+  }
+  @keyframes np-eq4 {
+    0%, 100% { height: 40%; }
+    20% { height: 90%; }
+    45% { height: 55%; }
+    70% { height: 100%; }
+  }
+  @keyframes np-eq5 {
+    0%, 100% { height: 70%; }
+    30% { height: 30%; }
+    60% { height: 90%; }
+    85% { height: 45%; }
+  }
+  /* Paused (showing "Last Played") — no waveform */
+  .np-wave[data-paused] {
+    display: none;
   }
 </style>
 
@@ -138,6 +218,118 @@
   if (resEls.length) {
     updateRes();
     window.addEventListener('resize', updateRes);
+  }
+
+  // Now playing — straight from Last.fm (user.getrecenttracks marks the live
+  // track with @attr.nowplaying). The API key is read-only and meant for
+  // client-side use; leave either constant empty to keep the row hidden.
+  const LASTFM_USER = '';
+  const LASTFM_API_KEY = '';
+
+  const npRows = document.querySelectorAll<HTMLElement>('[data-np-row]');
+
+  // Pull the 3 dominant colors out of the album art (tiny canvas sample,
+  // saturation-weighted buckets, lightened enough to read on the dark bg).
+  const extractColors = (img: HTMLImageElement): string[] => {
+    const size = 24;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return [];
+    ctx.drawImage(img, 0, 0, size, size);
+    let data: Uint8ClampedArray;
+    try {
+      data = ctx.getImageData(0, 0, size, size).data;
+    } catch {
+      return []; // CORS-tainted canvas — keep the default green
+    }
+    const buckets = new Map<number, { r: number; g: number; b: number; n: number; score: number }>();
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const max = Math.max(r, g, b);
+      const sat = max === 0 ? 0 : (max - Math.min(r, g, b)) / max;
+      const key = ((r >> 4) << 8) | ((g >> 4) << 4) | (b >> 4);
+      const e = buckets.get(key) ?? { r: 0, g: 0, b: 0, n: 0, score: 0 };
+      e.r += r; e.g += g; e.b += b; e.n++;
+      e.score += 0.15 + sat + (max > 50 && max < 245 ? 0.3 : 0);
+      buckets.set(key, e);
+    }
+    const sorted = [...buckets.values()]
+      .sort((a, b) => b.score - a.score)
+      .map((e) => ({ r: e.r / e.n, g: e.g / e.n, b: e.b / e.n }));
+    const picked: { r: number; g: number; b: number }[] = [];
+    for (const c of sorted) {
+      if (picked.every((p) => Math.hypot(p.r - c.r, p.g - c.g, p.b - c.b) > 60)) picked.push(c);
+      if (picked.length === 3) break;
+    }
+    return picked.map((p) => {
+      const mx = Math.max(p.r, p.g, p.b, 1);
+      const s = mx < 120 ? 120 / mx : 1; // lift very dark colors so they glow on the terminal
+      return `rgb(${(p.r * s) | 0}, ${(p.g * s) | 0}, ${(p.b * s) | 0})`;
+    });
+  };
+
+  const applyWaveColors = (colors: string[]) => {
+    npRows.forEach((row) => {
+      row.querySelectorAll<HTMLElement>('[data-np-wave] span').forEach((bar, i) => {
+        const col = colors.length ? colors[i % colors.length] : '';
+        bar.style.background = col;
+        bar.style.boxShadow = col ? `0 0 6px ${col}` : '';
+      });
+    });
+  };
+
+  if (LASTFM_USER && LASTFM_API_KEY && npRows.length) {
+    let lastArt = '';
+    const endpoint =
+      'https://ws.audioscrobbler.com/2.0/?' +
+      new URLSearchParams({
+        method: 'user.getrecenttracks',
+        user: LASTFM_USER,
+        api_key: LASTFM_API_KEY,
+        format: 'json',
+        limit: '1',
+      });
+    const updateNowPlaying = async () => {
+      try {
+        const res = await fetch(endpoint);
+        if (!res.ok) return;
+        const data = await res.json();
+        const t = data?.recenttracks?.track?.[0];
+        if (!t?.name) return;
+        const isPlaying = t['@attr']?.nowplaying === 'true';
+        npRows.forEach((row) => {
+          row.classList.add('np-on');
+          const label = row.querySelector<HTMLElement>('[data-np-label]');
+          if (label) label.textContent = isPlaying ? 'Playing' : 'Last Played';
+          row.querySelector<HTMLElement>('[data-np-wave]')?.toggleAttribute('data-paused', !isPlaying);
+          const text = row.querySelector<HTMLElement>('[data-np-text]');
+          if (text) text.textContent = `${t.name} — ${t.artist?.['#text'] ?? ''}`;
+          const link = row.querySelector<HTMLAnchorElement>('[data-np-link]');
+          if (link && t.url) link.href = t.url;
+        });
+
+        // Tint the waveform with the album art's palette (once per track)
+        type LfmImage = { size: string; '#text': string };
+        const art = (t.image as LfmImage[] | undefined)?.find((i) => i.size === 'medium')?.['#text'] || '';
+        if (art && art !== lastArt) {
+          lastArt = art;
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => applyWaveColors(extractColors(img));
+          img.onerror = () => applyWaveColors([]);
+          img.src = art;
+        } else if (!art && lastArt) {
+          lastArt = '';
+          applyWaveColors([]);
+        }
+      } catch {
+        /* Last.fm unreachable — row stays as-is */
+      }
+    };
+    updateNowPlaying();
+    setInterval(updateNowPlaying, 45000);
   }
 
   // Typing prompt loop — only runs while the terminal is on-screen
