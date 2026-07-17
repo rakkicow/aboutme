@@ -74,9 +74,10 @@ import { reel } from '~/data/projects';
                 )}
               </div>
 
-              {/* Meta */}
+              {/* Meta — title, then caption, then award badges */}
               <div class="reel-meta mt-5" data-reel-meta>
                 <h3 class="font-display text-xl font-medium tracking-tight" style="color: var(--ink);">{v.title}</h3>
+                <p class="mt-2 text-sm" style="color: var(--ink-muted);">{v.caption}</p>
                 {v.stats && (
                   <div class="mt-3 flex flex-wrap justify-center gap-2">
                     {v.stats.map((s) => (
@@ -84,7 +85,6 @@ import { reel } from '~/data/projects';
                     ))}
                   </div>
                 )}
-                <p class="mt-2 text-sm" style="color: var(--ink-muted);">{v.caption}</p>
               </div>
             </div>
           </section>
@@ -92,12 +92,12 @@ import { reel } from '~/data/projects';
       })}
     </div>
     </div>
+    {/* Animated scroll cue — a bouncing chevron; fades out after the first scroll */}
+    <div class="reel-cue" data-reel-cue aria-hidden="true">
+      <svg class="reel-cue-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8l6 6 6-6" /></svg>
+      <span>scroll · arrows · esc</span>
+    </div>
   </div>
-
-  {/* Scroll hint — pinned to the dialog, below the panel */}
-  <p class="reel-hint pointer-events-none absolute inset-x-0 bottom-5 z-10 text-center text-[10px] uppercase tracking-[0.25em]" style="color: rgba(246,240,250,0.5);">
-    scroll · arrows · esc
-  </p>
 </dialog>
 
 <style>
@@ -173,6 +173,36 @@ import { reel } from '~/data/projects';
   .reel-x:hover {
     transform: translateY(-2px);
     background: var(--cow-pink-soft);
+  }
+
+  /* Scroll cue — sits just below the panel, bounces to invite a scroll */
+  .reel-cue {
+    position: absolute;
+    left: 50%;
+    bottom: -2.5rem;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: rgba(246, 240, 250, 0.55);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    pointer-events: none;
+    transition: opacity 400ms ease;
+  }
+  .reel-cue.is-hidden {
+    opacity: 0;
+  }
+  .reel-cue-chevron {
+    width: 22px;
+    height: 22px;
+    animation: reel-cue-bounce 1.5s ease-in-out infinite;
+  }
+  @keyframes reel-cue-bounce {
+    0%, 100% { transform: translateY(0); opacity: 0.55; }
+    50% { transform: translateY(5px); opacity: 1; }
   }
 </style>
 
@@ -375,24 +405,38 @@ import { reel } from '~/data/projects';
     );
     if ('onscrollend' in window) scroller.addEventListener('scrollend', onSettle);
 
+    // Fade the scroll cue away the first time the user moves the deck
+    const cue = modal.querySelector<HTMLElement>('[data-reel-cue]');
+    const hideCue = () => cue?.classList.add('is-hidden');
+    scroller.addEventListener('scroll', hideCue, { passive: true });
+
     // Wheel — advance exactly ONE video per gesture no matter how hard the
     // trackpad is flicked (native momentum scroll is replaced by a controlled
     // step + cooldown). This also guarantees you can always move past every
     // slide, including the external (click-through) one. Touch still uses
     // native scroll-snap, which is already one-per-swipe.
-    let wheelCooling = false;
+    // One video per continuous wheel gesture: after a step we stay LOCKED until
+    // the wheel has been quiet for ~160ms (the gesture — including trackpad
+    // momentum — has fully ended), so a long flick can never skip extra videos.
+    let wheelLocked = false;
     let wheelAcc = 0;
+    let wheelEnd: number | null = null;
     scroller.addEventListener(
       'wheel',
       (e) => {
         e.preventDefault();
-        if (wheelCooling || !slideH) return;
+        if (!slideH) return;
+        if (wheelEnd !== null) clearTimeout(wheelEnd);
+        wheelEnd = window.setTimeout(() => {
+          wheelLocked = false;
+          wheelAcc = 0;
+        }, 160);
+        if (wheelLocked) return;
         wheelAcc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-        if (Math.abs(wheelAcc) > 30) {
+        if (Math.abs(wheelAcc) > 24) {
           const dir = wheelAcc > 0 ? 1 : -1;
           wheelAcc = 0;
-          wheelCooling = true;
-          window.setTimeout(() => (wheelCooling = false), 650);
+          wheelLocked = true;
           scroller.scrollBy({ top: dir * slideH, behavior: 'smooth' });
         }
       },
@@ -423,6 +467,7 @@ import { reel } from '~/data/projects';
       document.body.style.overflow = 'hidden';
       lenis()?.stop();
       cursorFx.forEach(({ el }) => modal.appendChild(el));
+      cue?.classList.remove('is-hidden'); // show the cue again each open
       domIndex = 1;
       // Measure as soon as the dialog has a layout; retry until it does
       // (mobile can take a couple of frames), then land on the first slide.
