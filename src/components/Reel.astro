@@ -13,11 +13,11 @@ import { reel } from '~/data/projects';
   <div data-reel-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
 
   {/* Panel — height is set by JS to hug one slide */}
-  <div class="reel-panel relative flex w-full max-w-[560px] flex-col overflow-hidden rounded-[28px] border" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
-    <button type="button" data-reel-close class="reel-x absolute right-4 top-4 z-20" aria-label="Close reel">
+  <div class="relative w-full max-w-[560px]">
+    <button type="button" data-reel-close class="reel-x absolute -right-3 -top-3 z-30" aria-label="Close reel">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
     </button>
-
+    <div class="reel-panel relative flex w-full flex-col overflow-hidden rounded-[28px] border" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
     <div class="no-scrollbar reel-scroller" data-reel-scroller>
       {reel.map((v) => {
         const source = v.source ?? 'youtube';
@@ -68,7 +68,7 @@ import { reel } from '~/data/projects';
                   </a>
                 )}
                 {v.pill && (
-                  <span class="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
+                  <span class="reel-pill pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20 transition-opacity duration-200">
                     {v.pill}
                   </span>
                 )}
@@ -78,7 +78,7 @@ import { reel } from '~/data/projects';
               <div class="reel-meta mt-5" data-reel-meta>
                 <h3 class="font-display text-xl font-medium tracking-tight" style="color: var(--ink);">{v.title}</h3>
                 {v.stats && (
-                  <div class="mt-3 flex flex-wrap gap-2">
+                  <div class="mt-3 flex flex-wrap justify-center gap-2">
                     {v.stats.map((s) => (
                       <span class="reel-stat">{s}</span>
                     ))}
@@ -90,6 +90,7 @@ import { reel } from '~/data/projects';
           </section>
         );
       })}
+    </div>
     </div>
   </div>
 
@@ -148,6 +149,12 @@ import { reel } from '~/data/projects';
     height: var(--slide-h, 78vh);
     scroll-snap-align: start;
     scroll-snap-stop: always;
+    /* Clip so a slide's content can never bleed over its neighbours */
+    overflow: hidden;
+  }
+  /* Once the player loads, fade the category pill out of the way */
+  .reel-slide.is-playing .reel-pill {
+    opacity: 0;
   }
 
   .reel-x {
@@ -270,20 +277,33 @@ import { reel } from '~/data/projects';
       // Autoplay WITH sound. Browsers may still gate unmuted autoplay, but the
       // modal opens from a click and scrolling is an active gesture, so it
       // plays in practice.
+      // No loop — the video plays through so we can auto-advance on end.
+      // enablejsapi lets the YouTube player postMessage its state changes.
       iframe.src =
         source === 'drive'
           ? `https://drive.google.com/file/d/${id}/preview`
-          : `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&loop=1&playlist=${id}`;
+          : `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
       iframe.title = slide.dataset.title ?? '';
       iframe.allow =
         'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.className = 'absolute inset-0 h-full w-full border-0';
+      iframe.addEventListener('load', () => {
+        slide.classList.add('is-playing'); // hide the pill once the player is up
+        if (source === 'youtube') {
+          // Subscribe to the player's state changes (0 = ended → auto-advance)
+          iframe.contentWindow?.postMessage(
+            JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
+            '*',
+          );
+        }
+      });
       target.appendChild(iframe);
     };
     const unmount = (slide: HTMLElement) => {
       slide.querySelector('[data-reel-mount] iframe')?.remove();
+      slide.classList.remove('is-playing');
     };
 
     // The real slide filling the viewport gets its player; the rest torn down
@@ -300,16 +320,35 @@ import { reel } from '~/data/projects';
     realSlides.forEach((s) => activeIO.observe(s));
 
     // ── Responsive slide height — hug the video + meta, cap at the panel ──
+    // Returns false when the scroller has no layout yet (dialog just opened),
+    // so the caller can retry. The `next === slideH` guard stops the
+    // ResizeObserver from looping (changing --slide-h resizes the scroller).
     const setSlideHeight = () => {
       const frameW = scroller.clientWidth - 32; // px-4 both sides
-      if (frameW <= 0) return;
+      if (frameW <= 0) return false;
       const videoH = (frameW * 9) / 16;
-      const metaH = realSlides[0].querySelector('[data-reel-meta]')?.getBoundingClientRect().height ?? 130;
-      const contentH = videoH + metaH + 44; // gap + breathing room
-      slideH = Math.min(Math.round(contentH), Math.round(window.innerHeight * 0.9));
-      scroller.style.setProperty('--slide-h', `${slideH}px`);
-      scroller.scrollTop = slideH * domIndex; // stay anchored on resize
+      // Size to the TALLEST caption so no slide's content is clipped or bleeds
+      let maxMetaH = 0;
+      realSlides.forEach((s) => {
+        const h = s.querySelector('[data-reel-meta]')?.getBoundingClientRect().height ?? 0;
+        if (h > maxMetaH) maxMetaH = h;
+      });
+      const contentH = videoH + (maxMetaH || 130) + 44; // gap + breathing room
+      const next = Math.min(Math.round(contentH), Math.round(window.innerHeight * 0.9));
+      if (next !== slideH) {
+        slideH = next;
+        scroller.style.setProperty('--slide-h', `${slideH}px`);
+        scroller.scrollTop = slideH * domIndex; // stay anchored
+      }
+      return true;
     };
+
+    // Re-measure whenever the scroller gets or changes size — this is what
+    // reliably fixes the height once the dialog actually has a layout
+    // (openModal's first frame can measure a zero-width scroller on mobile).
+    new ResizeObserver(() => {
+      if (modal.open) setSlideHeight();
+    }).observe(scroller);
 
     // ── Seamless wrap when a clone settles into view ─────────────────
     const onSettle = () => {
@@ -336,6 +375,47 @@ import { reel } from '~/data/projects';
     );
     if ('onscrollend' in window) scroller.addEventListener('scrollend', onSettle);
 
+    // Wheel — advance exactly ONE video per gesture no matter how hard the
+    // trackpad is flicked (native momentum scroll is replaced by a controlled
+    // step + cooldown). This also guarantees you can always move past every
+    // slide, including the external (click-through) one. Touch still uses
+    // native scroll-snap, which is already one-per-swipe.
+    let wheelCooling = false;
+    let wheelAcc = 0;
+    scroller.addEventListener(
+      'wheel',
+      (e) => {
+        e.preventDefault();
+        if (wheelCooling || !slideH) return;
+        wheelAcc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+        if (Math.abs(wheelAcc) > 30) {
+          const dir = wheelAcc > 0 ? 1 : -1;
+          wheelAcc = 0;
+          wheelCooling = true;
+          window.setTimeout(() => (wheelCooling = false), 650);
+          scroller.scrollBy({ top: dir * slideH, behavior: 'smooth' });
+        }
+      },
+      { passive: false },
+    );
+
+    // Auto-advance when a YouTube video finishes. Only the active slide has a
+    // mounted player, so an ENDED (info 0) state change comes from the current
+    // video → glide to the next one.
+    window.addEventListener('message', (e) => {
+      if (!modal.open || !slideH) return;
+      if (!e.origin || !e.origin.includes('youtube')) return;
+      if (typeof e.data !== 'string' || !e.data.includes('onStateChange')) return;
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.event === 'onStateChange' && msg.info === 0) {
+          scroller.scrollBy({ top: slideH, behavior: 'smooth' });
+        }
+      } catch {
+        /* not a JSON YT message */
+      }
+    });
+
     // ── Open / close ─────────────────────────────────────────────────
     const openModal = (e: Event) => {
       e.preventDefault();
@@ -344,11 +424,17 @@ import { reel } from '~/data/projects';
       lenis()?.stop();
       cursorFx.forEach(({ el }) => modal.appendChild(el));
       domIndex = 1;
-      requestAnimationFrame(() => {
-        setSlideHeight();
-        scroller.scrollTop = slideH; // land on the first real slide
-        mount(realSlides[0]);
-      });
+      // Measure as soon as the dialog has a layout; retry until it does
+      // (mobile can take a couple of frames), then land on the first slide.
+      const prime = (tries = 0) => {
+        if (setSlideHeight()) {
+          scroller.scrollTop = slideH;
+          mount(realSlides[0]);
+        } else if (tries < 12) {
+          requestAnimationFrame(() => prime(tries + 1));
+        }
+      };
+      prime();
     };
     document.querySelectorAll<HTMLAnchorElement>('a[href="#reel"]').forEach((a) => {
       a.addEventListener('click', openModal);
