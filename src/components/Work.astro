@@ -21,7 +21,7 @@ import { featured } from '~/data/projects';
     </div>
 
     {/* Featured grid */}
-    <div class="mt-16 grid gap-7 lg:grid-cols-3">
+    <div class="mt-16 grid gap-12 lg:grid-cols-3 lg:gap-7">
       {featured.map((p, i) => (
         <ProjectCard project={p} index={i} />
       ))}

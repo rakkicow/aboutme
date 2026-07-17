@@ -351,6 +351,15 @@
     mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 30%, #000 70%, rgba(0,0,0,0) 100%);
   }
 
+  /* The drifting mesh blobs are huge blurred layers animated inside
+     3D-tilted cards — pin each to its own compositor layer so they get
+     rasterized once instead of flickering through re-rasters. */
+  .animate-mesh-drift,
+  .animate-mesh-drift-2,
+  .animate-mesh-drift-3 {
+    will-change: transform;
+  }
+
   /* Punchier ember-to-pink gradient — high contrast on canvas */
   .text-gradient {
     background: linear-gradient(96deg, #B44000 0%, #FF6A05 30%, #FF7A1E 55%, #DC9BB5 100%);
@@ -616,6 +625,18 @@
 }
 
 /* Reduce motion respects */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Respect reduced-motion: freeze the decorative animation layer wholesale */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
