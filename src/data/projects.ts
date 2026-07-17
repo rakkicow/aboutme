@@ -126,6 +126,7 @@ export type WebShelfEntry = {
   year: string;
   liveUrl: string;
   href: string;
+  shot: string; // static screenshot (public/assets/shelf) — no live iframes, keeps memory sane
 };
 
 export const webShelf: WebShelfEntry[] = [
@@ -136,6 +137,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/hosa',
     href: 'https://rakshita.me/hosa',
+    shot: '/assets/shelf/hosa.jpg',
   },
   {
     name: 'Plex Landing',
@@ -144,6 +146,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2022',
     liveUrl: 'https://rakshita.me/plex',
     href: 'https://rakshita.me/plex',
+    shot: '/assets/shelf/plex.jpg',
   },
   {
     name: 'TEDxYouth Lake Olmstead',
@@ -152,6 +155,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2021',
     liveUrl: 'https://rakshita.me/TEDxYouthLakeOlmstead',
     href: 'https://rakshita.me/TEDxYouthLakeOlmstead',
+    shot: '/assets/shelf/TEDxYouthLakeOlmstead.jpg',
   },
   {
     name: 'Modifiable Graph Nodes',
@@ -160,6 +164,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/graph',
     href: 'https://rakshita.me/graph',
+    shot: '/assets/shelf/graph.jpg',
   },
   {
     name: 'Weather',
@@ -168,6 +173,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/weather',
     href: 'https://rakshita.me/weather',
+    shot: '/assets/shelf/weather.jpg',
   },
 ];
 

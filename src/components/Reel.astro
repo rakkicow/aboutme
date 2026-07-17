@@ -1,46 +1,25 @@
 ---
+// Reel — a TikTok/Shorts-style popup viewer.
+// Opens from any `a[href="#reel"]` (CDI card "Reel ↓", nav link). A vertical
+// scroll-snap scroller flips one video per gesture; the active video's embed
+// mounts + autoplays while everything off-screen stays torn down. The loop is
+// infinite (edge clones wrap seamlessly) and each slide hugs its own content
+// so the panel stays tight instead of leaving big letterbox bars.
 import { reel } from '~/data/projects';
 ---
 
-<section id="reel" class="relative pt-4 pb-6 sm:pt-10 sm:pb-12">
-  <div class="container-x">
-    <div class="reveal flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
-      <div>
-        <p class="eyebrow">Reel</p>
-        <h2 class="h2 mt-4 max-w-[20ch]">
-          lights... camera... <span class="h-italic text-gradient-pink-animated" style="padding-right: 0.18em;">action!</span>
-        </h2>
-      </div>
-      <p class="max-w-sm text-sm" style="color: var(--ink-muted);">
-        Experience my CDI Official era: featuring healthcare campaigns, educational content, and a few personal favorites. Swipe or use arrow keys.
-      </p>
-    </div>
+<dialog id="reel" data-reel-modal aria-label="Video reel">
+  {/* Backdrop — clicking it closes the reel */}
+  <div data-reel-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
 
-    {/* Arrow controls */}
-    <div class="reveal mt-10 flex items-center justify-end">
-      <div class="flex items-center gap-2">
-        <button
-          type="button"
-          data-reel-prev
-          class="reel-arrow"
-          aria-label="Scroll videos left"
-        >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        </button>
-        <button
-          type="button"
-          data-reel-next
-          class="reel-arrow"
-          aria-label="Scroll videos right"
-        >
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
-        </button>
-      </div>
-    </div>
+  {/* Panel — height is set by JS to hug one slide */}
+  <div class="reel-panel relative flex w-full max-w-[560px] flex-col overflow-hidden rounded-[28px] border" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
+    <button type="button" data-reel-close class="reel-x absolute right-4 top-4 z-20" aria-label="Close reel">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+    </button>
 
-    {/* Card deck — flash-card style: the front card physically tucks to the back */}
-    <div data-reel-deck class="reel-deck reveal mx-auto mt-8 w-full max-w-[640px]">
-      {reel.map((v, i) => {
+    <div class="no-scrollbar reel-scroller" data-reel-scroller>
+      {reel.map((v) => {
         const source = v.source ?? 'youtube';
         const isExternal = source === 'external';
         const thumbnail =
@@ -54,284 +33,144 @@ import { reel } from '~/data/projects';
           source === 'youtube' ? `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg` : undefined;
 
         return (
-          <article
-            class="reel-card group w-full overflow-hidden rounded-3xl border bg-black/90"
-            style="border-color: var(--hair); box-shadow: 0 24px 60px -20px rgba(15,15,16,0.35);"
+          <section
+            class="reel-slide"
+            data-reel-slide
+            data-source={source}
+            data-id={v.id}
+            data-title={v.title}
           >
-            {v.pill && (
-              <span class="absolute left-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
-                {v.pill}
-              </span>
-            )}
-
-            {/* Click-to-play (or click-through) poster. YouTube + Drive mount
-                an iframe on click and tear it down on scroll-off; external
-                items navigate to v.href on click and never mount anything. */}
-            <div
-              class="reel-video-slot relative aspect-video w-full overflow-hidden"
-              data-source={source}
-              data-yt-id={v.id}
-              data-yt-title={v.title}
-            >
-              {isExternal ? (
-                <a
-                  href={v.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
-                  aria-label={`Open: ${v.title}`}
-                >
-                  <img
-                    src={thumbnail}
-                    alt={v.title}
-                    loading="lazy"
-                    decoding="async"
-                    class="reel-thumb absolute inset-0 h-full w-full object-cover"
-                  />
-                  <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
-                  <span class="pointer-events-none absolute inset-0 grid place-items-center">
+            <div class="reel-slide-inner w-full px-4">
+              {/* Video frame */}
+              <div class="reel-frame relative w-full overflow-hidden rounded-2xl bg-black" style="aspect-ratio: 16 / 9;">
+                <img
+                  src={thumbnail}
+                  data-maxres={ytMaxres}
+                  alt={v.title}
+                  loading="lazy"
+                  decoding="async"
+                  class="reel-thumb absolute inset-0 h-full w-full object-cover"
+                />
+                <div data-reel-mount class="absolute inset-0"></div>
+                {isExternal && (
+                  <a
+                    href={v.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="absolute inset-0 z-10 grid place-items-center"
+                    aria-label={`Open: ${v.title}`}
+                  >
                     <span class="reel-play">
                       <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                         <path d="M7 17L17 7M9 7h8v8" stroke-linecap="round" stroke-linejoin="round" />
                       </svg>
                     </span>
+                  </a>
+                )}
+                {v.pill && (
+                  <span class="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center rounded-full bg-black/40 px-3 py-1 text-[10px] font-medium uppercase tracking-[0.2em] text-white/95 backdrop-blur-md ring-1 ring-white/20">
+                    {v.pill}
                   </span>
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  class="reel-poster group/poster absolute inset-0 block h-full w-full text-left"
-                  aria-label={`Play: ${v.title}`}
-                >
-                  <img
-                    src={thumbnail}
-                    data-maxres={ytMaxres}
-                    alt={v.title}
-                    loading="lazy"
-                    decoding="async"
-                    class="reel-thumb absolute inset-0 h-full w-full object-cover"
-                  />
-                  <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-black/25"></span>
-                  <span class="pointer-events-none absolute inset-0 grid place-items-center">
-                    <span class="reel-play">
-                      <svg class="h-8 w-8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                        <path d="M9.5 6.5v11l8.5-5.5z" />
-                      </svg>
-                    </span>
-                  </span>
-                </button>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div class="p-6">
-              <h3 class="font-display text-xl font-medium tracking-tight text-white">{v.title}</h3>
-              {v.stats && (
-                <div class="mt-3 flex flex-wrap gap-2">
-                  {v.stats.map((s) => (
-                    <span class="reel-stat">{s}</span>
-                  ))}
-                </div>
-              )}
-              <p class="mt-2 text-sm text-white/70">{v.caption}</p>
+              {/* Meta */}
+              <div class="reel-meta mt-5" data-reel-meta>
+                <h3 class="font-display text-xl font-medium tracking-tight" style="color: var(--ink);">{v.title}</h3>
+                {v.stats && (
+                  <div class="mt-3 flex flex-wrap gap-2">
+                    {v.stats.map((s) => (
+                      <span class="reel-stat">{s}</span>
+                    ))}
+                  </div>
+                )}
+                <p class="mt-2 text-sm" style="color: var(--ink-muted);">{v.caption}</p>
+              </div>
             </div>
-          </article>
+          </section>
         );
       })}
-
     </div>
   </div>
-</section>
+
+  {/* Scroll hint — pinned to the dialog, below the panel */}
+  <p class="reel-hint pointer-events-none absolute inset-x-0 bottom-5 z-10 text-center text-[10px] uppercase tracking-[0.25em]" style="color: rgba(246,240,250,0.5);">
+    scroll · arrows · esc
+  </p>
+</dialog>
 
 <style>
-  .reel-arrow {
+  /* Native <dialog> in the top layer — same treatment as the web shelf */
+  dialog[data-reel-modal] {
+    position: fixed;
+    inset: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    overscroll-behavior: contain;
+  }
+  dialog[data-reel-modal][open] {
+    display: flex;
+  }
+  dialog[data-reel-modal]::backdrop {
+    background: transparent;
+  }
+  @media (min-width: 640px) {
+    dialog[data-reel-modal] {
+      padding: 2rem;
+    }
+  }
+
+  .reel-panel {
+    max-height: 92vh;
+  }
+
+  /* TikTok-style scroller: one full slide per gesture. Height is a JS-set
+     px value (--slide-h) so the panel hugs the video + meta with no big bars. */
+  .reel-scroller {
+    height: var(--slide-h, 78vh);
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .reel-slide {
+    display: grid;
+    place-items: center;
+    height: var(--slide-h, 78vh);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+  }
+
+  .reel-x {
     display: inline-grid;
     place-items: center;
-    height: 40px;
-    width: 40px;
+    height: 38px;
+    width: 38px;
     border-radius: 999px;
     border: 1px solid var(--hair);
     background: var(--surface);
     color: var(--ink);
     transition:
       transform 280ms cubic-bezier(0.16, 1, 0.3, 1),
-      background 240ms ease,
-      box-shadow 240ms ease;
+      background 240ms ease;
   }
-  .reel-arrow:hover {
+  .reel-x:hover {
     transform: translateY(-2px);
     background: var(--cow-pink-soft);
-    box-shadow: 0 12px 28px -10px rgba(220, 155, 181, 0.45);
-  }
-  .reel-arrow:active {
-    transform: translateY(0);
-  }
-
-  /* ── 3D flash-card deck ──────────────────────────────────────────
-     TikTok-style: the front card lifts toward the viewer in the swipe
-     direction, then recedes into depth behind the stack while the card
-     underneath physically draws forward to take its place. */
-  .reel-deck {
-    position: relative;
-    perspective: 1200px;
-  }
-  .reel-deck :global(.reel-card) {
-    position: absolute;
-    inset-inline: 0;
-    top: 0;
-    transform-origin: center center;
-    transition:
-      transform 680ms cubic-bezier(0.3, 1.15, 0.35, 1),
-      opacity 500ms ease,
-      filter 500ms ease;
-    will-change: transform;
-    /* Horizontal swipes drag the card; vertical swipes still scroll the page */
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .reel-deck :global(.reel-card img) {
-    -webkit-user-drag: none;
-    user-select: none;
-    pointer-events: none;
-  }
-  .reel-deck :global(.deck-pos-0) {
-    transform: translate3d(0, 0, 0);
-    opacity: 1;
-    z-index: 30;
-    filter: brightness(1);
-  }
-  .reel-deck :global(.deck-pos-1) {
-    transform: translate3d(0, -20px, -70px);
-    opacity: 1;
-    z-index: 20;
-    filter: brightness(0.6);
-    cursor: pointer;
-  }
-  .reel-deck :global(.deck-pos-2) {
-    transform: translate3d(0, -38px, -140px);
-    opacity: 1;
-    z-index: 10;
-    filter: brightness(0.38);
-    cursor: pointer;
-  }
-  .reel-deck :global(.deck-rest) {
-    transform: translate3d(0, -38px, -140px);
-    opacity: 0;
-    z-index: 0;
-    filter: brightness(0.38);
-    pointer-events: none;
-  }
-  /* Cycling — one continuous arc: the card lifts toward the viewer, sweeps
-     around the corner, and recedes into the back of the deck (z-index flips
-     halfway so it slots behind). Quizlet flash-card feel. */
-  .reel-deck :global(.deck-cycling-right),
-  .reel-deck :global(.deck-cycling-left),
-  .reel-deck :global(.deck-cycling-up) {
-    animation-duration: 760ms;
-    animation-timing-function: cubic-bezier(0.42, 0.02, 0.22, 1);
-    animation-fill-mode: both;
-  }
-  .reel-deck :global(.deck-cycling-right) {
-    animation-name: deck-cycle-right;
-  }
-  .reel-deck :global(.deck-cycling-left) {
-    animation-name: deck-cycle-left;
-  }
-  .reel-deck :global(.deck-cycling-up) {
-    animation-name: deck-cycle-up;
-  }
-  .reel-deck :global(.deck-uncycling) {
-    animation: deck-uncycle 760ms cubic-bezier(0.42, 0.02, 0.22, 1) both;
-  }
-  .reel-deck :global(.deck-instant) {
-    transition: none !important;
   }
 </style>
 
 <style is:global>
-  @keyframes deck-cycle-right {
-    0% {
-      transform: translate3d(0, 0, 0);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    45% {
-      transform: translate3d(44%, -16%, 80px) rotateY(14deg) rotateZ(5deg);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    55% {
-      z-index: 0;
-    }
-    100% {
-      transform: translate3d(0, -38px, -140px);
-      z-index: 0;
-      filter: brightness(0.38);
-    }
-  }
-  @keyframes deck-cycle-left {
-    0% {
-      transform: translate3d(0, 0, 0);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    45% {
-      transform: translate3d(-44%, -16%, 80px) rotateY(-14deg) rotateZ(-5deg);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    55% {
-      z-index: 0;
-    }
-    100% {
-      transform: translate3d(0, -38px, -140px);
-      z-index: 0;
-      filter: brightness(0.38);
-    }
-  }
-  @keyframes deck-cycle-up {
-    0% {
-      transform: translate3d(0, 0, 0);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    45% {
-      transform: translate3d(8%, -52%, 80px) rotateX(9deg) rotateZ(3deg);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    55% {
-      z-index: 0;
-    }
-    100% {
-      transform: translate3d(0, -38px, -140px);
-      z-index: 0;
-      filter: brightness(0.38);
-    }
-  }
-  @keyframes deck-uncycle {
-    0% {
-      transform: translate3d(0, -38px, -140px);
-      opacity: 0;
-      z-index: 40;
-      filter: brightness(0.38);
-    }
-    18% {
-      opacity: 1;
-    }
-    50% {
-      transform: translate3d(42%, -18%, 80px) rotateY(12deg) rotateZ(4deg);
-      z-index: 40;
-      filter: brightness(1);
-    }
-    100% {
-      transform: translate3d(0, 0, 0);
-      z-index: 40;
-      filter: brightness(1);
-    }
-  }
-
-  /* ── Play / open button — hidden until the card is hovered, orange glow ── */
+  /* Open/visit affordance — dark glass, pulsing orange ring */
   .reel-play {
     display: grid;
     place-items: center;
@@ -343,18 +182,10 @@ import { reel } from '~/data/projects';
     backdrop-filter: blur(8px);
     color: #fff;
     border: 2px solid rgba(255, 122, 30, 0.9);
-    opacity: 0;
-    transform: scale(0.82);
-    transition:
-      opacity 300ms ease,
-      transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
     animation: reel-play-glow 2.2s ease-in-out infinite;
+    transition: transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
   }
-  .deck-pos-0:hover .reel-play {
-    opacity: 1;
-    transform: scale(1);
-  }
-  .reel-poster:hover .reel-play {
+  .reel-play:hover {
     transform: scale(1.08);
   }
   @keyframes reel-play-glow {
@@ -369,15 +200,8 @@ import { reel } from '~/data/projects';
         0 0 0 7px rgba(255, 122, 30, 0.12);
     }
   }
-  /* Touch devices can't hover — keep the affordance visible */
-  @media (hover: none) {
-    .reel-play {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
 
-  /* ── Award chips ── */
+  /* Award chips */
   .reel-stat {
     display: inline-flex;
     align-items: center;
@@ -395,310 +219,164 @@ import { reel } from '~/data/projects';
 </style>
 
 <script>
-  // YouTube thumbnail upgrade — try maxresdefault.jpg, fall back to hqdefault
-  // if YouTube returned the 120×90 "not available" placeholder.
+  // YouTube thumbnail upgrade — maxresdefault when it exists
   document.querySelectorAll<HTMLImageElement>('.reel-thumb').forEach((img) => {
     const maxres = img.dataset.maxres;
     if (!maxres) return;
     const probe = new Image();
     probe.onload = () => {
-      // Real thumbnails are 1280×720; placeholders are 120×90.
       if (probe.naturalWidth >= 480) img.src = maxres;
     };
     probe.src = maxres;
   });
 
-  // Click to play, scroll-away to unload. The poster stays in the DOM and the
-  // iframe sits next to it — we toggle which is visible and tear the iframe
-  // down entirely when the card leaves the viewport. External-source slots
-  // skip the mount/unmount path and let the anchor's native click navigate.
-  document.querySelectorAll<HTMLElement>('.reel-video-slot').forEach((slot) => {
-    const source = (slot.dataset.source ?? 'youtube') as
-      | 'youtube'
-      | 'drive'
-      | 'external';
-    if (source === 'external') return;
+  const modal = document.querySelector<HTMLDialogElement>('[data-reel-modal]');
+  const scroller = modal?.querySelector<HTMLElement>('[data-reel-scroller]');
+  if (modal && scroller) {
+    const lenis = () => (window as unknown as { __lenis?: { stop(): void; start(): void } }).__lenis;
+    const realSlides = [...scroller.querySelectorAll<HTMLElement>('[data-reel-slide]')];
+    const n = realSlides.length;
 
-    const id = slot.dataset.ytId;
-    const title = slot.dataset.ytTitle ?? '';
-    const poster = slot.querySelector<HTMLElement>('.reel-poster');
-    if (!id || !poster) return;
+    // Keep the custom cursor visible above the top-layer dialog
+    const cursorFx = ['cursor', 'cursor-dot']
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => !!el)
+      .map((el) => ({ el, home: el.parentElement }));
 
-    const buildSrc = () => {
-      if (source === 'drive') {
-        return `https://drive.google.com/file/d/${id}/preview`;
-      }
-      return `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+    // ── Infinite loop via edge clones ────────────────────────────────
+    // DOM order becomes: [lastClone, R0..R(n-1), firstClone].
+    const makeClone = (src: HTMLElement) => {
+      const c = src.cloneNode(true) as HTMLElement;
+      c.setAttribute('data-clone', '');
+      c.removeAttribute('data-reel-slide'); // observers/mount ignore it
+      c.removeAttribute('data-id');
+      return c;
     };
+    const lastClone = makeClone(realSlides[n - 1]);
+    const firstClone = makeClone(realSlides[0]);
+    scroller.insertBefore(lastClone, realSlides[0]);
+    scroller.appendChild(firstClone);
 
-    const mount = () => {
-      if (slot.querySelector('iframe')) return;
+    let slideH = 0;
+    let domIndex = 1; // start on the first real slide (index 0 is lastClone)
+
+    // ── Mount / unmount players ──────────────────────────────────────
+    const mount = (slide: HTMLElement) => {
+      const target = slide.querySelector<HTMLElement>('[data-reel-mount]');
+      const source = slide.dataset.source ?? 'youtube';
+      if (!target || source === 'external' || target.querySelector('iframe')) return;
+      const id = slide.dataset.id ?? '';
       const iframe = document.createElement('iframe');
-      iframe.src = buildSrc();
-      iframe.title = title;
+      // Autoplay WITH sound. Browsers may still gate unmuted autoplay, but the
+      // modal opens from a click and scrolling is an active gesture, so it
+      // plays in practice.
+      iframe.src =
+        source === 'drive'
+          ? `https://drive.google.com/file/d/${id}/preview`
+          : `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&loop=1&playlist=${id}`;
+      iframe.title = slide.dataset.title ?? '';
       iframe.allow =
         'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
       iframe.allowFullscreen = true;
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.className = 'absolute inset-0 h-full w-full border-0';
-      slot.appendChild(iframe);
-      poster.style.display = 'none';
+      target.appendChild(iframe);
+    };
+    const unmount = (slide: HTMLElement) => {
+      slide.querySelector('[data-reel-mount] iframe')?.remove();
     };
 
-    const unmount = () => {
-      const iframe = slot.querySelector('iframe');
-      if (!iframe) return;
-      iframe.remove();
-      poster.style.display = '';
+    // The real slide filling the viewport gets its player; the rest torn down
+    const activeIO = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const slide = entry.target as HTMLElement;
+          if (entry.isIntersecting && modal.open) mount(slide);
+          else unmount(slide);
+        });
+      },
+      { root: scroller, threshold: 0.6 },
+    );
+    realSlides.forEach((s) => activeIO.observe(s));
+
+    // ── Responsive slide height — hug the video + meta, cap at the panel ──
+    const setSlideHeight = () => {
+      const frameW = scroller.clientWidth - 32; // px-4 both sides
+      if (frameW <= 0) return;
+      const videoH = (frameW * 9) / 16;
+      const metaH = realSlides[0].querySelector('[data-reel-meta]')?.getBoundingClientRect().height ?? 130;
+      const contentH = videoH + metaH + 44; // gap + breathing room
+      slideH = Math.min(Math.round(contentH), Math.round(window.innerHeight * 0.9));
+      scroller.style.setProperty('--slide-h', `${slideH}px`);
+      scroller.scrollTop = slideH * domIndex; // stay anchored on resize
     };
 
-    poster.addEventListener('click', (e) => {
-      e.preventDefault();
-      mount();
-    });
-
-    // The deck fires this when the card leaves the front position.
-    slot.addEventListener('reel:unmount', unmount);
-
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(
-        ([entry]) => {
-          if (!entry.isIntersecting) unmount();
-        },
-        { rootMargin: '250px' },
-      );
-      io.observe(slot);
-    }
-  });
-
-  // ── Flash-card deck ──────────────────────────────────────────────
-  // Arrows (or tapping a card behind) cycle the deck. The front card
-  // physically drops, tilts, and glides up behind the stack.
-  const deck = document.querySelector<HTMLElement>('[data-reel-deck]');
-  if (deck) {
-    const cards = [...deck.querySelectorAll<HTMLElement>('.reel-card')];
-    let order = cards.map((_, i) => i);
-    let busy = false;
-
-    const POS = [
-      'deck-pos-0',
-      'deck-pos-1',
-      'deck-pos-2',
-      'deck-rest',
-      'deck-cycling-up',
-      'deck-cycling-left',
-      'deck-cycling-right',
-      'deck-uncycling',
-      'deck-instant',
-    ];
-    const setPos = (card: HTMLElement, cls: string) => {
-      card.classList.remove(...POS);
-      card.classList.add(cls);
-    };
-    const posClass = (pos: number) =>
-      pos === 0 ? 'deck-pos-0' : pos === 1 ? 'deck-pos-1' : pos === 2 ? 'deck-pos-2' : 'deck-rest';
-
-    const assign = (except?: HTMLElement) => {
-      order.forEach((cardIdx, pos) => {
-        if (cards[cardIdx] === except) return;
-        setPos(cards[cardIdx], posClass(pos));
-      });
-    };
-
-    // Deck height = tallest card + room for the stacked peek
-    const sizeDeck = () => {
-      const h = Math.max(...cards.map((c) => c.offsetHeight));
-      deck.style.height = `${h + 40}px`;
-    };
-
-    const unmountBehind = () => {
-      cards.forEach((card, i) => {
-        if (i === order[0]) return;
-        card.querySelector('.reel-video-slot')?.dispatchEvent(new Event('reel:unmount'));
-      });
-    };
-
-    // Cycle the front card to the back in ONE fluid keyframe arc (via the
-    // corner) while the stack draws forward underneath it at the same time.
-    const settle = (card: HTMLElement, cls: string) => {
-      let done = false;
-      const finish = () => {
-        if (done) return;
-        done = true;
-        card.classList.remove(cls);
-        assign();
-        busy = false;
-      };
-      card.addEventListener('animationend', finish, { once: true });
-      window.setTimeout(finish, 950); // safety net if the animation is interrupted
-    };
-
-    const tuck = (cycleClass: string) => {
-      if (busy) return;
-      busy = true;
-      const front = cards[order[0]];
-      front.style.transition = '';
-      front.style.transform = '';
-      front.style.opacity = '';
-      order.push(order.shift()!);
-      assign(front); // the card underneath draws forward immediately
-      front.classList.remove(...POS);
-      front.classList.add(cycleClass);
-      unmountBehind();
-      settle(front, cycleClass);
-    };
-    const next = () => tuck('deck-cycling-up');
-
-    const prev = () => {
-      if (busy) return;
-      busy = true;
-      const incoming = cards[order[order.length - 1]];
-      order.unshift(order.pop()!);
-      assign(incoming); // the current front recedes while the card arcs back in
-      incoming.classList.remove(...POS);
-      incoming.classList.add('deck-uncycling');
-      unmountBehind();
-      settle(incoming, 'deck-uncycling');
-    };
-
-    // Clicking a card that isn't in front advances the deck instead of playing
-    cards.forEach((card, i) => {
-      card.addEventListener(
-        'click',
-        (e) => {
-          if (order[0] === i) return;
-          e.preventDefault();
-          e.stopPropagation();
-          next();
-        },
-        true,
-      );
-    });
-
-    document.querySelector('[data-reel-next]')?.addEventListener('click', next);
-    document.querySelector('[data-reel-prev]')?.addEventListener('click', prev);
-
-    // ── Drag-to-flick ────────────────────────────────────────────
-    // The front card follows the pointer; release past the threshold
-    // flings it off in the drag direction and tucks it to the back,
-    // otherwise it springs back. Small drags still count as clicks.
-    const DRAG_START = 8;
-    const FLING_AT = 90;
-    let drag: { card: HTMLElement; x: number; y: number; dx: number; dy: number; live: boolean } | null = null;
-    let suppressClick = false;
-
-    deck.addEventListener('pointerdown', (e) => {
-      if (busy || drag) return;
-      const card = cards[order[0]];
-      const target = e.target as HTMLElement;
-      if (!card.contains(target) || target.closest('iframe')) return;
-      drag = { card, x: e.clientX, y: e.clientY, dx: 0, dy: 0, live: false };
-      card.setPointerCapture(e.pointerId);
-    });
-
-    deck.addEventListener('pointermove', (e) => {
-      if (!drag) return;
-      drag.dx = e.clientX - drag.x;
-      drag.dy = e.clientY - drag.y;
-      if (!drag.live && Math.hypot(drag.dx, drag.dy) > DRAG_START) {
-        drag.live = true;
-        drag.card.style.transition = 'none';
-      }
-      if (drag.live) {
-        e.preventDefault();
-        drag.card.style.transform = `translate(${drag.dx}px, ${drag.dy}px) rotate(${drag.dx * 0.05}deg)`;
-      }
-    });
-
-    const endDrag = () => {
-      if (!drag) return;
-      const { card, dx, dy, live } = drag;
-      drag = null;
-      if (!live) return; // plain click — poster handles it
-      suppressClick = true;
-      window.setTimeout(() => (suppressClick = false), 80);
-
-      const dist = Math.hypot(dx, dy);
-      if (dist > FLING_AT) {
-        // Cycle in the swipe direction; swiping down brings the previous card back
-        card.style.transition = '';
-        card.style.transform = '';
-        if (Math.abs(dx) > Math.abs(dy)) {
-          tuck(dx < 0 ? 'deck-cycling-left' : 'deck-cycling-right');
-        } else if (dy < 0) {
-          tuck('deck-cycling-up');
-        } else {
-          prev();
-        }
+    // ── Seamless wrap when a clone settles into view ─────────────────
+    const onSettle = () => {
+      if (!slideH) return;
+      const idx = Math.round(scroller.scrollTop / slideH);
+      if (idx <= 0) {
+        domIndex = n; // lastClone → real last
+        scroller.scrollTop = slideH * n;
+      } else if (idx >= n + 1) {
+        domIndex = 1; // firstClone → real first
+        scroller.scrollTop = slideH;
       } else {
-        // Spring back to the front slot
-        card.style.transition = '';
-        card.style.transform = '';
+        domIndex = idx;
       }
     };
-    deck.addEventListener('pointerup', endDrag);
-    deck.addEventListener('pointercancel', endDrag);
-    // Native image ghost-drag would fight the pointer drag — flatten it
-    deck.addEventListener('dragstart', (e) => e.preventDefault());
-
-    // Desktop: scrolling over the deck flips through it TikTok-style — one
-    // card per gesture. Scroll down / swipe left = next (card lifts away),
-    // scroll up / swipe right = previous card returns.
-    let wheelCooling = false;
-    let wheelAcc = 0;
-    deck.addEventListener(
-      'wheel',
-      (e) => {
-        e.preventDefault();
-        e.stopPropagation(); // keep it away from the page's smooth-scroller
-        if (wheelCooling || busy) return;
-        const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY);
-        wheelAcc += horizontal ? e.deltaX : e.deltaY;
-        if (Math.abs(wheelAcc) > 50) {
-          const positive = wheelAcc > 0;
-          wheelAcc = 0;
-          wheelCooling = true;
-          window.setTimeout(() => (wheelCooling = false), 800);
-          if (positive) tuck(horizontal ? 'deck-cycling-left' : 'deck-cycling-up');
-          else prev();
-        }
+    let settleTimer: number | null = null;
+    scroller.addEventListener(
+      'scroll',
+      () => {
+        if (settleTimer !== null) clearTimeout(settleTimer);
+        settleTimer = window.setTimeout(onSettle, 90);
       },
-      { passive: false },
+      { passive: true },
     );
+    if ('onscrollend' in window) scroller.addEventListener('scrollend', onSettle);
 
-    // Arrow keys flip the deck while it's on screen
-    let deckVisible = false;
-    new IntersectionObserver(([entry]) => (deckVisible = entry.isIntersecting), {
-      threshold: 0.25,
-    }).observe(deck);
-    window.addEventListener('keydown', (e) => {
-      if (!deckVisible) return;
-      const t = e.target as HTMLElement;
-      if (t.closest?.('input, textarea, [contenteditable]')) return;
-      if (e.key === 'ArrowRight') {
+    // ── Open / close ─────────────────────────────────────────────────
+    const openModal = (e: Event) => {
+      e.preventDefault();
+      modal.showModal();
+      document.body.style.overflow = 'hidden';
+      lenis()?.stop();
+      cursorFx.forEach(({ el }) => modal.appendChild(el));
+      domIndex = 1;
+      requestAnimationFrame(() => {
+        setSlideHeight();
+        scroller.scrollTop = slideH; // land on the first real slide
+        mount(realSlides[0]);
+      });
+    };
+    document.querySelectorAll<HTMLAnchorElement>('a[href="#reel"]').forEach((a) => {
+      a.addEventListener('click', openModal);
+    });
+    modal.querySelectorAll('[data-reel-close]').forEach((el) => {
+      el.addEventListener('click', () => modal.close());
+    });
+    modal.addEventListener('close', () => {
+      document.body.style.overflow = '';
+      lenis()?.start();
+      cursorFx.forEach(({ el, home }) => home?.appendChild(el));
+      realSlides.forEach(unmount);
+    });
+
+    // Arrow keys page through the reel while it's open
+    modal.addEventListener('keydown', (e) => {
+      if (!slideH) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
         e.preventDefault();
-        tuck('deck-cycling-left');
-      } else if (e.key === 'ArrowLeft') {
+        scroller.scrollBy({ top: slideH, behavior: 'smooth' });
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
         e.preventDefault();
-        prev();
+        scroller.scrollBy({ top: -slideH, behavior: 'smooth' });
       }
     });
 
-    // A drag that ends on the poster must not trigger its click-to-play
-    deck.addEventListener(
-      'click',
-      (e) => {
-        if (suppressClick) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-      },
-      true,
-    );
-
-    assign();
-    sizeDeck();
-    window.addEventListener('resize', sizeDeck);
-    window.addEventListener('load', sizeDeck);
+    window.addEventListener('resize', () => {
+      if (modal.open) setSlideHeight();
+    });
   }
 </script>

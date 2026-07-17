@@ -62,15 +62,27 @@ import { webShelf } from '~/data/projects';
             <span class="ml-2 flex-1 truncate rounded-md px-2 py-0.5 text-[9px]" style="background: var(--hair); color: var(--ink-muted);">{s.liveUrl}</span>
           </div>
 
-          <div class="absolute inset-x-0 bottom-0 top-[28px] overflow-hidden" data-iframe-slot data-iframe-src={s.liveUrl} data-iframe-title={`${s.name} live preview`} style="background: var(--surface);"></div>
+          {/* Screenshot at rest; the live site fades in over it on hover.
+              Only the hovered card ever holds an iframe — that's what kept
+              memory (and the old flicker) in check. */}
+          <div
+            class="absolute inset-x-0 bottom-0 top-[28px] overflow-hidden"
+            data-live-slot
+            data-live-src={s.liveUrl}
+            data-live-title={`${s.name} live preview`}
+            style="background: var(--surface);"
+          >
+            <img
+              src={s.shot}
+              alt={`${s.name} — screenshot`}
+              loading="lazy"
+              decoding="async"
+              class="h-full w-full object-cover object-top"
+            />
+          </div>
 
-          <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[28px] z-[1] grid place-items-center text-center transition-opacity duration-700 group-hover:opacity-0" style="background: linear-gradient(135deg, var(--cow-pink-soft), var(--surface));">
-            <div>
-              <p class="text-[10px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">Live preview</p>
-              <p class="mt-1 text-sm font-medium" style="color: var(--ink-soft);">{s.name}</p>
-              <p class="mt-3 text-[10px] sm:hidden" style="color: var(--ink-faint);">tap to visit</p>
-              <p class="mt-3 hidden text-[10px] sm:block" style="color: var(--ink-faint);">hover to peek</p>
-            </div>
+          <div class="pointer-events-none absolute inset-x-0 bottom-0 top-[28px] z-[2] grid place-items-end justify-items-center pb-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100" style="background: linear-gradient(180deg, transparent 60%, rgba(10, 10, 16, 0.5));">
+            <p class="text-[10px] uppercase tracking-[0.2em] text-white/90">live · click to visit ↗</p>
           </div>
 
           <span class="pointer-events-none absolute inset-x-0 bottom-0 block h-px bg-gradient-to-r from-transparent via-cow-300 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"></span>
@@ -143,70 +155,46 @@ import { webShelf } from '~/data/projects';
 </style>
 
 <script>
-  // Defer each sub-site iframe until the user hovers/focuses, AND tear it
-  // back down once the card scrolls off-screen — each iframe is a full
-  // sub-document worth tens to hundreds of MB. Keeping them resident after
-  // the user moves past is the main memory hog on the page.
-  const slots = document.querySelectorAll<HTMLElement>('[data-iframe-slot]');
-
-  const mountIframe = (slot: HTMLElement) => {
-    if (slot.dataset.mounted) return;
-    slot.dataset.mounted = '1';
-    const iframe = document.createElement('iframe');
-    iframe.src = slot.dataset.iframeSrc ?? '';
-    iframe.title = slot.dataset.iframeTitle ?? '';
-    iframe.loading = 'lazy';
-    iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-    iframe.className =
-      'absolute left-0 top-0 origin-top-left border-0 transition-transform duration-700 group-hover:scale-[0.55]';
-    iframe.setAttribute('style', 'width:200%;height:200%;transform:scale(0.5);');
-    slot.appendChild(iframe);
-  };
-
-  const unmountIframe = (slot: HTMLElement) => {
-    if (!slot.dataset.mounted) return;
-    delete slot.dataset.mounted;
-    // Wipe everything inside (just the iframe in practice) and release the
-    // document tree so the browser can GC it.
-    while (slot.firstChild) slot.removeChild(slot.firstChild);
-  };
-
-  const cardOf = (slot: HTMLElement) => slot.closest('a');
-
-  // Re-attach the on-demand mount listeners. We do this on every (un)mount
-  // because `{ once: true }` removes them after first fire — for the unmount
-  // path we want them ready again next time the card comes into view.
-  const wireMountListeners = (slot: HTMLElement) => {
-    const card = cardOf(slot);
+  // Live-on-hover previews. The screenshot stays underneath, the iframe fades
+  // in once its document has painted, and it's torn down shortly after the
+  // pointer leaves — so at most one sub-site is ever resident in memory.
+  document.querySelectorAll<HTMLElement>('[data-live-slot]').forEach((slot) => {
+    const card = slot.closest('a');
     if (!card) return;
-    const handler = () => {
-      mountIframe(slot);
-      card.removeEventListener('mouseenter', handler);
-      card.removeEventListener('focusin', handler);
+    let killTimer: number | null = null;
+
+    const mount = () => {
+      if (killTimer !== null) {
+        clearTimeout(killTimer);
+        killTimer = null;
+      }
+      if (slot.querySelector('iframe')) return;
+      const iframe = document.createElement('iframe');
+      iframe.src = slot.dataset.liveSrc ?? '';
+      iframe.title = slot.dataset.liveTitle ?? '';
+      iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+      iframe.className =
+        'absolute left-0 top-0 origin-top-left border-0 opacity-0 transition-opacity duration-500';
+      iframe.setAttribute('style', 'width:200%;height:200%;transform:scale(0.5);');
+      iframe.addEventListener('load', () => {
+        iframe.classList.remove('opacity-0');
+      });
+      slot.appendChild(iframe);
     };
-    card.addEventListener('mouseenter', handler);
-    card.addEventListener('focusin', handler);
-  };
 
-  slots.forEach(wireMountListeners);
+    const scheduleUnmount = () => {
+      if (killTimer !== null) clearTimeout(killTimer);
+      killTimer = window.setTimeout(() => {
+        slot.querySelector('iframe')?.remove();
+        killTimer = null;
+      }, 400);
+    };
 
-  // Unmount when the card scrolls clearly out of view (250px margin keeps
-  // hover-to-mount from immediately bouncing if the user scrolls just past).
-  if ('IntersectionObserver' in window) {
-    const offscreenIO = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          const slot = entry.target as HTMLElement;
-          if (!entry.isIntersecting && slot.dataset.mounted) {
-            unmountIframe(slot);
-            wireMountListeners(slot);
-          }
-        }
-      },
-      { rootMargin: '250px' },
-    );
-    slots.forEach((slot) => offscreenIO.observe(slot));
-  }
+    card.addEventListener('mouseenter', mount);
+    card.addEventListener('focusin', mount);
+    card.addEventListener('mouseleave', scheduleUnmount);
+    card.addEventListener('focusout', scheduleUnmount);
+  });
 
   // Modal open/close — "See the shelf →" (any #web-shelf link) opens it;
   // the X, the blur backdrop, or Escape (native dialog behavior) closes it.
@@ -239,6 +227,8 @@ import { webShelf } from '~/data/projects';
       document.body.style.overflow = '';
       lenis()?.start();
       cursorFx.forEach(({ el, home }) => home?.appendChild(el));
+      // Release any live preview still mounted
+      modal.querySelectorAll('[data-live-slot] iframe').forEach((f) => f.remove());
     });
   }
 
