@@ -328,7 +328,11 @@
       }
     };
     updateNowPlaying();
-    setInterval(updateNowPlaying, 45000);
+    // Poll often enough to feel live, and refresh the moment the tab is refocused.
+    setInterval(updateNowPlaying, 12000);
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) updateNowPlaying();
+    });
   }
 
   // Typing prompt loop — only runs while the terminal is on-screen

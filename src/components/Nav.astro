@@ -22,6 +22,8 @@ const links = [
     >
       <a href="#top" class="group flex items-center gap-2.5 px-2 py-1">
         <Monogram size={34} stroke={1.1} className="transition-transform duration-500 group-hover:rotate-[8deg]" />
+        {/* Short name on narrow screens — a nod to the shorter name when the screen is shorter */}
+        <span class="font-display text-base tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 min-[440px]:hidden" style="color: var(--ink);">Ria</span>
         <span class="hidden font-display text-base tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 min-[440px]:inline" style="color: var(--ink);">Rakshita&nbsp;Gupta</span>
       </a>
 

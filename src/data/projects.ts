@@ -13,6 +13,21 @@ export type Project = {
 
 export const featured: Project[] = [
   {
+    slug: 'cdi',
+    title: 'CDI Official',
+    tagline: 'Camera Developed Imagination.',
+    role: 'Founder',
+    years: '2014 — 2023',
+    blurb:
+      'CDI Official was my one-stop media production studio, founded as a teen and run for almost a decade. It delivered 50+ professionally edited videos plus apps, websites, event videography, and photography that built clients\' brand identities — including healthcare clients under NDA. Highlights: immersive 360°/VR simulations for the Augusta University Medical Simulation Center, later adapted into VR training apps for medical students, and patient explainers for AugustaENT credited with measurably easing patient anxiety.',
+    stack: ['Final Cut', 'Premiere', 'After Effects', 'PhotoShop', 'Photography', 'Videography', 'Video Planning & Production', 'VR / 360°', 'Design', 'App Development'],
+    links: [
+      { label: 'YouTube channel', href: 'https://www.youtube.com/c/cdiofficial' },
+      { label: 'Swipe through reel →', href: '#reel' },
+    ],
+    theme: 'camera',
+  },
+  {
     slug: 'bluebubbles',
     title: 'OpenBubbles / BlueBubbles',
     tagline: 'iMessage on Android, finally.',
@@ -26,21 +41,6 @@ export const featured: Project[] = [
       { label: 'GitHub', href: 'https://github.com/BlueBubblesApp' },
     ],
     theme: 'bubbles',
-  },
-  {
-    slug: 'cdi',
-    title: 'CDI Official',
-    tagline: 'Camera Developed Imagination.',
-    role: 'Founder',
-    years: '2014 — 2023',
-    blurb:
-      'CDI Official was my one-stop media production studio, founded as a teen and run for almost a decade. It delivered 50+ professionally edited videos plus apps, websites, event videography, and photography that built clients\' brand identities — including healthcare clients under NDA. Highlights: immersive 360°/VR simulations for the Augusta University Medical Simulation Center, later adapted into VR training apps for medical students, and patient explainers for AugustaENT credited with measurably easing patient anxiety.',
-    stack: ['Final Cut', 'Premiere', 'After Effects', 'PhotoShop', 'Photography', 'Videography', 'Video Planning & Production', 'VR / 360°', 'Design', 'App Development'],
-    links: [
-      { label: 'YouTube channel', href: 'https://www.youtube.com/c/cdiofficial' },
-      { label: 'Reel ↓', href: '#reel' },
-    ],
-    theme: 'camera',
   },
   {
     slug: 'web-builds',

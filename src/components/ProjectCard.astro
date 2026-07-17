@@ -60,6 +60,7 @@ const s = themes[project.theme];
 <article
   data-tilt
   data-card-theme={project.theme}
+  data-card-open={project.theme === 'camera' ? '#reel' : project.theme === 'terminal' ? '#web-shelf' : undefined}
   class="project-card group reveal card-lift relative overflow-hidden rounded-[28px] p-7 sm:p-9"
   style="box-shadow: var(--shadow-glow-sm);"
 >
@@ -119,3 +120,19 @@ const s = themes[project.theme];
     })}
   </div>
 </article>
+
+<script>
+  // CDI (camera) and Archive (terminal) cards open their modal when clicked
+  // anywhere — but real links/buttons inside still handle their own clicks.
+  document.querySelectorAll<HTMLElement>('[data-card-open]').forEach((card) => {
+    const sel = card.getAttribute('data-card-open');
+    if (!sel) return;
+    card.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).closest('a, button')) return;
+      (
+        card.querySelector<HTMLElement>(`a[href="${sel}"]`) ??
+        document.querySelector<HTMLElement>(`a[href="${sel}"]`)
+      )?.click();
+    });
+  });
+</script>

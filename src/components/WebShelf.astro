@@ -10,11 +10,12 @@ import { webShelf } from '~/data/projects';
   {/* Backdrop — clicking it closes the shelf */}
   <div data-shelf-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
 
-  {/* Panel */}
-  <div class="relative max-h-full w-full max-w-5xl overflow-y-auto rounded-[28px] border p-6 sm:p-10" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
-    <button type="button" data-shelf-close class="shelf-arrow absolute right-5 top-5 z-10" aria-label="Close shelf">
+  {/* Panel wrapped in a shell so the close button floats just outside the corner */}
+  <div class="relative w-full max-w-5xl">
+    <button type="button" data-shelf-close class="shelf-arrow absolute -right-3 -top-3 z-30" aria-label="Close shelf">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
     </button>
+    <div class="relative max-h-[88vh] w-full overflow-y-auto rounded-[28px] border p-6 sm:p-10" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
 
     <div class="grid items-end gap-6 lg:grid-cols-[1fr,auto]">
       <div>
@@ -99,6 +100,7 @@ import { webShelf } from '~/data/projects';
         </div>
       </a>
     ))}
+      </div>
     </div>
   </div>
 </dialog>
@@ -158,7 +160,11 @@ import { webShelf } from '~/data/projects';
   // Live-on-hover previews. The screenshot stays underneath, the iframe fades
   // in once its document has painted, and it's torn down shortly after the
   // pointer leaves — so at most one sub-site is ever resident in memory.
-  document.querySelectorAll<HTMLElement>('[data-live-slot]').forEach((slot) => {
+  // Only on hover-capable pointers: on touch there's no hover, and swiping
+  // would rapidly mount/unmount full-site iframes (flicker + broken layout),
+  // so mobile just shows the static screenshots.
+  const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (canHover) document.querySelectorAll<HTMLElement>('[data-live-slot]').forEach((slot) => {
     const card = slot.closest('a');
     if (!card) return;
     let killTimer: number | null = null;
@@ -246,15 +252,22 @@ import { webShelf } from '~/data/projects';
       track.scrollBy({ left: -step(), behavior: 'smooth' });
     });
 
-    // Wheel — vertical/diagonal trackpad gestures push the shelf horizontally,
-    // never bleed into page scroll while interacting.
+    // Wheel — advance exactly one card per gesture, no matter how far the
+    // trackpad is flicked (a cooldown swallows the rest of the momentum).
+    let wheelCooling = false;
+    let wheelAcc = 0;
     track.addEventListener('wheel', (e) => {
       const target = e.target as HTMLElement;
       if (target.closest('iframe')) return;
-      const horizontal = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-      if (horizontal !== 0) {
-        e.preventDefault();
-        track.scrollBy({ left: horizontal * 1.2, behavior: 'auto' });
+      e.preventDefault();
+      if (wheelCooling) return;
+      wheelAcc += Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+      if (Math.abs(wheelAcc) > 40) {
+        const dir = wheelAcc > 0 ? 1 : -1;
+        wheelAcc = 0;
+        wheelCooling = true;
+        setTimeout(() => (wheelCooling = false), 600);
+        track.scrollBy({ left: dir * step(), behavior: 'smooth' });
       }
     }, { passive: false });
 
