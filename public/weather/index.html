@@ -594,7 +594,7 @@ nav li a,
               box-shadow var(--sky-fade, 1.4s) ease;
 }
 
-body.dusk .weather { background-color: #6E5A6E; }
+body.dusk .weather { background-color: #9E7682; }
 body.dusk #card .details { color: #FFE8D2; }
 body.dusk .weather #cloud1 { fill: #C08A86; }
 body.dusk .weather #cloud2 { fill: #9C6E77; }
@@ -1834,7 +1834,7 @@ CORS-open, so this stays a fully static page.
         if (orb) TweenMax.fromTo(orb, RISE_MS / 1000, { y: restY }, { y: midY, ease: Sine.easeOut, overwrite: 'auto' });
         if (sunburstEl) TweenMax.fromTo(sunburstEl, RISE_MS / 1000, { y: burstRestY }, { y: burstMidY, ease: Sine.easeOut, overwrite: 'auto' });
       }
-    }, SINK_MS);
+    }, SINK_MS + 400);
   }
 
   /* 🌒 Real lunar phase.
