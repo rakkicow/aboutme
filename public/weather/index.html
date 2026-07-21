@@ -73,7 +73,7 @@ body {
   z-index: 0;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--sky-fade, 1.9s) ease;
+  transition: opacity var(--sky-fade, 1.4s) ease;
   will-change: opacity;
 }
 /* Daylight: the three original gradients, stacked in one pane. */
@@ -99,9 +99,9 @@ body {
     linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0)),
     #0A0E1A;
 }
-body.dusk #sky-day { opacity: 0; }
+/* Stack layers to prevent transparent holes during crossfades */
 body.dusk #sky-dusk { opacity: 1; }
-body.night #sky-day { opacity: 0; }
+body.night #sky-dusk { opacity: 1; }
 body.night #sky-night { opacity: 1; }
 
 .container {
@@ -589,9 +589,9 @@ body .container,
 .weather #cloud3,
 nav li a,
 #home, #zen, #search input {
-  transition: background 1.9s ease, background-color 1.9s ease,
-              color 1.9s ease, fill 1.9s ease, border-color 1.9s ease,
-              box-shadow 1.9s ease;
+  transition: background var(--sky-fade, 1.4s) ease, background-color var(--sky-fade, 1.4s) ease,
+              color var(--sky-fade, 1.4s) ease, fill var(--sky-fade, 1.4s) ease, border-color var(--sky-fade, 1.4s) ease,
+              box-shadow var(--sky-fade, 1.4s) ease;
 }
 
 body.dusk .weather { background-color: #6E5A6E; }
@@ -605,10 +605,10 @@ body.dusk .weather #cloud3 { fill: #7A5566; }
    Reykjavik at 2am and you get Reykjavik's night. Everything shifts together:
    page, card, controls, orb and the loading curtain. */
 #moon { display: none; }
-body.night #sun { display: none; }
-body.night #moon { display: block; }
+body.night #sun, body.sunrise #sun { display: none; }
+body.night #moon, body.sunrise #moon { display: block; }
 /* !important because #sunburst carries an inline fill from the original markup */
-body.night #sunburst { fill: url(#SVGID_moon_) !important; }
+body.night #sunburst, body.sunrise #sunburst { fill: url(#SVGID_moon_) !important; }
 
 /* Card faces, one per mood, all pushed down into night */
 body.night .weather { background-color: #1B2438; }
@@ -1557,12 +1557,24 @@ function changeWeather(weather)
   switch (weather.type) {
 
     case 'sun':
-      TweenMax.to(sun.node, 4, { x: sizes.card.width / 2, y: sizes.card.height / 2, ease: Power2.easeInOut });
-      TweenMax.to(sunburst.node, 4, { scale: 1, opacity: 0.8, y: sizes.card.height / 2 + sizes.card.offset.top, ease: Power2.easeInOut });
+      var sunProps = { x: sizes.card.width / 2, ease: Power2.easeInOut };
+      var burstProps = { scale: 1, opacity: 0.8, ease: Power2.easeInOut };
+      if (!$('body').hasClass('dusk')) {
+        sunProps.y = sizes.card.height / 2;
+        burstProps.y = sizes.card.height / 2 + sizes.card.offset.top;
+      }
+      TweenMax.to(sun.node, 4, sunProps);
+      TweenMax.to(sunburst.node, 4, burstProps);
       break;
     default:
-      TweenMax.to(sun.node, 2, { x: sizes.card.width / 2, y: -100, leafCount: 0, ease: Power2.easeInOut });
-      TweenMax.to(sunburst.node, 2, { scale: 0.4, opacity: 0, y: sizes.container.height / 2 - 50, ease: Power2.easeInOut });
+      var sunProps = { x: sizes.card.width / 2, leafCount: 0, ease: Power2.easeInOut };
+      var burstProps = { scale: 0.4, opacity: 0, ease: Power2.easeInOut };
+      if (!$('body').hasClass('dusk')) {
+        sunProps.y = -100;
+        burstProps.y = sizes.container.height / 2 - 50;
+      }
+      TweenMax.to(sun.node, 2, sunProps);
+      TweenMax.to(sunburst.node, 2, burstProps);
       break;}
 
 
@@ -1772,49 +1784,55 @@ CORS-open, so this stays a fully static page.
      The orb only moves when it is the thing you can see — on a rainy or
      overcast card the engine parks it above the card, and dragging it into
      view would be worse than not animating at all. */
-  var SINK_MS = 2600;
-  var RISE_MS = 1900;
-  var duskTimer = null;
-  var riseTimer = null;
-  var nightSettled = false;
+    var SINK_MS = 1400;
+    var RISE_MS = 1000;
+    var duskTimer = null;
+    var riseTimer = null;
+    var nightSettled = false;
 
-  function setNight(on) {
-    on = !!on;
-    var $b = $('body');
-    if ($b.hasClass('night') === on && nightSettled) return; // already there
+    function setNight(on) {
+      on = !!on;
+      var $b = $('body');
+      if ($b.hasClass('night') === on && nightSettled) return; // already there
 
-    clearTimeout(duskTimer);
-    clearTimeout(riseTimer);
+      clearTimeout(duskTimer);
+      clearTimeout(riseTimer);
 
-    if (!nightSettled) {
-      // First reading of the session: arrive already in the right state.
-      nightSettled = true;
-      $b.toggleClass('night', on);
-      return;
-    }
+      if (!nightSettled) {
+        // First reading of the session: arrive already in the right state.
+        nightSettled = true;
+        $b.toggleClass('night', on);
+        return;
+      }
 
-    var orb = document.getElementById('orb');
-    var visible = typeof currentWeather !== 'undefined' && currentWeather.type === 'sun';
-    // r=50, so this rests the disc on the bottom edge without clipping it.
-    var restY = sizes.card.height - 50;
-    var midY = sizes.card.height / 2;
+      var orb = document.getElementById('orb');
+      var sunburstEl = document.getElementById('sunburst');
+      var visible = typeof currentWeather !== 'undefined' && currentWeather.type === 'sun';
+      // r=50, plus 10 margin so it completely hides below the card's bottom edge.
+      var restY = sizes.card.height + 60;
+      var midY = sizes.card.height / 2;
+    var burstRestY = restY + sizes.card.offset.top;
+    var burstMidY = midY + sizes.card.offset.top;
 
     // Colour ramp and descent share one duration, so the sky finishes warming
     // at the exact moment the sun touches the horizon.
     document.documentElement.style.setProperty('--sky-fade', (SINK_MS / 1000) + 's');
+    var wasNight = $b.hasClass('night');
     $b.addClass('dusk').removeClass('night');
-    if (visible && orb) {
-      TweenMax.to(orb, SINK_MS / 1000, { y: restY, ease: Sine.easeIn, overwrite: 'all' });
+    if (wasNight && !on) $b.addClass('sunrise');
+
+    if (visible) {
+      if (orb) TweenMax.to(orb, SINK_MS / 1000, { y: restY, ease: Sine.easeIn, overwrite: 'auto' });
+      if (sunburstEl) TweenMax.to(sunburstEl, SINK_MS / 1000, { y: burstRestY, ease: Sine.easeIn, overwrite: 'auto' });
     }
 
     duskTimer = setTimeout(function () {
       document.documentElement.style.setProperty('--sky-fade', (RISE_MS / 1000) + 's');
-      $b.removeClass('dusk').toggleClass('night', on);
+      $b.removeClass('dusk sunrise').toggleClass('night', on);
       // Whatever is now showing climbs back up out of the horizon.
-      if (visible && orb) {
-        TweenMax.fromTo(orb, RISE_MS / 1000,
-          { y: restY },
-          { y: midY, ease: Sine.easeOut, overwrite: 'all' });
+      if (visible) {
+        if (orb) TweenMax.fromTo(orb, RISE_MS / 1000, { y: restY }, { y: midY, ease: Sine.easeOut, overwrite: 'auto' });
+        if (sunburstEl) TweenMax.fromTo(sunburstEl, RISE_MS / 1000, { y: burstRestY }, { y: burstMidY, ease: Sine.easeOut, overwrite: 'auto' });
       }
     }, SINK_MS);
   }
@@ -1894,7 +1912,7 @@ CORS-open, so this stays a fully static page.
     root.setProperty('--sky-fade', '0s');
     $('body').toggleClass('night', dark);
     nightSettled = true;
-    setTimeout(function () { root.setProperty('--sky-fade', '1.9s'); }, 200);
+    setTimeout(function () { root.setProperty('--sky-fade', '1.4s'); }, 200);
   })();
 
   function setError(msg) {
