@@ -243,9 +243,7 @@ export function initGame(
     out.style.color = '#7CE57C';
 
     if (cmd === 'help') {
-      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whoami</span>: identify user<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode`;
-    } else if (cmd === 'whoami') {
-      out.textContent = 'guest@rakshita.me';
+      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode`;
     } else if (cmd === 'walloftext') {
       out.innerHTML = `<span style="color:#DC9BB5">Redirecting via secure tunnel...</span>`;
       setTimeout(() => {
