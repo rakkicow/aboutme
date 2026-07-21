@@ -269,17 +269,13 @@ const SCAN: [string, number, number, boolean][] = [
   ['Suva', -18.14, 178.44, false], ['Davao', 7.19, 125.46, false],
 ];
 
-// If nothing is doing the exact thing, fall back to the nearest relative
-// rather than reporting that the world is out of weather.
-const NEIGHBOURS: Partial<Record<Scene, Scene[]>> = {
-  thunder: ['rain', 'drizzle'],
-  snow: ['rain', 'cloudy'],
-  wind: ['cloudy', 'clear'],
-  rain: ['drizzle', 'thunder'],
-  drizzle: ['rain', 'cloudy'],
-  fog: ['cloudy'],
-  clear: ['cloudy'],
-  cloudy: ['clear'],
+const GROUPS: Record<Scene, string> = {
+  clear: 'clear',
+  cloudy: 'cloudy', fog: 'cloudy',
+  rain: 'rain', drizzle: 'rain',
+  snow: 'snow',
+  thunder: 'thunder',
+  wind: 'wind',
 };
 
 let lastCondPick: Partial<Record<Scene, string>> = {};
@@ -341,19 +337,26 @@ async function fetchByCondition(want: Scene): Promise<Conditions> {
 
 /** Picks a city for `want`, avoiding an immediate repeat of the last one. */
 function choosePick(readings: Conditions[], want: Scene): Conditions {
-  for (const scene of [want, ...(NEIGHBOURS[want] ?? [])]) {
-    let pool = readings.filter((r) => r.scene === scene);
-    if (!pool.length) continue;
-    // Never hand back the same city twice in a row for the same word.
+  const targetGroup = GROUPS[want];
+  let pool = readings.filter((r) => GROUPS[r.scene] === targetGroup);
+
+  if (pool.length > 0) {
     const fresh = pool.filter((r) => r.place !== lastCondPick[want]);
     if (fresh.length) pool = fresh;
     const pick = { ...pool[Math.floor(Math.random() * pool.length)] };
     lastCondPick[want] = pick.place;
-    // Say so when this isn't actually the condition that was asked for.
-    if (scene !== want) pick.fellBackFrom = want;
     return pick;
   }
-  throw new Error('nocondition');
+
+  pool = readings;
+  const fresh = pool.filter((r) => r.place !== lastCondPick[want]);
+  if (fresh.length) pool = fresh;
+  if (!pool.length) throw new Error('nocondition');
+  
+  const pick = { ...pool[Math.floor(Math.random() * pool.length)] };
+  lastCondPick[want] = pick.place;
+  pick.fellBackFrom = want;
+  return pick;
 }
 
 async function fetchConditions(city: string): Promise<Conditions> {
