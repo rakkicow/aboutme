@@ -183,7 +183,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         100% { transform: scale(1); }
       }
       .shout-anim {
-        animation: shout-effect 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: shout-effect 1.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         display: inline-block;
         transform-origin: left center;
       }
@@ -325,7 +325,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
           void emojiSpan.offsetWidth; // trigger reflow
           emojiSpan.classList.add('shout-anim');
         }
-        setTimeout(() => document.body.classList.remove('shake-screen'), 800);
+        setTimeout(() => document.body.classList.remove('shake-screen'), 1800);
 
         audio.currentTime = 0;
         audio.play().catch(() => {});
