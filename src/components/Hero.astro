@@ -268,13 +268,16 @@ import MeshGradient from '~/components/MeshGradient.astro';
       })();
     </script>
 
-    {/* Strip */}
-    <div class="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 sm:mt-14 sm:grid-cols-4 sm:gap-x-12">
+    {/* Strip — px-4 matches the nav pill's inner padding and the last column is
+        pushed flush right, so the row starts and ends on the same verticals as
+        the logo and the "Get in touch" button. Both live in .container-x, so
+        they narrow together. */}
+    <div class="mt-10 grid grid-cols-2 gap-x-8 gap-y-5 px-4 sm:mt-14 sm:grid-cols-4 sm:gap-x-12">
       {[
         { k: 'Based', v: 'West Lafayette, IN' },
         { k: 'Grad', v: 'May 2028' },
         { k: 'Stack', v: 'Full :)', href: '#languages' },
-        { k: 'Fav skill', v: 'cow', emoji: '🐄', moo: true },
+        { k: 'Fav skill', v: 'cow', emoji: '🐄', moo: true, last: true },
       ].map((m) => (
         m.href ? (
           <a
@@ -295,7 +298,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
             type="button"
             data-moo
             aria-label={`${m.k}: ${m.v} ${m.emoji} — press for a moo`}
-            class="group block w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus:outline-none"
+            class="group block w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus:outline-none sm:justify-self-end"
           >
             <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium transition-transform duration-200 group-active:scale-90" style="color: var(--ink-soft);">
