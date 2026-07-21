@@ -2029,10 +2029,9 @@ CORS-open, so this stays a fully static page.
     setNight(reading.night);
     if (reading.night) drawMoon(Date.now());
 
-    // The place name opens that city's forecast on weather.com.
+    // The place name opens that city's forecast on merrysky.net (Open-Meteo UI).
     $place.html($('<a>', {
-      href: 'https://weather.com/weather/today/l/' +
-            encodeURIComponent(reading.lat + ',' + reading.lon),
+      href: 'https://merrysky.net/forecast/' + reading.lat + ',' + reading.lon,
       target: '_blank',
       rel: 'noopener noreferrer',
       text: reading.place
@@ -2051,10 +2050,6 @@ CORS-open, so this stays a fully static page.
     var mood = byType(reading.type);
     mood.name = reading.label;
     changeWeather(mood);
-    // Set it directly too: the engine only writes the label from a tween's
-    // onComplete, and a second changeWeather within that second kills the tween
-    // before it ever fires, leaving the label blank.
-    $('#summary').html(reading.label);
     setFavicon(reading.type);
   }
 
