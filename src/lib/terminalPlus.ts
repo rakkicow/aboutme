@@ -425,6 +425,8 @@ export function initGame(
         });
     } else if (cmd === 'rm -rf /' || cmd === 'rm -fr /') {
       out.innerHTML = `<span style="color:#FF5F57">rm: cannot remove '/': Permission denied</span><br/>Try again with <span style="color:#DC9BB5">sudo</span>. Or don't.`;
+    } else if (cmd === 'moo') {
+      out.innerHTML = `moo`;
     } else if (cmd === 'help') {
       out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">weather</span>: see the live sky of your city<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode<br/><br/><span style="opacity:0.6">↑/↓ for history · Tab to complete</span>`;
     } else if (cmd === 'walloftext') {
