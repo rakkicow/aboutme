@@ -1716,12 +1716,15 @@ CORS-open, so this stays a fully static page.
   /* The curtain runs blank until the sky is known. Only then do the bars fade
      in — already the right colour, already doing the right animation — hold
      for a beat, and lift. No neutral phase, no recolouring mid-flight. */
-  function revealLoader(type) {
+  function revealLoader(type, isNight) {
     var el = document.getElementById('loader');
     if (!el || el.getAttribute('data-done')) return;
     el.setAttribute('data-done', '1');
 
-    el.style.setProperty('--wx-rgb', LOADER_RGB[type] || LOADER_RGB.cloud);
+    var color = LOADER_RGB[type] || LOADER_RGB.cloud;
+    if (type === 'sun' && isNight) color = '255, 255, 255';
+    el.style.setProperty('--wx-rgb', color);
+    
     el.classList.add('wx-' + type);
     if (type === 'thunder') el.classList.add('storm');
 
@@ -2062,7 +2065,7 @@ CORS-open, so this stays a fully static page.
       // The curtain belongs to whatever the page opened on — your own sky
       // normally, or the city a ?q= link pointed at. Later navigation happens
       // behind an already-lifted curtain.
-      if (isInitial) revealLoader(reading.type);
+      if (isInitial) revealLoader(reading.type, reading.night);
     }, function (why) {
       $details.removeClass('loading');
       if (why === 'nocity') setError('no city by that name');
