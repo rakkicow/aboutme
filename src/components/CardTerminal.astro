@@ -24,7 +24,7 @@ const { isStandalone = false } = Astro.props;
 
 {/* Terminal window */}
 <div class={isStandalone ? "w-full h-full" : "-mx-2 w-[calc(100%+16px)] sm:mx-0 sm:w-full"} style="container-type: inline-size;">
-<div class={`term-window relative flex w-full flex-col overflow-hidden bg-[#0E1620]/95 backdrop-blur-sm transition-all duration-300 ease-out ${isStandalone ? 'h-[100svh] text-lg sm:text-xl' : 'rounded-2xl border border-cow-300/20 shadow-2xl cursor-pointer hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-cow-300/40'}`} data-standalone={isStandalone ? "true" : "false"}>
+<div class={`term-window relative flex w-full flex-col overflow-hidden bg-[#0E1620]/95 backdrop-blur-sm transition-all duration-300 ease-out ${isStandalone ? 'h-[100svh] text-lg sm:text-xl' : 'rounded-2xl border border-cow-300/20 shadow-2xl cursor-pointer hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-cow-300/40'}`} data-standalone={isStandalone ? "true" : "false"}>
   {/* Title bar */}
   <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
     <div class="group flex items-center gap-1.5">
