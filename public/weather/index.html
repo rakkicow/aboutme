@@ -90,6 +90,19 @@ nav li a:hover {
 nav li a.active {
   color: #4444ff;
 }
+/* Nothing on the map is doing that right now — say so on the button itself
+   rather than quietly showing a different sky. */
+nav li a.notfound,
+body.night nav li a.notfound {
+  color: #e0524f !important;
+  animation: iconShake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes iconShake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
 
 #card {
   box-shadow: 9px 7px 40px -6px rgba(0, 0, 0, 0.25);
@@ -704,10 +717,14 @@ body.night #loader.wx-snow li::after {
      path: a circle arc out, then a wider arc back to bite the shape. -->
 <g id="orb">
 <circle id="sun" style="fill: #F7ED47" cx="0" cy="0" r="50" />
-<!-- Endpoints shifted +21 so the crescent's bounding box is centred on the
-     group origin; otherwise every tween that centres the orb leaves the moon
-     sitting a third of the way off to one side. -->
-<path id="moon" style="fill: #EAF0FF" d="M29,-49.4 A50,50 0 1,0 29,49.4 A62,62 0 0,1 29,-49.4 Z" />
+<!-- The lit path is drawn at runtime from the real lunar phase; the dim disc
+     behind it is the earthlit remainder, so the moon still reads as a sphere
+     when it is only a sliver. -->
+<g id="moon">
+<circle id="moon-dark" cx="0" cy="0" r="50" style="fill: #8FA3CC; opacity: 0.18" />
+<path id="moon-lit" style="fill: #EAF0FF" d="" />
+<title id="moon-title"></title>
+</g>
 </g>
 <g id="layer3"></g>
 <g id="cloud3" class="cloud"></g>
@@ -1552,6 +1569,56 @@ CORS-open, so this stays a fully static page.
     $('body').toggleClass('night', !!on);
   }
 
+  /* 🌒 Real lunar phase.
+
+     Age is measured from a known new moon and folded over the synodic month.
+     The lit shape is then two arcs: the limb on the illuminated side, and the
+     terminator — a half-ellipse whose width tracks cos(phase). It bulges away
+     from the lit side when gibbous and into it when crescent, which is what
+     turns the same two arcs into every phase. */
+  var SYNODIC = 29.530588853;
+  var NEW_MOON = Date.UTC(2000, 0, 6, 18, 14); // 2000 Jan 6, first new moon
+
+  function moonPhase(when) {
+    var age = ((when - NEW_MOON) / 86400000) % SYNODIC;
+    if (age < 0) age += SYNODIC;
+    return age / SYNODIC; // 0 new · 0.25 first quarter · 0.5 full · 0.75 last
+  }
+
+  function phaseName(p) {
+    if (p < 0.02 || p > 0.98) return 'New moon';
+    if (p < 0.23) return 'Waxing crescent';
+    if (p < 0.27) return 'First quarter';
+    if (p < 0.48) return 'Waxing gibbous';
+    if (p < 0.52) return 'Full moon';
+    if (p < 0.73) return 'Waning gibbous';
+    if (p < 0.77) return 'Last quarter';
+    return 'Waning crescent';
+  }
+
+  function drawMoon(when) {
+    var lit = document.getElementById('moon-lit');
+    if (!lit) return;
+    var R = 50;
+    var p = moonPhase(when);
+    var k = Math.cos(2 * Math.PI * p);       // +1 new … -1 full
+    var illum = (1 - k) / 2;                 // 0 … 1 fraction lit
+    var waxing = p < 0.5;                    // lit limb on the right
+    // Keep a sliver at new moon rather than vanishing entirely.
+    var rx = Math.min(R * 0.985, R * Math.abs(k));
+
+    var limbSweep = waxing ? 1 : 0;
+    var termSweep = illum > 0.5 ? (waxing ? 1 : 0) : (waxing ? 0 : 1);
+
+    lit.setAttribute('d',
+      'M0,' + -R +
+      ' A' + R + ',' + R + ' 0 0,' + limbSweep + ' 0,' + R +
+      ' A' + rx.toFixed(2) + ',' + R + ' 0 0,' + termSweep + ' 0,' + -R + ' Z');
+
+    var t = document.getElementById('moon-title');
+    if (t) t.textContent = phaseName(p) + ' · ' + Math.round(illum * 100) + '% lit';
+  }
+
   /* Read the clock straight off the ISO string. `timezone=auto` already gives
      local wall-clock for that city, so parsing it into a Date would only drag
      the visitor's own offset back in. */
@@ -1657,6 +1724,7 @@ CORS-open, so this stays a fully static page.
     lastReading = reading;
     unitOverride = null;
     setNight(reading.night);
+    if (reading.night) drawMoon(Date.now());
 
     // The place name opens that city's forecast on weather.com.
     $place.html($('<a>', {
@@ -1747,36 +1815,40 @@ CORS-open, so this stays a fully static page.
      animates the mood; this fills the card with a real place to match. */
   var lastPick = {}; // per mood, so the same button never repeats a city back to back
 
-  // If nothing on the list is doing the exact thing, fall back to the nearest
-  // relative rather than telling you the world is out of weather.
-  var NEIGHBOURS = {
-    thunder: ['rain', 'wind'],
-    snow: ['rain', 'cloud'],
-    wind: ['cloud', 'rain'],
-    rain: ['thunder', 'cloud'],
-    sun: ['cloud'],
-    cloud: ['sun', 'rain']
-  };
-
+  /* Exact matches only. Handing back a merely-similar sky would quietly
+     contradict the button you pressed; the button says so instead. */
   function pickFor(readings, type) {
-    var order = [type].concat(NEIGHBOURS[type] || []);
-    for (var i = 0; i < order.length; i++) {
-      var pool = readings.filter(function (r) { return r.type === order[i]; });
-      if (!pool.length) continue;
-      // Drop the city this button showed last time, so repeat presses travel.
-      var fresh = pool.filter(function (r) { return r.place !== lastPick[type]; });
-      if (fresh.length) pool = fresh;
-      return pool[Math.floor(Math.random() * pool.length)];
-    }
-    return null;
+    var pool = readings.filter(function (r) { return r.type === type; });
+    if (!pool.length) return null;
+    // Drop the city this button showed last time, so repeat presses travel.
+    var fresh = pool.filter(function (r) { return r.place !== lastPick[type]; });
+    if (fresh.length) pool = fresh;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /* Flash the pressed button red and shake it, then put the card back the way
+     it was — the engine's own click handler has already animated to the mood
+     we could not actually find a city for. */
+  function rejectButton(el) {
+    var $el = $(el);
+    $el.removeClass('notfound');
+    void el.offsetWidth; // restart the animation if it is pressed twice
+    $el.addClass('notfound');
+    setTimeout(function () { $el.removeClass('notfound'); }, 900);
+    if (lastReading) render(lastReading);
   }
 
   $('nav a').on('click', function () {
     var type = this.id.replace('button-', '');
+    var btn = this;
     $details.addClass('loading');
     scanWorld().then(function (readings) {
       var pick = pickFor(readings, type);
-      if (!pick) { $details.removeClass('loading'); return; }
+      if (!pick) {
+        $details.removeClass('loading');
+        rejectButton(btn);
+        return;
+      }
       lastPick[type] = pick.place;
       currentQuery = pick.place;
       render(pick);
@@ -1784,7 +1856,7 @@ CORS-open, so this stays a fully static page.
       $cityInput.val('');
     }, function () {
       $details.removeClass('loading');
-      setError('could not reach the weather');
+      rejectButton(btn);
     });
   });
 

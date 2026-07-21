@@ -15,7 +15,7 @@
   {/* Grid */}
   <svg class="absolute inset-0 h-full w-full opacity-[0.08]" preserveAspectRatio="none" aria-hidden="true">
     <defs>
-      <pattern id="grid-term" width="32" height="32" patternUnits="userSpaceOnUse">
+      <pattern id="grid-term" data-grid width="32" height="32" patternUnits="userSpaceOnUse">
         <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.5" />
       </pattern>
     </defs>
@@ -254,6 +254,28 @@
   if (resEls.length) {
     updateRes();
     window.addEventListener('resize', updateRes);
+  }
+
+  // Centre the backdrop grid. The pattern tiles from the origin, so whatever
+  // doesn't divide evenly into 32px piles up on one side; splitting the
+  // remainder puts equal margins left/right and top/bottom.
+  const gridPatterns = document.querySelectorAll<SVGPatternElement>('[data-grid]');
+  const centreGrid = () => {
+    gridPatterns.forEach((p) => {
+      const svg = p.ownerSVGElement;
+      if (!svg) return;
+      const box = svg.getBoundingClientRect();
+      if (!box.width || !box.height) return;
+      const cell = 32;
+      p.setAttribute('x', ((box.width % cell) / 2).toFixed(2));
+      p.setAttribute('y', ((box.height % cell) / 2).toFixed(2));
+    });
+  };
+  if (gridPatterns.length) {
+    centreGrid();
+    window.addEventListener('resize', centreGrid);
+    // The card is laid out after fonts/animations settle, so measure again.
+    setTimeout(centreGrid, 300);
   }
 
   // Weather line — this panel is *my* machine, so it reports my sky rather than
