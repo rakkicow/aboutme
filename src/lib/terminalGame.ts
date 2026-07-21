@@ -16,7 +16,7 @@ export function initGame(
   // Second-level completions, so `weather ` + Tab cycles the conditions the
   // same way a real shell cycles a command's arguments.
   const WEATHER_ARGS = [
-    'help', 'sunny', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy',
+    'help', 'sunny', 'clear', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy',
   ];
 
   // Shell history. Newest last; `histPos === history.length` means "not

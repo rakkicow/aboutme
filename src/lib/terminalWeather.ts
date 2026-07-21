@@ -204,7 +204,7 @@ const SCENE_VERB: Record<Scene, string> = {
 };
 
 /** The canonical word we print for each scene, in the help listing. */
-const CONDITION_WORDS = ['sunny', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy'];
+const CONDITION_WORDS = ['sunny', 'clear', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy'];
 
 // Cities scanned when you ask for a condition rather than a place. Spread over
 // both hemispheres and heavy on the tropics and the poles, because that is
