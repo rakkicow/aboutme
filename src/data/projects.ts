@@ -142,7 +142,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/hosa',
     href: 'https://rakshita.me/hosa',
-    shot: '/assets/shelf/hosa.jpg',
+    shot: '/assets/shelf/hosa.webp',
   },
   {
     name: 'Plex Landing',
@@ -151,7 +151,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2022',
     liveUrl: 'https://rakshita.me/plex',
     href: 'https://rakshita.me/plex',
-    shot: '/assets/shelf/plex.jpg',
+    shot: '/assets/shelf/plex.webp',
   },
   {
     name: 'TEDxYouth Lake Olmstead',
@@ -160,7 +160,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2021',
     liveUrl: 'https://rakshita.me/TEDxYouthLakeOlmstead',
     href: 'https://rakshita.me/TEDxYouthLakeOlmstead',
-    shot: '/assets/shelf/TEDxYouthLakeOlmstead.jpg',
+    shot: '/assets/shelf/TEDxYouthLakeOlmstead.webp',
   },
   {
     name: 'Modifiable Graph Nodes',
@@ -169,7 +169,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/graph',
     href: 'https://rakshita.me/graph',
-    shot: '/assets/shelf/graph.jpg',
+    shot: '/assets/shelf/graph.webp',
   },
   {
     name: 'Weather',
@@ -178,7 +178,7 @@ export const webShelf: WebShelfEntry[] = [
     year: '2020',
     liveUrl: 'https://rakshita.me/weather',
     href: 'https://rakshita.me/weather',
-    shot: '/assets/shelf/weather.jpg',
+    shot: '/assets/shelf/weather.webp',
   },
 ];
 

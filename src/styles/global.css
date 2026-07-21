@@ -245,6 +245,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     transition: background-position 650ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: background-position;
   }
   .group:hover .cow-ink {
     background-position: 0 0;

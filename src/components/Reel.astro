@@ -17,7 +17,7 @@ import { reel } from '~/data/projects';
       overflows the slide. */}
   <div class="relative" style="width: min(90vw, 1100px, 100vh); max-width: 100%;">
     <button type="button" data-reel-close class="reel-x absolute -right-3 -top-3 z-30" aria-label="Close reel">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
     </button>
     <div class="reel-panel relative flex w-full flex-col overflow-hidden rounded-[28px] border" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
     <div class="no-scrollbar reel-scroller" data-reel-scroller>
@@ -97,10 +97,10 @@ import { reel } from '~/data/projects';
     </div>
     {/* Navigation buttons — positioned close to the viewer pane, outside the rounded border */}
     <button type="button" data-reel-up class="reel-nav-btn absolute bottom-[100%] mb-2 sm:mb-3 left-1/2 -translate-x-1/2 z-50 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Previous video">
-      <svg class="reel-cue-chevron reel-cue-chevron-up h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
+      <svg class="reel-cue-chevron reel-cue-chevron-up h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
     </button>
     <button type="button" data-reel-down class="reel-nav-btn absolute top-[100%] mt-2 sm:mt-3 left-1/2 -translate-x-1/2 z-50 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Next video">
-      <svg class="reel-cue-chevron reel-cue-chevron-down h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      <svg class="reel-cue-chevron reel-cue-chevron-down h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
     </button>
   </div>
   
