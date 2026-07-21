@@ -8,6 +8,28 @@ export function initGame(
 ) {
   let inGame = false;
 
+  // Last.fm track metadata is third-party text — escape before it touches innerHTML.
+  const esc = (s: unknown) =>
+    String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+  // Only let through URLs we'd actually navigate to — blocks javascript:/data: hrefs.
+  const safeUrl = (u: unknown) => {
+    const raw = String(u ?? '').trim();
+    if (!raw) return 'https://last.fm';
+    try {
+      const parsed = new URL(raw, window.location.origin);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return esc(parsed.href);
+    } catch {
+      /* malformed — fall through */
+    }
+    return 'https://last.fm';
+  };
+
   const updateWhatsongView = (outContainer: HTMLElement) => {
     const track = (window as any)._currentTrack;
     if (!track || !track.name) {
@@ -15,15 +37,21 @@ export function initGame(
       return;
     }
     
-    // Prevent redundant re-renders of the exact same song
-    if (outContainer.dataset.lastTrack === track.name + track.artUrl) return;
-    outContainer.dataset.lastTrack = track.name + track.artUrl;
-    
+    // Prevent redundant re-renders of the exact same song. `lastTrack` is only
+    // committed once the art actually renders, so a failed load can still retry;
+    // `pendingTrack` stops duplicate in-flight loads in the meantime.
+    const trackKey = track.name + track.artUrl;
+    if (outContainer.dataset.lastTrack === trackKey) return;
+    if (outContainer.dataset.pendingTrack === trackKey) return;
+    outContainer.dataset.pendingTrack = trackKey;
+
     outContainer.innerHTML = `<span style="color:#DC9BB5">Fetching audio data...</span>`;
-    
+
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload = () => {
+      delete outContainer.dataset.pendingTrack;
+      outContainer.dataset.lastTrack = trackKey;
       // Read the dynamically scaling font size of the terminal!
       const rootSize = parseFloat(getComputedStyle(outContainer).fontSize) || 11;
       const charH = rootSize * 0.5; // Bumped to 0.5em font size
@@ -90,10 +118,10 @@ export function initGame(
         <div style="display:flex; align-items:center; gap:12px; margin-bottom: 8px;">
           <div style="width:3px; height:24px; border-radius:2px; background:${mainColor};"></div>
           <div>
-            <a href="${track.url || 'https://last.fm'}" target="_blank" rel="noopener noreferrer" style="color:#FFFFFF; text-decoration:none; display:block;" class="hover:text-cow-300 transition-colors cursor-pointer">
-              <div style="font-size:1.15em; font-weight:bold; letter-spacing:0.5px;">${track.name}</div>
+            <a href="${safeUrl(track.url)}" target="_blank" rel="noopener noreferrer" style="color:#FFFFFF; text-decoration:none; display:block;" class="hover:text-cow-300 transition-colors cursor-pointer">
+              <div style="font-size:1.15em; font-weight:bold; letter-spacing:0.5px;">${esc(track.name)}</div>
             </a>
-            <div style="color:#DC9BB5; font-size:0.95em; opacity:0.8;">${track.artist}</div>
+            <div style="color:#DC9BB5; font-size:0.95em; opacity:0.8;">${esc(track.artist)}</div>
           </div>
           <div style="flex:1"></div>
           <div aria-hidden="true" style="display:inline-flex; align-items:center; gap:2px; height:1.2em; padding-right:8px; flex-shrink:0;">
@@ -201,11 +229,13 @@ export function initGame(
       setTimeout(() => { termBody.scrollTop = termBody.scrollHeight; }, 10);
     };
     img.onerror = () => {
+      delete outContainer.dataset.pendingTrack;
       outContainer.innerHTML = `<span style="color:#FF5F57">Error: Cannot decode album art stream.</span>`;
     };
     if (track.artUrl) {
        img.src = track.artUrl;
     } else {
+       delete outContainer.dataset.pendingTrack;
        outContainer.innerHTML = `<span style="color:#FF5F57">Error: No album art available.</span>`;
     }
   };
@@ -272,11 +302,25 @@ export function initGame(
       audio.volume = 0.5;
       audio.play().catch(() => {}); // Catch in case browser blocks autoplay
       
-      // 2. Visual Easter Egg
-      document.body.style.transition = 'filter 0.5s ease';
-      document.body.style.filter = 'invert(1) hue-rotate(180deg)';
+      // 2. Visual Easter Egg — a backdrop-filter overlay rather than a filter on
+      // <body>, because a filtered ancestor becomes the containing block for its
+      // fixed descendants and would tear the fixed nav loose for the duration.
+      const invertOverlay = document.createElement('div');
+      invertOverlay.style.cssText = [
+        'position:fixed',
+        'inset:0',
+        'z-index:9999',
+        'pointer-events:none',
+        'backdrop-filter:invert(1) hue-rotate(180deg)',
+        '-webkit-backdrop-filter:invert(1) hue-rotate(180deg)',
+        'opacity:0',
+        'transition:opacity 0.5s ease'
+      ].join(';');
+      document.body.appendChild(invertOverlay);
+      requestAnimationFrame(() => { invertOverlay.style.opacity = '1'; });
       setTimeout(() => {
-        document.body.style.filter = '';
+        invertOverlay.style.opacity = '0';
+        setTimeout(() => invertOverlay.remove(), 500);
       }, 1500);
       
       // 3. ASCII Art Cow Payload

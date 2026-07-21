@@ -10,9 +10,35 @@ interface Props {
 }
 
 const {
-  title = 'Ria Gupta — Computer Engineer',
-  description = 'Rakshita "Ria" Gupta is a Computer Engineering Technology student at Purdue. Hardware-meets-software builder, designer, and 3D modeler.',
+  title = 'Rakshita Gupta — Computer Engineer',
+  description = 'Rakshita Gupta is a Computer Engineering Technology student at Purdue. Hardware-meets-software builder, designer, and 3D modeler.',
 } = Astro.props;
+
+// Absolute, self-referencing canonical so Google treats this page as the
+// primary URL for the name — the resume PDFs were outranking it.
+const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://rakshita.me').href;
+
+// Person schema ties the name "Rakshita Gupta" to the homepage rather than to
+// the standalone resume PDFs.
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Rakshita Gupta',
+  alternateName: 'Ria Gupta',
+  url: 'https://rakshita.me',
+  image: 'https://rakshita.me/assets/og.png',
+  jobTitle: 'Computer Engineering Technology Student',
+  description,
+  alumniOf: {
+    '@type': 'CollegeOrUniversity',
+    name: 'Purdue University',
+  },
+  sameAs: [
+    'https://www.linkedin.com/in/rakshita-gupta-4571a7251',
+    'https://www.instagram.com/rakhicow/',
+    'https://www.youtube.com/c/cdiofficial',
+  ],
+};
 ---
 
 <!doctype html>
@@ -27,7 +53,8 @@ const {
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://rakshita.me" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="Rakshita Gupta" />
     <meta property="og:image" content="https://rakshita.me/assets/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -37,6 +64,7 @@ const {
     <meta name="twitter:image" content="https://rakshita.me/assets/og.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
     {/* Inline theme bootstrap — runs before paint to avoid flash */}
     <script is:inline>
