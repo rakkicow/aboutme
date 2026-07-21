@@ -7,6 +7,215 @@ export function initGame(
   onExit: () => void
 ) {
   let inGame = false;
+
+  const updateWhatsongView = (outContainer: HTMLElement) => {
+    const track = (window as any)._currentTrack;
+    if (!track || !track.name) {
+      outContainer.innerHTML = `<span style="color:#FF5F57">Error: No track currently scrobbling. Try again later.</span>`;
+      return;
+    }
+    
+    // Prevent redundant re-renders of the exact same song
+    if (outContainer.dataset.lastTrack === track.name + track.artUrl) return;
+    outContainer.dataset.lastTrack = track.name + track.artUrl;
+    
+    outContainer.innerHTML = `<span style="color:#DC9BB5">Fetching audio data...</span>`;
+    
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      // Read the dynamically scaling font size of the terminal!
+      const rootSize = parseFloat(getComputedStyle(outContainer).fontSize) || 11;
+      const charH = rootSize * 0.5; // Bumped to 0.5em font size
+      const charW = rootSize * 0.425; // 0.5em * 0.85 (0.6 base width + 0.25 letter-spacing) = 0.425
+      
+      let w = 28;
+      let h = 24;
+      
+      const termBody = outContainer.closest('.term-body') as HTMLElement;
+      if (termBody) {
+         const availH = termBody.clientHeight - (rootSize * 15); // buffer for title, lyrics, and input
+         const availW = termBody.clientWidth - (rootSize * 4); // buffer for padding
+         
+         if (availH > 50 && availW > 50) {
+           const maxHChars = Math.floor(availH / charH);
+           const maxWChars = Math.floor(availW / charW);
+           
+           h = Math.max(16, Math.min(80, maxHChars));
+           w = Math.max(18, Math.min(94, Math.floor(h * (28/24))));
+           
+           if (w > maxWChars) {
+              w = maxWChars;
+              h = Math.floor(w * (24/28));
+           }
+         }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+      
+      ctx.drawImage(img, 0, 0, w, h);
+      const data = ctx.getImageData(0, 0, w, h).data;
+      
+      // Density chars from dark to light
+      const chars = ['@', '%', '#', '*', '+', '=', '-', ':', '.', ' '];
+      
+      let asciiHtml = '<div style="font-size:0.5em; line-height:1em; letter-spacing:0.25em; font-weight:900; font-family:monospace; margin-bottom:1.2em; margin-top:0.4em;">';
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const i = (y * w + x) * 4;
+          const r = data[i], g = data[i+1], b = data[i+2];
+          // Calculate luminance
+          const bright = (0.299 * r + 0.587 * g + 0.114 * b);
+          const charIdx = Math.floor((bright / 255) * (chars.length - 1));
+          const char = chars[charIdx];
+          
+          // Boost colors slightly so it glows on the dark terminal
+          asciiHtml += `<span style="color:rgb(${Math.min(255, r+20)},${Math.min(255, g+20)},${Math.min(255, b+20)})">${char === ' ' ? '&nbsp;' : char}</span>`;
+        }
+        asciiHtml += '<br/>';
+      }
+      asciiHtml += '</div>';
+      
+      const mainColor = track.colors?.[0] || '#7CE57C';
+      const titleHtml = `
+        <style>
+          @keyframes lyricReveal {
+            0% { opacity: 0.25; text-shadow: none; }
+            100% { opacity: 1; text-shadow: 0 0 6px rgba(255,255,255,0.6); }
+          }
+        </style>
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom: 8px;">
+          <div style="width:3px; height:24px; border-radius:2px; background:${mainColor};"></div>
+          <div>
+            <a href="${track.url || 'https://last.fm'}" target="_blank" rel="noopener noreferrer" style="color:#FFFFFF; text-decoration:none; display:block;" class="hover:text-cow-300 transition-colors cursor-pointer">
+              <div style="font-size:1.15em; font-weight:bold; letter-spacing:0.5px;">${track.name}</div>
+            </a>
+            <div style="color:#DC9BB5; font-size:0.95em; opacity:0.8;">${track.artist}</div>
+          </div>
+          <div style="flex:1"></div>
+          <div aria-hidden="true" style="display:inline-flex; align-items:center; gap:2px; height:1.2em; padding-right:8px; flex-shrink:0;">
+            ${[
+              { name: 'np-eq1', duration: '1.7s' },
+              { name: 'np-eq2', duration: '2.1s' },
+              { name: 'np-eq3', duration: '1.45s' },
+              { name: 'np-eq4', duration: '2.3s' },
+              { name: 'np-eq5', duration: '1.5s' }
+            ].map((anim, i) => {
+              const col = track.colors?.length ? track.colors[i % track.colors.length] : '#39FF14';
+              return `<span style="display:block; width:2px; border-radius:2px; background:${col}; box-shadow:0 0 6px ${col}; animation: ${anim.name} ${anim.duration} ease-in-out infinite;"></span>`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="whatsong-lyrics" style="display:none; color:#FFFFFF; font-size:0.95em; font-style:italic; border-left:1px dashed ${mainColor}; margin-left:1px; padding-left:13px; margin-bottom:8px; white-space:pre-wrap; line-height:1.4;"></div>
+      `;
+      
+      outContainer.innerHTML = asciiHtml + titleHtml;
+      
+      const lyricsDiv = outContainer.querySelector('.whatsong-lyrics') as HTMLElement;
+      if (lyricsDiv) {
+        fetch(`https://lrclib.net/api/get?artist_name=${encodeURIComponent(track.artist)}&track_name=${encodeURIComponent(track.name)}`)
+          .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+          .then(data => {
+            if (data && data.plainLyrics) {
+              const lines = data.plainLyrics.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0 && !l.startsWith('['));
+              if (lines.length > 0) {
+                lyricsDiv.style.display = 'block';
+                
+                if ((outContainer as any)._lyricsTimer) clearTimeout((outContainer as any)._lyricsTimer);
+                
+                let currentIdx = 0;
+                const showNext = () => {
+                  if (!document.body.contains(outContainer)) return; // Stop memory leak if cleared!
+                  
+                  let count = 1;
+                  const isNarrow = window.innerWidth <= 450;
+                  
+                  if (!isNarrow && currentIdx + 1 < lines.length) {
+                     const l1 = lines[currentIdx];
+                     const l2 = lines[currentIdx + 1];
+                     // Heuristically decide if 2 lines fit perfectly in the terminal UI
+                     if (l1.length + l2.length < 80 && l1.length < 45 && l2.length < 45) {
+                        count = 2;
+                     }
+                  }
+                  
+                  let snippet = lines.slice(currentIdx, currentIdx + count).join('\n');
+                  
+                  // Calculate global reading estimate (average ~200 WPM -> ~3.3 words/sec -> 300ms/word + 1.2s buffer)
+                  let duration = Math.max(2500, snippet.split(/\s+/).length * 300 + 1200);
+                  
+                  // On thin phones, aggressively truncate overflowing words and proportionally speed up the timer
+                  if (isNarrow && count === 1) {
+                     const maxChars = 36;
+                     if (snippet.length > maxChars) {
+                        const words = snippet.split(' ');
+                        let kept = '';
+                        let keptCount = 0;
+                        for (const w of words) {
+                           if (kept.length + w.length + 1 > maxChars) break;
+                           kept += (kept.length > 0 ? ' ' : '') + w;
+                           keptCount++;
+                        }
+                        if (keptCount === 0 && words.length > 0) {
+                           kept = words[0].substring(0, maxChars);
+                           keptCount = 1;
+                        }
+                        
+                        const ratio = keptCount / words.length;
+                        duration = Math.max(1000, Math.round(duration * ratio));
+                        snippet = kept + '...';
+                     }
+                  }
+                  
+                  const fullSnippet = '"' + snippet + '"';
+                  const animDuration = (duration * 0.9) / 1000;
+                  const html = fullSnippet.split('').map((char, i) => {
+                     const delay = (i / fullSnippet.length) * animDuration;
+                     let c = char;
+                     if (c === '<') c = '&lt;';
+                     else if (c === '>') c = '&gt;';
+                     else if (c === '&') c = '&amp;';
+                     else if (c === '\n') return '<br>';
+                     return `<span style="opacity:0.25; animation: lyricReveal 0.8s forwards ${delay.toFixed(3)}s">${c}</span>`;
+                  }).join('');
+                  
+                  lyricsDiv.innerHTML = html;
+                  
+                  currentIdx += count;
+                  if (currentIdx >= lines.length) currentIdx = 0; // Loop back to top
+                  
+                  (outContainer as any)._lyricsTimer = setTimeout(showNext, duration);
+                };
+                
+                showNext();
+                setTimeout(() => { termBody.scrollTop = termBody.scrollHeight; }, 10);
+              }
+            }
+          })
+          .catch(() => {});
+      }
+      
+      setTimeout(() => { termBody.scrollTop = termBody.scrollHeight; }, 10);
+    };
+    img.onerror = () => {
+      outContainer.innerHTML = `<span style="color:#FF5F57">Error: Cannot decode album art stream.</span>`;
+    };
+    if (track.artUrl) {
+       img.src = track.artUrl;
+    } else {
+       outContainer.innerHTML = `<span style="color:#FF5F57">Error: No album art available.</span>`;
+    }
+  };
+
+  window.addEventListener('trackupdate', () => {
+    document.querySelectorAll('.whatsong-view').forEach(el => {
+      updateWhatsongView(el as HTMLElement);
+    });
+  });
+
   const autoTyper = document.getElementById('auto-typer');
   termInput.addEventListener('input', () => {
     // Mirror the text into the typer so the caret naturally gets pushed!
@@ -19,6 +228,8 @@ export function initGame(
     const cmd = rawCmd.trim().toLowerCase();
     termInput.value = '';
     if (autoTyper) autoTyper.textContent = '';
+
+
 
     // Echo command
     const echo = document.createElement('div');
@@ -46,77 +257,10 @@ export function initGame(
     } else if (cmd === 'whatsong') {
       // Clear chat above
       interactiveOutput.innerHTML = '';
-      out.innerHTML = '';
-      
-      const track = (window as any)._currentTrack;
-      if (!track || !track.name) {
-        out.innerHTML = `<span style="color:#FF5F57">Error: No track currently scrobbling. Try again later.</span>`;
-      } else {
-        out.innerHTML = `<span style="color:#DC9BB5">Fetching audio data...</span>`;
-        
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          // Adjusted to exactly match character aspect ratio for a perfect square
-          const w = 34;
-          const h = 24;
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          if (!ctx) return;
-          
-          ctx.drawImage(img, 0, 0, w, h);
-          const data = ctx.getImageData(0, 0, w, h).data;
-          
-          // Density chars from dark to light
-          const chars = ['@', '%', '#', '*', '+', '=', '-', ':', '.', ' '];
-          
-          let asciiHtml = '<div style="font-size:4px; line-height:4px; letter-spacing:1px; font-weight:900; font-family:monospace; margin-bottom:12px; margin-top:4px;">';
-          for (let y = 0; y < h; y++) {
-            for (let x = 0; x < w; x++) {
-              const i = (y * w + x) * 4;
-              const r = data[i], g = data[i+1], b = data[i+2];
-              // Calculate luminance
-              const bright = (0.299 * r + 0.587 * g + 0.114 * b);
-              const charIdx = Math.floor((bright / 255) * (chars.length - 1));
-              const char = chars[charIdx];
-              
-              // Boost colors slightly so it glows on the dark terminal
-              asciiHtml += `<span style="color:rgb(${Math.min(255, r+20)},${Math.min(255, g+20)},${Math.min(255, b+20)})">${char === ' ' ? '&nbsp;' : char}</span>`;
-            }
-            asciiHtml += '<br/>';
-          }
-          asciiHtml += '</div>';
-          
-          const mainColor = track.colors?.[0] || '#7CE57C';
-          const titleHtml = `
-            <div style="display:flex; align-items:center; gap:12px; border-left:3px solid ${mainColor}; padding-left:12px; margin-bottom: 8px;">
-              <div>
-                <div style="color:#FFFFFF; font-size:12px; font-weight:bold; letter-spacing:0.5px;">${track.name}</div>
-                <div style="color:#DC9BB5; font-size:10px; opacity:0.8;">${track.artist}</div>
-              </div>
-              <div style="flex:1"></div>
-              <div aria-hidden="true" style="display:flex; gap:3px; align-items:flex-end; height:12px; padding-right:8px;">
-                ${[1,2,3,4,5].map((_, i) => {
-                  const col = track.colors?.length ? track.colors[i % track.colors.length] : '#39FF14';
-                  return `<span style="width:3px; border-radius:2px; background:${col}; box-shadow:0 0 4px ${col}; display:inline-block; animation: np-eq${i+1} 1s ease-in-out infinite alternate;"></span>`;
-                }).join('')}
-              </div>
-            </div>
-          `;
-          
-          out.innerHTML = asciiHtml + titleHtml;
-          setTimeout(() => { termBody.scrollTop = termBody.scrollHeight; }, 10);
-        };
-        img.onerror = () => {
-          out.innerHTML = `<span style="color:#FF5F57">Error: Cannot decode album art stream.</span>`;
-        };
-        if (track.artUrl) {
-           img.src = track.artUrl;
-        } else {
-           out.innerHTML = `<span style="color:#FF5F57">Error: No album art available.</span>`;
-        }
+      out.className = 'mb-1 whatsong-view';
+      updateWhatsongView(out);
+
+
     } else if (cmd === 'hack') {
       out.innerHTML = `<span style="color:#FF5F57">WARNING: UNAUTHORIZED ACCESS DETECTED.</span><br/>Initiating override sequence...<br/><br/>To bypass the firewall, type the password. Hint: it says "moo".`;
       inGame = true;
@@ -179,4 +323,10 @@ export function initGame(
       termBody.scrollTop = termBody.scrollHeight;
     }, 10);
   });
+
+  // Expose an imperative hook for external elements to trigger commands programmatically
+  (window as any)._runTerminalCommand = (cmdString: string) => {
+    termInput.value = cmdString;
+    termForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+  };
 }

@@ -24,14 +24,26 @@
 </div>
 
 {/* Terminal window — 16/10 minimum, grows with content on narrow cards */}
-<div class="w-full" style="container-type: inline-size;">
+<div class="-mx-2 w-[calc(100%+16px)] sm:mx-0 sm:w-full" style="container-type: inline-size;">
 <div class="term-window relative flex w-full flex-col overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm cursor-pointer transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-cow-300/40">
   {/* Title bar */}
   <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
-    <div class="flex items-center gap-1.5">
-      <span class="h-3 w-3 rounded-full bg-[#FF5F57]"></span>
-      <span class="h-3 w-3 rounded-full bg-[#FEBC2E]"></span>
-      <span class="h-3 w-3 rounded-full bg-[#28C840]"></span>
+    <div class="group flex items-center gap-1.5">
+      <span id="term-close-btn" class="relative flex h-3 w-3 cursor-pointer items-center justify-center rounded-full bg-[#FF5F57]" title="Exit Interactive Mode">
+        <svg class="opacity-0 transition-opacity duration-100 group-hover:opacity-100 w-2 h-2 text-black/60" viewBox="0 0 10 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="1.2" d="M2 2l6 6M8 2L2 8"></path>
+        </svg>
+      </span>
+      <span id="term-minimize-btn" class="relative flex h-3 w-3 cursor-pointer items-center justify-center rounded-full bg-[#FEBC2E]" title="Scroll to Next Section">
+        <svg class="opacity-0 transition-opacity duration-100 group-hover:opacity-100 w-2 h-2 text-black/60" viewBox="0 0 10 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-width="1.5" d="M2 5h6"></path>
+        </svg>
+      </span>
+      <span id="term-fullscreen-btn" class="relative flex h-3 w-3 cursor-pointer items-center justify-center rounded-full bg-[#28C840]" title="Toggle Fullscreen">
+        <svg class="opacity-0 transition-opacity duration-100 group-hover:opacity-100 w-1.5 h-1.5 text-black/60" viewBox="0 0 6 6">
+          <path fill="currentColor" d="M3.5,0 L6,0 L6,2.5 L5,1.5 L3.5,3 L3,2.5 L4.5,1 L3.5,0 Z M2.5,6 L0,6 L0,3.5 L1,4.5 L2.5,3 L3,3.5 L1.5,5 L2.5,6 Z"/>
+        </svg>
+      </span>
     </div>
     <span class="font-mono text-[10px] text-cow-200">ria@rakshita.me<span class="term-title-extra"> — zsh — 80×24</span></span>
     <span class="w-10"></span>
@@ -103,7 +115,7 @@
     min-height: 62.5cqw;
   }
   .term-body {
-    font-size: clamp(7.5px, 2.3cqw, 11px);
+    font-size: clamp(7.5px, 1.8cqw, 24px);
   }
   .term-cow {
     font-size: 1.08em;
@@ -333,8 +345,9 @@
           name: t.name,
           artist: t.artist?.['#text'] ?? '',
           artUrl: (t.image as LfmImage[] | undefined)?.find((i) => i.size === 'extralarge')?.['#text'] || art,
+          url: t.url || 'https://last.fm',
           isPlaying,
-          colors: []
+          colors: window._currentTrack?.colors || []
         };
 
         if (art && art !== lastArt) {
@@ -345,12 +358,20 @@
             const colors = extractColors(img);
             if (window._currentTrack) window._currentTrack.colors = colors;
             applyWaveColors(colors);
+            window.dispatchEvent(new CustomEvent('trackupdate'));
           };
-          img.onerror = () => applyWaveColors([]);
+          img.onerror = () => {
+            applyWaveColors([]);
+            window.dispatchEvent(new CustomEvent('trackupdate'));
+          };
           img.src = art;
         } else if (!art && lastArt) {
           lastArt = '';
           applyWaveColors([]);
+          window.dispatchEvent(new CustomEvent('trackupdate'));
+        } else {
+          // Track is the same, but maybe name/playing status changed
+          window.dispatchEvent(new CustomEvent('trackupdate'));
         }
       } catch {
         /* Last.fm unreachable — row stays as-is */
@@ -437,12 +458,13 @@
       const termHistory = document.getElementById('term-history') as HTMLElement;
       let gameLoaded = false;
 
-      termWindow.addEventListener('click', async (e) => {
-        e.stopPropagation(); // Prevent the parent ProjectCard from opening the web shelf
+      const activateTerminal = async () => {
         if (!interactive) {
           interactive = true;
           // Lock the current height in pixels so the game doesn't stretch the grid!
-          termWindow.style.height = termWindow.getBoundingClientRect().height + 'px';
+          if (!document.fullscreenElement) {
+            termWindow.style.height = termWindow.getBoundingClientRect().height + 'px';
+          }
           // Keep autoTyper visible to mirror text!
           autoTyper.textContent = ''; // clear any partially typed text
           if (termHistory) termHistory.style.display = 'none';
@@ -464,6 +486,7 @@
               // @ts-ignore
               const { initGame } = await import('../lib/terminalGame.ts');
               initGame(termForm, termInput, interactiveOutput, termBody, termCaret, () => {
+
                 // The onExit callback
                 interactive = false;
                 termWindow.style.height = ''; // release the lock
@@ -482,6 +505,87 @@
         } else {
           termInput.focus();
         }
+      };
+
+      termWindow.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent the parent ProjectCard from opening the web shelf
+        activateTerminal();
+      });
+
+      // Intercept clicks on the neofetch track link
+      const npLinks = document.querySelectorAll('[data-np-link]');
+      npLinks.forEach(link => {
+        link.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          await activateTerminal();
+          setTimeout(() => {
+            if ((window as any)._runTerminalCommand) {
+              (window as any)._runTerminalCommand('whatsong');
+            }
+          }, 50);
+        });
+      });
+      const fullscreenBtn = document.getElementById('term-fullscreen-btn');
+      if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (!document.fullscreenElement) {
+            await termWindow.requestFullscreen().catch(() => {});
+            if (!interactive) activateTerminal();
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen();
+          }
+        });
+      }
+
+      const closeBtn = document.getElementById('term-close-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+          if (interactive && (window as any)._runTerminalCommand) {
+            (window as any)._runTerminalCommand('exit');
+          }
+        });
+      }
+
+      const minimizeBtn = document.getElementById('term-minimize-btn');
+      if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+          const workSection = document.getElementById('work');
+          if (workSection) {
+             workSection.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        if (document.fullscreenElement === termWindow) {
+          termWindow.style.height = '100vh';
+          termWindow.style.width = '100vw';
+          termWindow.style.maxWidth = 'none';
+        } else {
+          termWindow.style.width = '';
+          termWindow.style.maxWidth = '';
+          if (interactive) {
+            termWindow.style.height = termWindow.getBoundingClientRect().height + 'px';
+          } else {
+            termWindow.style.height = '';
+          }
+        }
+        
+        // Force the whatsong engine to dynamically recalculate the available space
+        setTimeout(() => {
+          if ((window as any)._runTerminalCommand) {
+            const out = document.getElementById('term-interactive-output');
+            if (out && out.querySelector('.whatsong-view')) {
+              (window as any)._runTerminalCommand('whatsong');
+            }
+          }
+        }, 100);
       });
     }
   }
