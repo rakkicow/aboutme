@@ -25,7 +25,7 @@
 
 {/* Terminal window — 16/10 minimum, grows with content on narrow cards */}
 <div class="w-full" style="container-type: inline-size;">
-<div class="term-window relative flex w-full flex-col overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm">
+<div class="term-window relative flex w-full flex-col overflow-hidden rounded-2xl border border-cow-300/20 bg-[#0E1620]/95 shadow-2xl backdrop-blur-sm cursor-pointer transition-all duration-300 ease-out hover:-translate-y-1.5 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-cow-300/40">
   {/* Title bar */}
   <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
     <div class="flex items-center gap-1.5">
@@ -38,8 +38,9 @@
   </div>
 
   {/* Body */}
-  <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45]">
-    <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
+  <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45] overflow-y-auto overflow-x-hidden scrollbar-hide">
+    <div id="term-history">
+      <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
 
     {/* Two-column grid — cow centered in the left column, sysinfo right */}
     <div class="term-grid mt-1.5 grid grid-cols-[max-content_1fr] gap-x-3 items-center">
@@ -72,8 +73,22 @@
       <a class="np-text" data-np-link href="https://open.spotify.com" target="_blank" rel="noopener noreferrer" style="color:#7CE57C;"><span data-np-text>…</span></a>
     </div>
 
+    </div>
+
+    {/* Interactive output appended here */}
+    <div id="term-interactive-output"></div>
+
     {/* Prompt with typer */}
-    <div class="mt-2 text-cow-300">~/ <span class="text-cow-400">$</span> <span class="typer" style="color:#39FF14;"></span><span class="inline-block h-3 w-[7px] -mb-0.5 animate-caret" style="background:#39FF14;"></span></div>
+    <div class="mt-2 text-cow-300 flex items-center cursor-text" id="term-prompt-line">
+      <span class="shrink-0">~/</span> <span class="text-cow-400 shrink-0 mx-1.5">$</span> 
+      <span class="typer shrink-0" id="auto-typer" style="color:#39FF14;"></span>
+      <div class="relative flex-1 m-0 flex items-center">
+        <span class="inline-block h-3 w-[7px] shrink-0 animate-caret absolute left-0 pointer-events-none" id="term-caret" style="background:#39FF14;"></span>
+        <form id="term-form" class="hidden w-full m-0">
+          <input type="text" id="term-input" autocomplete="off" spellcheck="false" class="w-full bg-transparent border-none outline-none text-transparent caret-transparent font-mono p-0 m-0 leading-none pl-2" />
+        </form>
+      </div>
+    </div>
   </div>
 
   {/* Scanline */}
@@ -312,11 +327,25 @@
         // Tint the waveform with the album art's palette (once per track)
         type LfmImage = { size: string; '#text': string };
         const art = (t.image as LfmImage[] | undefined)?.find((i) => i.size === 'medium')?.['#text'] || '';
+
+        // Globally expose track data for the terminal game
+        window._currentTrack = {
+          name: t.name,
+          artist: t.artist?.['#text'] ?? '',
+          artUrl: (t.image as LfmImage[] | undefined)?.find((i) => i.size === 'extralarge')?.['#text'] || art,
+          isPlaying,
+          colors: []
+        };
+
         if (art && art !== lastArt) {
           lastArt = art;
           const img = new Image();
           img.crossOrigin = 'anonymous';
-          img.onload = () => applyWaveColors(extractColors(img));
+          img.onload = () => {
+            const colors = extractColors(img);
+            if (window._currentTrack) window._currentTrack.colors = colors;
+            applyWaveColors(colors);
+          };
           img.onerror = () => applyWaveColors([]);
           img.src = art;
         } else if (!art && lastArt) {
@@ -348,13 +377,23 @@
   if (typerEls.length) {
     let onScreen = false;
     let running = false;
+    let interactive = false;
+    let inGame = false;
     let i = 0;
+
+    const termWindow = document.querySelector('.term-window') as HTMLElement;
+    const autoTyper = document.getElementById('auto-typer') as HTMLElement;
+    const termForm = document.getElementById('term-form') as HTMLFormElement;
+    const termInput = document.getElementById('term-input') as HTMLInputElement;
+    const termCaret = document.getElementById('term-caret') as HTMLElement;
+    const interactiveOutput = document.getElementById('term-interactive-output') as HTMLElement;
+    const termBody = document.querySelector('.term-body') as HTMLElement;
 
     const wait = (ms: number) =>
       new Promise<void>((resolve) => {
         const start = performance.now();
         const check = () => {
-          if (!onScreen) return resolve(); // bail early when off-screen
+          if (!onScreen || interactive) return resolve(); // bail early when off-screen or user interacts
           if (performance.now() - start >= ms) return resolve();
           requestAnimationFrame(check);
         };
@@ -364,18 +403,19 @@
     const loop = async () => {
       if (running) return;
       running = true;
-      while (onScreen) {
+      while (onScreen && !interactive) {
         for (const el of typerEls) {
+          if (interactive) break;
           const cmd = commands[i % commands.length];
           el.textContent = '';
           for (let c = 0; c < cmd.length; c++) {
-            if (!onScreen) break;
+            if (!onScreen || interactive) break;
             el.textContent += cmd[c];
             await wait(70 + Math.random() * 60);
           }
           await wait(1800);
           for (let c = cmd.length; c > 0; c--) {
-            if (!onScreen) break;
+            if (!onScreen || interactive) break;
             el.textContent = cmd.slice(0, c - 1);
             await wait(30);
           }
@@ -388,8 +428,61 @@
 
     const io = new IntersectionObserver(([entry]) => {
       onScreen = entry.isIntersecting;
-      if (onScreen) loop();
+      if (onScreen && !interactive) loop();
     }, { rootMargin: '100px' });
     io.observe(typerEls[0]);
+
+    // Gamification Logic - Lazy Loaded!
+    if (termWindow && termForm && termInput) {
+      const termHistory = document.getElementById('term-history') as HTMLElement;
+      let gameLoaded = false;
+
+      termWindow.addEventListener('click', async (e) => {
+        e.stopPropagation(); // Prevent the parent ProjectCard from opening the web shelf
+        if (!interactive) {
+          interactive = true;
+          // Lock the current height in pixels so the game doesn't stretch the grid!
+          termWindow.style.height = termWindow.getBoundingClientRect().height + 'px';
+          // Keep autoTyper visible to mirror text!
+          autoTyper.textContent = ''; // clear any partially typed text
+          if (termHistory) termHistory.style.display = 'none';
+          termForm.classList.remove('hidden');
+          termForm.classList.add('flex');
+          termInput.focus();
+          
+          // Initial greeting
+          const msg = document.createElement('div');
+          msg.className = 'mt-1 mb-2 opacity-80';
+          msg.innerHTML = '<span style="color:#FEBC2E">Terminal overridden.</span> Manual input enabled.<br/>Type <span style="color:#39FF14">help</span> to view commands.';
+          interactiveOutput.appendChild(msg);
+          termBody.scrollTop = termBody.scrollHeight;
+
+          // Dynamically fetch the game engine ONLY when the user interacts
+          if (!gameLoaded) {
+            gameLoaded = true;
+            try {
+              // @ts-ignore
+              const { initGame } = await import('../lib/terminalGame.ts');
+              initGame(termForm, termInput, interactiveOutput, termBody, termCaret, () => {
+                // The onExit callback
+                interactive = false;
+                termWindow.style.height = ''; // release the lock
+                autoTyper.style.display = 'inline';
+                if (termHistory) termHistory.style.display = 'block';
+                termForm.classList.add('hidden');
+                termForm.classList.remove('flex');
+                interactiveOutput.innerHTML = '';
+                termInput.blur();
+                if (onScreen) loop();
+              });
+            } catch (err) {
+               console.error("Failed to load terminal game engine:", err);
+            }
+          }
+        } else {
+          termInput.focus();
+        }
+      });
+    }
   }
 </script>
