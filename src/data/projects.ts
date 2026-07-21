@@ -49,7 +49,7 @@ export const featured: Project[] = [
     role: 'Designer & Developer',
     years: '2015 — present',
     blurb:
-      'A rotating shelf of websites I\'ve built for clubs, family, and friends. Quietly shipped, quietly archived.',
+      'A rotating shelf of websites I\'ve built for clubs, family, and friends. Quietly shipped, quietly archived.<br/><br/>btw, tap the Terminal above.',
     stack: ['HTML', 'CSS', 'Vanilla JS', 'Bootstrap', 'Astro', 'Tailwind'],
     links: [{ label: 'See the shelf →', href: '#web-shelf' }],
     theme: 'terminal',

@@ -89,9 +89,7 @@ const s = themes[project.theme];
   </div>
 
   {/* Blurb */}
-  <p class={`relative mt-5 text-[15px] leading-relaxed ${s.blurb}`}>
-    {project.blurb}
-  </p>
+  <p class={`relative mt-5 text-[15px] leading-relaxed ${s.blurb}`} set:html={project.blurb}></p>
 
   {/* Stack pills */}
   <div class="relative mt-6 flex flex-wrap gap-1.5">
