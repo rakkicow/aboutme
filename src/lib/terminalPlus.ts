@@ -164,7 +164,7 @@ export function initGame(
             }).join('')}
           </div>
         </div>
-        <div class="whatsong-lyrics" style="display:none; color:#FFFFFF; font-size:0.95em; font-style:italic; border-left:1px dashed ${mainColor}; margin-left:1px; padding-left:13px; margin-bottom:8px; white-space:pre-wrap; line-height:1.4;"></div>
+        <div class="whatsong-lyrics" style="display:none; color:#FFFFFF; font-size:1.1em; font-style:italic; border-left:1px dashed ${mainColor}; margin-left:1px; padding-left:13px; margin-bottom:8px; white-space:pre-wrap; line-height:1.4;"></div>
       `;
       
       outContainer.innerHTML = asciiHtml + titleHtml;
@@ -201,31 +201,8 @@ export function initGame(
                   
                   let snippet = lines.slice(currentIdx, currentIdx + count).join('\n');
                   
-                  // Calculate global reading estimate (average ~200 WPM -> ~3.3 words/sec -> 300ms/word + 1.2s buffer)
-                  let duration = Math.max(2500, snippet.split(/\s+/).length * 300 + 1200);
-                  
-                  // On thin phones, aggressively truncate overflowing words and proportionally speed up the timer
-                  if (isNarrow && count === 1) {
-                     const maxChars = 36;
-                     if (snippet.length > maxChars) {
-                        const words = snippet.split(' ');
-                        let kept = '';
-                        let keptCount = 0;
-                        for (const w of words) {
-                           if (kept.length + w.length + 1 > maxChars) break;
-                           kept += (kept.length > 0 ? ' ' : '') + w;
-                           keptCount++;
-                        }
-                        if (keptCount === 0 && words.length > 0) {
-                           kept = words[0].substring(0, maxChars);
-                           keptCount = 1;
-                        }
-                        
-                        const ratio = keptCount / words.length;
-                        duration = Math.max(1000, Math.round(duration * ratio));
-                        snippet = kept + '...';
-                     }
-                  }
+                  // Calculate global reading estimate (slower, per user request)
+                  let duration = Math.max(3000, snippet.split(/\s+/).length * 400 + 1800);
                   
                   const fullSnippet = '"' + snippet + '"';
                   const animDuration = (duration * 0.9) / 1000;
