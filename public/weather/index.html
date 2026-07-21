@@ -2440,6 +2440,8 @@ CORS-open, so this stays a fully static page.
   var deepLon = parseFloat(params.get('lon'));
   var deepName = (params.get('name') || '').trim();
   var deepLink = (params.get('q') || '').trim();
+  
+  var accessedViaTerminal = !!window.location.search;
 
   if (window.history && history.replaceState && window.location.search) {
     history.replaceState(null, '', window.location.pathname);
@@ -2456,6 +2458,12 @@ CORS-open, so this stays a fully static page.
   } else {
     if (deepLink) $cityInput.val(deepLink);
     load(deepLink, false, true);
+  }
+
+  // On mobile, start the page in hidden UI mode until the background is tapped, 
+  // UNLESS it was accessed via the terminal (which sets query params).
+  if (window.innerWidth <= 768 && !accessedViaTerminal) {
+    setTimeout(function() { setZen(true); }, 10);
   }
 
   // Conditions drift slowly; a refresh every 10 minutes is plenty, and only
