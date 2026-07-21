@@ -2,6 +2,9 @@
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,ts,tsx}'],
   darkMode: 'class',
+  // Only fire hover: / group-hover: utilities on devices that actually hover,
+  // so a tap on touch doesn't latch the hover state until you scroll away.
+  future: { hoverOnlyWhenSupported: true },
   theme: {
     extend: {
       colors: {
