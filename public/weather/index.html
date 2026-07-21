@@ -32,16 +32,52 @@ html, body {
   max-width: 100%;
 }
 
+/* The page's colour now lives entirely in the .sky-layer panes below, so these
+   stay transparent and nothing repaints when the sky changes. */
 body {
-  background: #eee;
-  background: -webkit-gradient(linear, left bottom, left top, from(rgba(0, 0, 200, 0.2)), to(rgba(0, 0, 200, 0)));
-  background: linear-gradient(0deg, rgba(0, 0, 200, 0.2), rgba(0, 0, 200, 0));
+  background: transparent;
 }
 
 .background {
-  background: #eee;
-  background: linear-gradient(120deg, rgba(50, 150, 100, 0.2), rgba(0, 0, 100, 0));
+  background: transparent;
 }
+
+.sky-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--sky-fade, 1.9s) ease;
+  will-change: opacity;
+}
+/* Daylight: the three original gradients, stacked in one pane. */
+#sky-day {
+  opacity: 1;
+  background:
+    linear-gradient(240deg, rgba(150, 50, 50, 0.3), rgba(0, 0, 200, 0)),
+    linear-gradient(120deg, rgba(50, 150, 100, 0.2), rgba(0, 0, 100, 0)),
+    linear-gradient(0deg, rgba(0, 0, 200, 0.2), rgba(0, 0, 200, 0)),
+    #ffffff;
+}
+#sky-dusk {
+  background:
+    linear-gradient(240deg, rgba(150, 60, 140, 0.5), rgba(255, 160, 70, 0.12)),
+    linear-gradient(120deg, rgba(255, 110, 80, 0.45), rgba(90, 50, 120, 0.15)),
+    linear-gradient(0deg, rgba(255, 140, 60, 0.5), rgba(120, 60, 130, 0.1)),
+    #F3C9A0;
+}
+#sky-night {
+  background:
+    linear-gradient(240deg, rgba(70, 40, 90, 0.5), rgba(10, 14, 26, 0)),
+    linear-gradient(120deg, rgba(30, 60, 90, 0.45), rgba(10, 14, 26, 0)),
+    linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0)),
+    #0A0E1A;
+}
+body.dusk #sky-day { opacity: 0; }
+body.dusk #sky-dusk { opacity: 1; }
+body.night #sky-day { opacity: 0; }
+body.night #sky-night { opacity: 1; }
 
 .container {
   display: -webkit-box;
@@ -60,8 +96,8 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
-  background: #eee;
-  background: linear-gradient(240deg, rgba(150, 50, 50, 0.3), rgba(0, 0, 200, 0));
+  z-index: 1; /* above the fixed sky panes */
+  background: transparent;
 }
 
 nav ul {
@@ -358,6 +394,101 @@ nav, #search {
 #search input::placeholder {
   color: #999;
 }
+/* ── City autocomplete ─────────────────────────────────────────────────────
+   Liquid glass: a translucent pane that blurs and lifts whatever is behind
+   it, with a bright inner rim so it reads as a physical sheet rather than a
+   flat panel. Suggestions come from the same geocoder the search uses. */
+#city-wrap {
+  position: relative;
+  display: flex;
+}
+/* Inline completion. Sits exactly over the input, repeating what you typed in
+   transparent text so the faded remainder lines up with the real caret. */
+#ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: 7px 12px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  white-space: pre;
+  color: transparent;
+  pointer-events: none;
+  overflow: hidden;
+}
+#ghost .rest { color: rgba(30, 30, 60, 0.34); }
+body.night #ghost .rest { color: rgba(255, 255, 255, 0.3); }
+
+#suggest {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  box-shadow:
+    0 14px 34px -10px rgba(40, 40, 90, 0.35),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -8px 18px rgba(255, 255, 255, 0.25);
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  transform-origin: top center;
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+#suggest.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+#suggest li {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 7px 11px;
+  border-radius: 13px;
+  font-size: 13px;
+  color: #444;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+#suggest li .region {
+  font-size: 11px;
+  opacity: 0.6;
+  margin-left: auto;
+  white-space: nowrap;
+}
+#suggest li:hover,
+#suggest li.active {
+  background: rgba(255, 255, 255, 0.75);
+  color: #1c1c2e;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+}
+
+body.night #suggest {
+  background: rgba(30, 40, 66, 0.55);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    0 14px 34px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -8px 18px rgba(255, 255, 255, 0.05);
+}
+body.night #suggest li { color: #B9C6DE; }
+body.night #suggest li:hover,
+body.night #suggest li.active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #FFFFFF;
+}
+
 #search .err {
   font-size: 12px;
   color: #c0392b;
@@ -400,6 +531,33 @@ nav, #search {
   pointer-events: none;
 }
 
+/* ── Dusk ──────────────────────────────────────────────────────────────────
+   Going straight from a pale afternoon to midnight is a hard cut, so the
+   change routes through a sunset: the page warms to orange, then to violet,
+   then settles into night. Every surface transitions on the same curve, and
+   the `dusk` stage below is held briefly on the way through. */
+body,
+body .background,
+body .container,
+#card,
+#card .details,
+.weather,
+.weather #cloud1,
+.weather #cloud2,
+.weather #cloud3,
+nav li a,
+#home, #zen, #search input {
+  transition: background 1.9s ease, background-color 1.9s ease,
+              color 1.9s ease, fill 1.9s ease, border-color 1.9s ease,
+              box-shadow 1.9s ease;
+}
+
+body.dusk .weather { background-color: #6E5A6E; }
+body.dusk #card .details { color: #FFE8D2; }
+body.dusk .weather #cloud1 { fill: #C08A86; }
+body.dusk .weather #cloud2 { fill: #9C6E77; }
+body.dusk .weather #cloud3 { fill: #7A5566; }
+
 /* ── Night ─────────────────────────────────────────────────────────────────
    Driven by the rendered city's own sunset, not the visitor's clock — look up
    Reykjavik at 2am and you get Reykjavik's night. Everything shifts together:
@@ -409,19 +567,6 @@ body.night #sun { display: none; }
 body.night #moon { display: block; }
 /* !important because #sunburst carries an inline fill from the original markup */
 body.night #sunburst { fill: url(#SVGID_moon_) !important; }
-
-body.night {
-  background: #0A0E1A;
-  background: linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0));
-}
-body.night .background {
-  background: #0A0E1A;
-  background: linear-gradient(120deg, rgba(30, 60, 90, 0.45), rgba(10, 14, 26, 0));
-}
-body.night .container {
-  background: #0A0E1A;
-  background: linear-gradient(240deg, rgba(70, 40, 90, 0.5), rgba(10, 14, 26, 0));
-}
 
 /* Card faces, one per mood, all pushed down into night */
 body.night .weather { background-color: #1B2438; }
@@ -670,6 +815,12 @@ body.night #loader.wx-snow li::after {
 </style>
 </head>
 <body translate="no">
+<!-- Sky layers. Crossfading three fixed panes by opacity keeps the sunset on
+     the compositor; transitioning the gradients themselves made the browser
+     re-interpolate and repaint every stacked layer each frame. -->
+<div id="sky-day" class="sky-layer" aria-hidden="true"></div>
+<div id="sky-dusk" class="sky-layer" aria-hidden="true"></div>
+<div id="sky-night" class="sky-layer" aria-hidden="true"></div>
 <div id="loader">
   <div class="glow"></div>
   <ul><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
@@ -750,7 +901,11 @@ body.night #loader.wx-snow li::after {
 <button type="button" id="home" title="Back to my city" aria-label="Back to my city">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg>
 </button>
-<input id="city" type="text" placeholder="another city…" autocomplete="off" spellcheck="false" aria-label="Search weather by city">
+<div id="city-wrap">
+<input id="city" type="text" placeholder="another city…" autocomplete="off" spellcheck="false" aria-label="Search weather by city" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="suggest">
+<div id="ghost" aria-hidden="true"></div>
+<ul id="suggest" role="listbox" aria-label="City suggestions"></ul>
+</div>
 <button type="button" id="zen" title="Hide everything but the weather" aria-label="Hide everything but the weather">
 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/><path d="M4 20 20 4"/></svg>
 </button>
@@ -1565,8 +1720,61 @@ CORS-open, so this stays a fully static page.
     return now < up || now >= down;
   }
 
+  /* Light ⇄ night plays as an actual sunset rather than a cut.
+
+     The orb sinks to the bottom edge of the card while the sky warms through
+     orange and violet; only once it has landed does night take hold, and the
+     other body rises back to the middle. The colour transition is longer than
+     the sink so the warm stage is on screen the whole way down.
+
+     The orb only moves when it is the thing you can see — on a rainy or
+     overcast card the engine parks it above the card, and dragging it into
+     view would be worse than not animating at all. */
+  var SINK_MS = 2600;
+  var RISE_MS = 1900;
+  var duskTimer = null;
+  var riseTimer = null;
+  var nightSettled = false;
+
   function setNight(on) {
-    $('body').toggleClass('night', !!on);
+    on = !!on;
+    var $b = $('body');
+    if ($b.hasClass('night') === on && nightSettled) return; // already there
+
+    clearTimeout(duskTimer);
+    clearTimeout(riseTimer);
+
+    if (!nightSettled) {
+      // First reading of the session: arrive already in the right state.
+      nightSettled = true;
+      $b.toggleClass('night', on);
+      return;
+    }
+
+    var orb = document.getElementById('orb');
+    var visible = typeof currentWeather !== 'undefined' && currentWeather.type === 'sun';
+    // r=50, so this rests the disc on the bottom edge without clipping it.
+    var restY = sizes.card.height - 50;
+    var midY = sizes.card.height / 2;
+
+    // Colour ramp and descent share one duration, so the sky finishes warming
+    // at the exact moment the sun touches the horizon.
+    document.documentElement.style.setProperty('--sky-fade', (SINK_MS / 1000) + 's');
+    $b.addClass('dusk').removeClass('night');
+    if (visible && orb) {
+      TweenMax.to(orb, SINK_MS / 1000, { y: restY, ease: Sine.easeIn, overwrite: 'all' });
+    }
+
+    duskTimer = setTimeout(function () {
+      document.documentElement.style.setProperty('--sky-fade', (RISE_MS / 1000) + 's');
+      $b.removeClass('dusk').toggleClass('night', on);
+      // Whatever is now showing climbs back up out of the horizon.
+      if (visible && orb) {
+        TweenMax.fromTo(orb, RISE_MS / 1000,
+          { y: restY },
+          { y: midY, ease: Sine.easeOut, overwrite: 'all' });
+      }
+    }, SINK_MS);
   }
 
   /* 🌒 Real lunar phase.
@@ -1629,10 +1837,23 @@ CORS-open, so this stays a fully static page.
     return (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'PM' : 'AM');
   }
 
-  // Provisional guess from the visitor's own clock, applied before the first
-  // fetch lands, so the loading curtain doesn't flash light then go dark.
-  var startHour = new Date().getHours();
-  setNight(startHour < 6 || startHour >= 19);
+  /* Set the opening state before anything paints, with the fade suppressed so
+     it is simply *already* dark rather than turning dark. A deep link from the
+     terminal states the answer outright; otherwise the visitor's own clock is
+     a good enough guess for their own city, and the real sunset corrects it a
+     few hundred milliseconds later. */
+  (function primeNight() {
+    var hinted = new URLSearchParams(window.location.search).get('n');
+    var dark = hinted !== null
+      ? hinted === '1'
+      : (new Date().getHours() < 6 || new Date().getHours() >= 19);
+
+    var root = document.documentElement.style;
+    root.setProperty('--sky-fade', '0s');
+    $('body').toggleClass('night', dark);
+    nightSettled = true;
+    setTimeout(function () { root.setProperty('--sky-fade', '1.9s'); }, 200);
+  })();
 
   function setError(msg) {
     $cityErr.text(msg || '').toggleClass('shown', !!msg);
@@ -1666,8 +1887,11 @@ CORS-open, so this stays a fully static page.
     });
   }
 
-  function fetchWeather(city) {
-    return locate(city).then(function (loc) {
+  // `preset` short-circuits geocoding when the caller already resolved a place
+  // (picking a suggestion), so the city you clicked is the city you get rather
+  // than whatever a fresh search for that name returns first.
+  function fetchWeather(city, preset) {
+    return (preset ? $.Deferred().resolve(preset) : locate(city)).then(function (loc) {
       return $.getJSON('https://api.open-meteo.com/v1/forecast', {
         latitude: loc.lat,
         longitude: loc.lon,
@@ -1755,9 +1979,9 @@ CORS-open, so this stays a fully static page.
     setFavicon(reading.type);
   }
 
-  function load(city, isRetry, isInitial) {
+  function load(city, isRetry, isInitial, preset) {
     $details.addClass('loading');
-    fetchWeather(city).then(function (reading) {
+    fetchWeather(city, preset).then(function (reading) {
       currentQuery = city;
       render(reading);
       setError('');
@@ -1926,22 +2150,250 @@ CORS-open, so this stays a fully static page.
 
   // 🔎 City search — Enter loads it, and the city sticks in the URL so the
   // view is linkable.
+  /* ── Autocomplete ─────────────────────────────────────────────────────── */
+  var $suggest = $('#suggest');
+  var hits = [];
+  var activeIdx = -1;
+  var suggestTimer = null;
+
+  var $ghost = $('#ghost');
+
+  function closeSuggest() {
+    hits = [];
+    activeIdx = -1;
+    $suggest.removeClass('open').empty();
+    $ghost.empty();
+    $cityInput.attr('aria-expanded', 'false');
+  }
+
+  /** The completion only shows when the top hit actually extends what's typed. */
+  function ghostTarget() {
+    var val = $cityInput.val();
+    var first = hits[0];
+    if (!val || !first) return null;
+    if (first.name.length <= val.length) return null;
+    if (first.name.slice(0, val.length).toLowerCase() !== val.toLowerCase()) return null;
+    return first.name;
+  }
+
+  function paintGhost() {
+    var full = ghostTarget();
+    $ghost.empty();
+    if (!full) return;
+    var val = $cityInput.val();
+    $ghost
+      .append($('<span>').text(val))
+      .append($('<span class="rest">').text(full.slice(val.length)));
+  }
+
+  function paintActive() {
+    $suggest.children().each(function (i) { $(this).toggleClass('active', i === activeIdx); });
+  }
+
+  function renderSuggest() {
+    if (!hits.length) return closeSuggest();
+    $suggest.empty();
+    hits.forEach(function (h, i) {
+      $('<li>', { role: 'option' })
+        .append($('<span>').text(h.name))
+        .append($('<span class="region">').text(h.region))
+        // mousedown, not click: the input's blur would tear the list down first.
+        .on('mousedown', function (e) { e.preventDefault(); choose(i); })
+        .appendTo($suggest);
+    });
+    activeIdx = -1;
+    $suggest.addClass('open');
+    $cityInput.attr('aria-expanded', 'true');
+    paintGhost();
+  }
+
+  function choose(i) {
+    var h = hits[i];
+    if (!h) return;
+    $cityInput.val(h.name).blur();
+    closeSuggest();
+    load(h.name, false, false, h.loc);
+  }
+
+  /* Clicking the field opens the panel straight away with a spread of places
+     to try, rather than making you guess and type before anything appears.
+     Coordinates are carried so picking one skips geocoding entirely. */
+  /* Well-known cities held locally. The geocoder returns nothing for a single
+     character, so the first keystroke matches against this instead — that's
+     what makes a completion appear the moment you start typing. From two
+     characters on, live results replace these. */
+  var LOCAL = [
+    ['Amsterdam','Netherlands',52.37,4.90,0], ['Athens','Greece',37.98,23.73,0],
+    ['Atlanta','Georgia',33.75,-84.39,1], ['Auckland','New Zealand',-36.85,174.76,0],
+    ['Bangkok','Thailand',13.76,100.50,0], ['Barcelona','Spain',41.39,2.17,0],
+    ['Beijing','China',39.90,116.41,0], ['Berlin','Germany',52.52,13.40,0],
+    ['Boston','Massachusetts',42.36,-71.06,1], ['Buenos Aires','Argentina',-34.60,-58.38,0],
+    ['Cairo','Egypt',30.04,31.24,0], ['Cape Town','South Africa',-33.92,18.42,0],
+    ['Chicago','Illinois',41.88,-87.63,1], ['Copenhagen','Denmark',55.68,12.57,0],
+    ['Delhi','India',28.61,77.21,0], ['Denver','Colorado',39.74,-104.99,1],
+    ['Dubai','United Arab Emirates',25.20,55.27,0], ['Dublin','Ireland',53.35,-6.26,0],
+    ['Edinburgh','Scotland',55.95,-3.19,0], ['Helsinki','Finland',60.17,24.94,0],
+    ['Hong Kong','China',22.32,114.17,0], ['Houston','Texas',29.76,-95.37,1],
+    ['Istanbul','Turkey',41.01,28.98,0], ['Jakarta','Indonesia',-6.21,106.85,0],
+    ['Kyoto','Japan',35.01,135.77,0], ['Lagos','Nigeria',6.52,3.38,0],
+    ['Lima','Peru',-12.05,-77.04,0], ['Lisbon','Portugal',38.72,-9.14,0],
+    ['London','United Kingdom',51.51,-0.13,0], ['Los Angeles','California',34.05,-118.24,1],
+    ['Madrid','Spain',40.42,-3.70,0], ['Melbourne','Australia',-37.81,144.96,0],
+    ['Mexico City','Mexico',19.43,-99.13,0], ['Miami','Florida',25.77,-80.19,1],
+    ['Moscow','Russia',55.76,37.62,0], ['Mumbai','India',19.08,72.88,0],
+    ['Nairobi','Kenya',-1.29,36.82,0], ['Naples','Italy',40.85,14.27,0],
+    ['New York','New York',40.71,-74.01,1], ['Oslo','Norway',59.91,10.75,0],
+    ['Paris','France',48.86,2.35,0], ['Perth','Australia',-31.95,115.86,0],
+    ['Prague','Czechia',50.08,14.44,0], ['Reykjavik','Iceland',64.15,-21.94,0],
+    ['Rio de Janeiro','Brazil',-22.91,-43.17,0], ['Rome','Italy',41.90,12.50,0],
+    ['San Francisco','California',37.77,-122.42,1], ['Seattle','Washington',47.61,-122.33,1],
+    ['Seoul','South Korea',37.57,126.98,0], ['Singapore','Singapore',1.35,103.82,0],
+    ['Stockholm','Sweden',59.33,18.07,0], ['Sydney','Australia',-33.87,151.21,0],
+    ['Tehran','Iran',35.69,51.39,0], ['Tokyo','Japan',35.69,139.69,0],
+    ['Toronto','Canada',43.65,-79.38,0], ['Vancouver','Canada',49.28,-123.12,0],
+    ['Venice','Italy',45.44,12.32,0], ['Vienna','Austria',48.21,16.37,0],
+    ['Warsaw','Poland',52.23,21.01,0], ['Washington','District of Columbia',38.91,-77.04,1],
+    ['Wellington','New Zealand',-41.29,174.78,0], ['Zurich','Switzerland',47.38,8.54,0]
+  ].map(function (c) {
+    return {
+      name: c[0], region: c[1],
+      loc: { lat: c[2], lon: c[3], place: c[0] + ', ' + c[1], imperial: !!c[4] }
+    };
+  });
+
+  function localMatches(q) {
+    var lower = q.toLowerCase();
+    return LOCAL.filter(function (c) {
+      return c.name.toLowerCase().indexOf(lower) === 0;
+    }).slice(0, 5);
+  }
+
+  var STARTERS = [
+    { name: 'Tokyo', region: 'Japan', lat: 35.69, lon: 139.69, imp: false },
+    { name: 'Reykjavik', region: 'Iceland', lat: 64.15, lon: -21.94, imp: false },
+    { name: 'Cairo', region: 'Egypt', lat: 30.04, lon: 31.24, imp: false },
+    { name: 'Sydney', region: 'Australia', lat: -33.87, lon: 151.21, imp: false },
+    { name: 'New York', region: 'New York', lat: 40.71, lon: -74.01, imp: true }
+  ];
+
+  function showStarters() {
+    hits = STARTERS.map(function (s) {
+      return {
+        name: s.name,
+        region: s.region,
+        loc: { lat: s.lat, lon: s.lon, place: s.name + ', ' + s.region, imperial: s.imp }
+      };
+    });
+    renderSuggest();
+  }
+
+  $cityInput.on('focus', function () {
+    if ($cityInput.val().trim().length < 2) showStarters();
+    else if (hits.length) renderSuggest();
+  });
+
+  $cityInput.on('input', function () {
+    var q = $cityInput.val().trim();
+    clearTimeout(suggestTimer);
+    if (!q.length) return showStarters();
+
+    // Answer from the local list straight away so the completion appears on
+    // the first keystroke; the network result overwrites this a moment later.
+    var local = localMatches(q);
+    if (local.length) {
+      hits = local;
+      renderSuggest();
+    } else {
+      paintGhost();
+    }
+    if (q.length < 2) return; // the geocoder needs at least two characters
+    // Debounced so a fast typist doesn't fire a request per keystroke.
+    suggestTimer = setTimeout(function () {
+      $.getJSON('https://geocoding-api.open-meteo.com/v1/search', {
+        name: q, count: 5, language: 'en', format: 'json'
+      }).then(function (data) {
+        // The field may have moved on while this was in flight.
+        if ($cityInput.val().trim() !== q) return;
+        hits = (data && data.results ? data.results : []).map(function (r) {
+          var region = r.country_code === 'US' && r.admin1 ? r.admin1 : r.country;
+          return {
+            name: r.name,
+            region: region || '',
+            loc: {
+              lat: r.latitude,
+              lon: r.longitude,
+              place: region ? r.name + ', ' + region : r.name,
+              imperial: IMPERIAL.indexOf(r.country_code) !== -1
+            }
+          };
+        });
+        if (hits.length) renderSuggest();
+      }, function () { /* keep whatever the local list already showed */ });
+    }, 180);
+  });
+
+  $cityInput.on('blur', function () { setTimeout(closeSuggest, 120); });
+
   $cityInput.on('keydown', function (e) {
+    if (e.which === 27) return closeSuggest(); // Esc
+
+    // Tab accepts the faded completion rather than leaving the field.
+    if (e.which === 9) {
+      var full = ghostTarget();
+      if (!full) return;
+      e.preventDefault();
+      $cityInput.val(full);
+      paintGhost();
+      return;
+    }
+
+    if (hits.length && (e.which === 38 || e.which === 40)) {
+      e.preventDefault();
+      activeIdx = e.which === 40
+        ? (activeIdx + 1) % hits.length
+        : (activeIdx <= 0 ? hits.length - 1 : activeIdx - 1);
+      paintActive();
+      return;
+    }
+
     if (e.which !== 13) return;
+    if (activeIdx >= 0) return choose(activeIdx); // Enter takes the highlighted city
     var q = $cityInput.val().trim();
     $cityInput.blur();
+    closeSuggest();
     load(q);
   });
 
-  /* A ?q= link (the terminal's "see full screen") opens on that city, curtain
-     and all. The parameter is then stripped, so a refresh still resets to
-     home rather than pinning you to wherever you arrived from. */
-  var deepLink = (new URLSearchParams(window.location.search).get('q') || '').trim();
+  /* A deep link (the terminal's "see full screen") opens on that place,
+     curtain and all, then the parameters are stripped so a refresh still
+     resets to home.
+
+     Coordinates are preferred over a name: the terminal's city list holds
+     exact points, and re-geocoding the label would quietly land somewhere
+     else — searching "Cape Horn" finds one in California long before the
+     one off Chile. */
+  var params = new URLSearchParams(window.location.search);
+  var deepLat = parseFloat(params.get('lat'));
+  var deepLon = parseFloat(params.get('lon'));
+  var deepName = (params.get('name') || '').trim();
+  var deepLink = (params.get('q') || '').trim();
+
   if (window.history && history.replaceState && window.location.search) {
     history.replaceState(null, '', window.location.pathname);
   }
-  if (deepLink) $cityInput.val(deepLink);
-  load(deepLink, false, true);
+
+  if (!isNaN(deepLat) && !isNaN(deepLon)) {
+    $cityInput.val(deepName.split(',')[0]);
+    load(deepName, false, true, {
+      lat: deepLat,
+      lon: deepLon,
+      place: deepName || 'Somewhere',
+      imperial: params.get('imp') === '1'
+    });
+  } else {
+    if (deepLink) $cityInput.val(deepLink);
+    load(deepLink, false, true);
+  }
 
   // Conditions drift slowly; a refresh every 10 minutes is plenty, and only
   // while the tab is actually being looked at.

@@ -9,6 +9,10 @@ type Scene = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunder
 
 type Conditions = {
   place: string;
+  /** Carried so the full-screen link points at this exact spot rather than
+   *  whatever a fresh name search happens to return. */
+  lat: number;
+  lon: number;
   temp: number; // °C
   feels: number; // °C
   humidity: number;
@@ -105,13 +109,60 @@ const esc = (s: unknown) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
+// US states by postal code, so `augusta ga` lands in Georgia rather than Maine.
+const US_STATES: Record<string, string> = {
+  al: 'Alabama', ak: 'Alaska', az: 'Arizona', ar: 'Arkansas', ca: 'California',
+  co: 'Colorado', ct: 'Connecticut', de: 'Delaware', fl: 'Florida', ga: 'Georgia',
+  hi: 'Hawaii', id: 'Idaho', il: 'Illinois', in: 'Indiana', ia: 'Iowa',
+  ks: 'Kansas', ky: 'Kentucky', la: 'Louisiana', me: 'Maine', md: 'Maryland',
+  ma: 'Massachusetts', mi: 'Michigan', mn: 'Minnesota', ms: 'Mississippi',
+  mo: 'Missouri', mt: 'Montana', ne: 'Nebraska', nv: 'Nevada', nh: 'New Hampshire',
+  nj: 'New Jersey', nm: 'New Mexico', ny: 'New York', nc: 'North Carolina',
+  nd: 'North Dakota', oh: 'Ohio', ok: 'Oklahoma', or: 'Oregon', pa: 'Pennsylvania',
+  ri: 'Rhode Island', sc: 'South Carolina', sd: 'South Dakota', tn: 'Tennessee',
+  tx: 'Texas', ut: 'Utah', vt: 'Vermont', va: 'Virginia', wa: 'Washington',
+  wv: 'West Virginia', wi: 'Wisconsin', wy: 'Wyoming', dc: 'District of Columbia',
+  pr: 'Puerto Rico',
+};
+
+/**
+ * Splits a trailing US state off a query — `augusta ga`, `augusta, ga` and
+ * `augusta,ga` all become `{ name: 'augusta', state: 'Georgia' }`. A bare state
+ * name is left alone, so `georgia` still searches for the country.
+ */
+function splitState(query: string): { name: string; state: string | null } {
+  const cleaned = query.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = cleaned.split(' ');
+  if (words.length < 2) return { name: cleaned, state: null };
+
+  // Longest match wins, so "kansas city ks" beats a stray "kansas".
+  for (let take = 3; take >= 1; take--) {
+    if (words.length <= take) continue;
+    const tail = words.slice(-take).join(' ').toLowerCase();
+    const full = Object.values(US_STATES).find((s) => s.toLowerCase() === tail);
+    const state = take === 1 ? US_STATES[tail] : undefined;
+    if (full || state) {
+      return { name: words.slice(0, words.length - take).join(' '), state: (full || state)! };
+    }
+  }
+  return { name: cleaned, state: null };
+}
+
 async function locate(city: string): Promise<{ lat: number; lon: number; place: string; imperial: boolean }> {
   if (city) {
+    const { name, state } = splitState(city);
+    // Ask for several candidates when a state is named, so we can pick the one
+    // that actually sits in it — the API orders purely by population.
     const res = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=${encodeURIComponent(city)}`
+      `https://geocoding-api.open-meteo.com/v1/search?count=${state ? 20 : 1}&language=en&format=json&name=${encodeURIComponent(name)}`
     );
     if (!res.ok) throw new Error('geocode');
-    const hit = (await res.json())?.results?.[0];
+    const results = (await res.json())?.results ?? [];
+    const hit = state
+      ? results.find(
+          (r: any) => r.country_code === 'US' && String(r.admin1 || '').toLowerCase() === state.toLowerCase()
+        ) ?? results[0]
+      : results[0];
     if (!hit) throw new Error('nocity');
     const region = hit.admin1 && hit.country_code === 'US' ? hit.admin1 : hit.country;
     return {
@@ -186,9 +237,31 @@ const SCAN: [string, number, number, boolean][] = [
   ['Panama City', 8.98, -79.52, false], ['Kuala Lumpur', 3.14, 101.69, false],
   ['Dhaka', 23.81, 90.41, false], ['Ho Chi Minh City', 10.82, 106.63, false],
   ['Cayenne', 4.92, -52.33, false], ['Colombo', 6.93, 79.86, false],
-  // …and the places the wind never lets up.
+  // …and the places the wind never lets up. Deliberately deep: a condition is
+  // only fun if pressing it twice can take you somewhere new, and wind needs
+  // both a clear sky and 30km/h, which few places manage at any one moment.
   ['Cape Horn', -55.98, -67.27, false], ['Torshavn', 62.01, -6.77, false],
   ['Stanley', -51.7, -57.85, false], ['Wick', 58.44, -3.09, false],
+  ['Perth', -31.95, 115.86, false], ['Hobart', -42.88, 147.33, false],
+  ['Invercargill', -46.41, 168.35, false], ['Esperance', -33.86, 121.89, false],
+  ['Port Elizabeth', -33.96, 25.6, false], ['Galway', 53.27, -9.05, false],
+  ['Aberdeen', 57.15, -2.09, false], ['Bergen', 60.39, 5.32, false],
+  ['Brest', 48.39, -4.49, false], ['Tarifa', 36.01, -5.6, false],
+  ['Halifax', 44.65, -63.58, false], ["St John's", 47.56, -52.71, false],
+  ['Iqaluit', 63.75, -68.52, false], ['Utqiagvik', 71.29, -156.79, true],
+  ['Amarillo', 35.22, -101.83, true], ['Cheyenne', 41.14, -104.82, true],
+  ['Dodge City', 37.75, -100.02, true], ['Casper', 42.85, -106.31, true],
+  ['Wollongong', -34.42, 150.89, false], ['Napier', -39.49, 176.92, false],
+  // Broader tropical sweep, so storms and showers vary too.
+  ['Belem', -1.46, -48.5, false], ['Manaus North', -2.6, -60.7, false],
+  ['Iquitos', -3.75, -73.25, false], ['Medellin', 6.24, -75.58, false],
+  ['Havana', 23.11, -82.37, false], ['San Juan', 18.47, -66.11, true],
+  ['Douala', 4.05, 9.77, false], ['Libreville', 0.42, 9.47, false],
+  ['Addis Ababa', 9.03, 38.74, false], ['Dar es Salaam', -6.79, 39.21, false],
+  ['Kolkata', 22.57, 88.36, false], ['Yangon', 16.87, 96.2, false],
+  ['Medan', 3.6, 98.67, false], ['Pontianak', -0.02, 109.33, false],
+  ['Port Moresby', -9.44, 147.18, false], ['Cairns', -16.92, 145.77, false],
+  ['Suva', -18.14, 178.44, false], ['Davao', 7.19, 125.46, false],
 ];
 
 // If nothing is doing the exact thing, fall back to the nearest relative
@@ -206,8 +279,17 @@ const NEIGHBOURS: Partial<Record<Scene, Scene[]>> = {
 
 let lastCondPick: Partial<Record<Scene, string>> = {};
 
+// One world scan covers every condition, so cache it. Open-Meteo bills a bulk
+// request per location, and this list is long — re-scanning on every command
+// burns through the rate limit fast enough to start failing.
+let scanCache: Conditions[] | null = null;
+let scanAt = 0;
+const SCAN_TTL = 10 * 60 * 1000;
+
 /** Finds a city somewhere on earth that is currently having `want`. */
 async function fetchByCondition(want: Scene): Promise<Conditions> {
+  if (scanCache && Date.now() - scanAt < SCAN_TTL) return choosePick(scanCache, want);
+
   const res = await fetch(
     'https://api.open-meteo.com/v1/forecast?' +
       new URLSearchParams({
@@ -232,6 +314,8 @@ async function fetchByCondition(want: Scene): Promise<Conditions> {
       wind >= 30 && (known.scene === 'clear' || known.scene === 'cloudy') ? 'wind' : known.scene;
     readings.push({
       place: SCAN[i][0],
+      lat: SCAN[i][1],
+      lon: SCAN[i][2],
       temp: Number(cur.temperature_2m),
       feels: Number(cur.apparent_temperature),
       humidity: Number(cur.relative_humidity_2m),
@@ -245,13 +329,20 @@ async function fetchByCondition(want: Scene): Promise<Conditions> {
     });
   });
 
+  scanCache = readings;
+  scanAt = Date.now();
+  return choosePick(readings, want);
+}
+
+/** Picks a city for `want`, avoiding an immediate repeat of the last one. */
+function choosePick(readings: Conditions[], want: Scene): Conditions {
   for (const scene of [want, ...(NEIGHBOURS[want] ?? [])]) {
     let pool = readings.filter((r) => r.scene === scene);
     if (!pool.length) continue;
     // Never hand back the same city twice in a row for the same word.
     const fresh = pool.filter((r) => r.place !== lastCondPick[want]);
     if (fresh.length) pool = fresh;
-    const pick = pool[Math.floor(Math.random() * pool.length)];
+    const pick = { ...pool[Math.floor(Math.random() * pool.length)] };
     lastCondPick[want] = pick.place;
     // Say so when this isn't actually the condition that was asked for.
     if (scene !== want) pick.fellBackFrom = want;
@@ -284,6 +375,8 @@ async function fetchConditions(city: string): Promise<Conditions> {
 
   return {
     place: loc.place,
+    lat: loc.lat,
+    lon: loc.lon,
     temp: Number(cur.temperature_2m),
     feels: Number(cur.apparent_temperature),
     humidity: Number(cur.relative_humidity_2m),
@@ -832,7 +925,15 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
           <span style="color:${C.dim};">humidity <span style="color:${C.pink}">${cond.humidity}%</span></span>
           <span style="color:${C.dim};">wind <span style="color:${C.pink}">${windVal} ${windUnit}</span></span>
           <span style="flex:1 1 auto;"></span>
-          <a href="/weather?q=${encodeURIComponent(cond.place.split(',')[0].trim())}" class="wx-fullscreen" style="flex:0 0 auto;">see full screen</a>
+          <a href="/weather?${new URLSearchParams({
+            lat: String(cond.lat),
+            lon: String(cond.lon),
+            name: cond.place,
+            imp: cond.imperial ? '1' : '0',
+            // Night is known here, so the page can open already dark instead
+            // of painting light and then transitioning.
+            n: cond.isDay ? '0' : '1',
+          })}" class="wx-fullscreen" target="_blank" rel="noopener" style="flex:0 0 auto;">see full screen</a>
         </div>
         <div style="margin-top:6px; opacity:0.55; color:${C.dim}; font-size:0.9em;">
           <span title="Weather data by Open-Meteo">weather</span> · try <span style="color:${C.pink}">weather <span class="wx-city" style="transition:opacity 0.35s ease;">tokyo</span></span>

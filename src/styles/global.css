@@ -660,6 +660,23 @@
     mix-blend-mode: multiply;
     opacity: 0.5;
   }
+
+  /* Backdrop grid for the shelf cards.
+
+     Anchored to the centre by the browser rather than by script. An SVG
+     <pattern> tiles from its own origin, so the leftover space piles up on one
+     side; offsetting it in JS fixes the centring but makes the whole grid jump
+     by half a cell every time the width crosses a multiple of the cell size.
+     background-position does the same job continuously and for free.
+
+     Cell size per card via --grid-cell. */
+  .card-grid {
+    background-image:
+      linear-gradient(to right, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 1px, transparent 1px);
+    background-size: var(--grid-cell, 32px) var(--grid-cell, 32px);
+    background-position: center center;
+  }
 }
 
 /* Reduce motion respects */

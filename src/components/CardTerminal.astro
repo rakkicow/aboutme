@@ -12,15 +12,8 @@
   <div class="absolute -bottom-24 -left-10 h-72 w-72 rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(57,255,20,0.18), transparent 65%); filter: blur(80px);"></div>
   <div class="absolute right-1/4 top-1/2 h-48 w-48 rounded-full animate-mesh-drift-3" style="background: radial-gradient(circle, rgba(184,91,130,0.45), transparent 65%); filter: blur(50px);"></div>
 
-  {/* Grid */}
-  <svg class="absolute inset-0 h-full w-full opacity-[0.08]" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <pattern id="grid-term" data-grid width="32" height="32" patternUnits="userSpaceOnUse">
-        <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-width="0.5" />
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#grid-term)" />
-  </svg>
+  {/* Grid — centred by background-position, so it never shifts on resize */}
+  <div class="card-grid absolute inset-0 opacity-[0.08]" style="--grid-cell: 32px;" aria-hidden="true"></div>
 </div>
 
 {/* Terminal window — 16/10 minimum, grows with content on narrow cards */}
@@ -74,7 +67,7 @@
 <span style="color:#DC9BB5;">Host</span><span style="color:#7CE57C;">: MacBook Air M5</span>
 <span style="color:#DC9BB5;">Uptime</span><span style="color:#7CE57C;">: </span><span data-uptime style="color:#7CE57C;">…</span>
 <span style="color:#DC9BB5;">Resolution</span><span style="color:#7CE57C;">: </span><span data-resolution style="color:#7CE57C;">…</span>
-<span style="color:#DC9BB5;">Weather</span><span style="color:#7CE57C;">: </span><span data-weather style="color:#7CE57C;">…</span>
+<span style="color:#DC9BB5;">Weather</span><span style="color:#7CE57C;">: </span><a href="/weather" class="wx-line" data-weather style="color:#7CE57C;">…</a>
 <span style="color:#DC9BB5;">Coffee</span><span style="color:#7CE57C;">: </span><span style="color:#FFB37A;">critical</span>
 <span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
     </div>
@@ -158,6 +151,15 @@
     white-space: nowrap;
   }
   .np-text:hover {
+    color: #39ff14 !important;
+  }
+  /* The weather readout is a link to the full page, same as the track title */
+  .wx-line {
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+  }
+  .wx-line:hover {
     color: #39ff14 !important;
   }
   /* Tiny equalizer, Dynamic Island style — five center-anchored bars, each
@@ -256,28 +258,6 @@
     window.addEventListener('resize', updateRes);
   }
 
-  // Centre the backdrop grid. The pattern tiles from the origin, so whatever
-  // doesn't divide evenly into 32px piles up on one side; splitting the
-  // remainder puts equal margins left/right and top/bottom.
-  const gridPatterns = document.querySelectorAll<SVGPatternElement>('[data-grid]');
-  const centreGrid = () => {
-    gridPatterns.forEach((p) => {
-      const svg = p.ownerSVGElement;
-      if (!svg) return;
-      const box = svg.getBoundingClientRect();
-      if (!box.width || !box.height) return;
-      const cell = 32;
-      p.setAttribute('x', ((box.width % cell) / 2).toFixed(2));
-      p.setAttribute('y', ((box.height % cell) / 2).toFixed(2));
-    });
-  };
-  if (gridPatterns.length) {
-    centreGrid();
-    window.addEventListener('resize', centreGrid);
-    // The card is laid out after fonts/animations settle, so measure again.
-    setTimeout(centreGrid, 300);
-  }
-
   // Weather line — this panel is *my* machine, so it reports my sky rather than
   // the visitor's. Open-Meteo is keyless and CORS-open, so it stays a static page.
   const wxEls = document.querySelectorAll<HTMLElement>('[data-weather]');
@@ -313,6 +293,10 @@
     };
     loadWeather();
     setInterval(loadWeather, 900000); // every 15 min
+
+    // Let the link navigate instead of the card swallowing the click and
+    // dropping into interactive mode.
+    wxEls.forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
   }
 
   // Now playing — straight from Last.fm (user.getrecenttracks marks the live
