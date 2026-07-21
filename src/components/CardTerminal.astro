@@ -67,7 +67,7 @@
 <span style="color:#DC9BB5;">Host</span><span style="color:#7CE57C;">: MacBook Air M5</span>
 <span style="color:#DC9BB5;">Uptime</span><span style="color:#7CE57C;">: </span><span data-uptime style="color:#7CE57C;">…</span>
 <span style="color:#DC9BB5;">Resolution</span><span style="color:#7CE57C;">: </span><span data-resolution style="color:#7CE57C;">…</span>
-<span style="color:#DC9BB5;">Weather</span><span style="color:#7CE57C;">: </span><a href="/weather" class="wx-line" data-weather style="color:#7CE57C;">…</a>
+<span style="color:#DC9BB5;">Weather</span><span style="color:#7CE57C;">: </span><a href="/weather" class="wx-line" data-weather-link data-weather style="color:#7CE57C;">…</a>
 <span style="color:#DC9BB5;">Coffee</span><span style="color:#7CE57C;">: </span><span style="color:#FFB37A;">critical</span>
 <span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
     </div>
@@ -293,10 +293,6 @@
     };
     loadWeather();
     setInterval(loadWeather, 900000); // every 15 min
-
-    // Let the link navigate instead of the card swallowing the click and
-    // dropping into interactive mode.
-    wxEls.forEach((el) => el.addEventListener('click', (e) => e.stopPropagation()));
   }
 
   // Now playing — straight from Last.fm (user.getrecenttracks marks the live
@@ -575,6 +571,22 @@
           setTimeout(() => {
             if ((window as any)._runTerminalCommand) {
               (window as any)._runTerminalCommand('whatsong');
+            }
+          }, 50);
+        });
+      });
+
+      // Same for the weather readout: it drops into the terminal's own weather
+      // view rather than leaving the page. The full site is one click further,
+      // behind "see more".
+      document.querySelectorAll('[data-weather-link]').forEach(link => {
+        link.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          await activateTerminal();
+          setTimeout(() => {
+            if ((window as any)._runTerminalCommand) {
+              (window as any)._runTerminalCommand('weather');
             }
           }, 50);
         });

@@ -136,6 +136,15 @@ export type WebShelfEntry = {
 
 export const webShelf: WebShelfEntry[] = [
   {
+    name: 'Weather',
+    purpose: 'Tiny 24/7 Weather Widget',
+    detail: 'Single-page weather card with custom animations, weather-based search, and dynamic rendering.',
+    year: '2026',
+    liveUrl: 'https://rakshita.me/weather',
+    href: 'https://rakshita.me/weather',
+    shot: '/assets/shelf/weather.webp',
+  },
+  {
     name: 'LHS HOSA',
     purpose: 'Healthcare club site for Lakeside High',
     detail: 'Multi-page Bootstrap build with Analytics, custom branding, and event docs.',
@@ -170,15 +179,6 @@ export const webShelf: WebShelfEntry[] = [
     liveUrl: 'https://rakshita.me/graph',
     href: 'https://rakshita.me/graph',
     shot: '/assets/shelf/graph.webp',
-  },
-  {
-    name: 'Weather',
-    purpose: 'Tiny weather widget',
-    detail: 'Single-page weather card with weather-icons + a soft gradient background. Built as a quick CSS exercise.',
-    year: '2020',
-    liveUrl: 'https://rakshita.me/weather',
-    href: 'https://rakshita.me/weather',
-    shot: '/assets/shelf/weather.webp',
   },
 ];
 

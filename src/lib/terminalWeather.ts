@@ -933,7 +933,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
             // Night is known here, so the page can open already dark instead
             // of painting light and then transitioning.
             n: cond.isDay ? '0' : '1',
-          })}" class="wx-fullscreen" target="_blank" rel="noopener" style="flex:0 0 auto;">see full screen</a>
+          })}" class="wx-fullscreen" target="_blank" rel="noopener" style="flex:0 0 auto;">see more</a>
         </div>
         <div style="margin-top:6px; opacity:0.55; color:${C.dim}; font-size:0.9em;">
           <span title="Weather data by Open-Meteo">weather</span> · try <span style="color:${C.pink}">weather <span class="wx-city" style="transition:opacity 0.35s ease;">tokyo</span></span>
