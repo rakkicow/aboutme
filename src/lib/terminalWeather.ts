@@ -2,8 +2,9 @@
 // animated ASCII scene inside the terminal.
 //
 // Location comes from IP (geojs), not the browser Geolocation API: city-level
-// accuracy is plenty for weather and it costs the visitor no permission prompt.
-// Conditions come from Open-Meteo, which is keyless and CORS-open.
+// conditions come from Open-Meteo, which is keyless and CORS-open.
+
+import { cliReveal } from './terminalGame';
 
 type Scene = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunder' | 'wind';
 
@@ -950,6 +951,8 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
         <div style="margin-top:6px; opacity:0.55; color:${C.dim}; font-size:0.9em;">
           <span title="Weather data by Open-Meteo">weather</span> · try <span style="color:${C.pink}">weather <span class="wx-city" style="transition:opacity 0.35s ease;">tokyo</span></span>
         </div>`;
+
+      cliReveal(out);
 
       // Click the temperature to swap units. Each city still opens in whatever
       // its own country uses.

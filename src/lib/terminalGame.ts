@@ -1,3 +1,30 @@
+export function cliReveal(el: HTMLElement) {
+  el.style.overflow = 'hidden';
+  el.style.maxHeight = '0px';
+  requestAnimationFrame(() => {
+    const target = el.scrollHeight;
+    if (target === 0) {
+      el.style.maxHeight = 'none';
+      el.style.overflow = '';
+      return;
+    }
+    let cur = 0;
+    const speed = 25; 
+    const stepSize = Math.max(16, Math.ceil(target / 40)); 
+    const int = setInterval(() => {
+      cur += stepSize;
+      el.style.maxHeight = cur + 'px';
+      const termBody = el.closest('.terminal-body') || document.querySelector('.terminal-body');
+      if (termBody) termBody.scrollTop = termBody.scrollHeight;
+      if (cur >= target + 20) {
+        clearInterval(int);
+        el.style.maxHeight = 'none';
+        el.style.overflow = '';
+      }
+    }, speed);
+  });
+}
+
 export function initGame(
   termForm: HTMLFormElement,
   termInput: HTMLInputElement,
@@ -137,8 +164,9 @@ export function initGame(
       const titleHtml = `
         <style>
           @keyframes lyricReveal {
-            0% { opacity: 0.25; text-shadow: none; }
-            100% { opacity: 1; text-shadow: 0 0 6px rgba(255,255,255,0.6); }
+            0% { opacity: 0; text-shadow: none; }
+            30% { opacity: 1; text-shadow: 0 0 6px rgba(255,255,255,0.8); }
+            100% { opacity: 1; }
           }
         </style>
         <div style="display:flex; align-items:center; gap:12px; margin-bottom: 8px;">
@@ -167,11 +195,14 @@ export function initGame(
       `;
       
       outContainer.innerHTML = asciiHtml + titleHtml;
+      cliReveal(outContainer);
       
       const lyricsDiv = outContainer.querySelector('.whatsong-lyrics') as HTMLElement;
       if (lyricsDiv) {
-        fetch(`https://lrclib.net/api/get?artist_name=${encodeURIComponent(track.artist)}&track_name=${encodeURIComponent(track.name)}`)
-          .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3500);
+        fetch(`https://lrclib.net/api/get?artist_name=${encodeURIComponent(track.artist)}&track_name=${encodeURIComponent(track.name)}`, { signal: controller.signal })
+          .then(res => { clearTimeout(timeoutId); if (!res.ok) throw new Error(); return res.json(); })
           .then(data => {
             if (data && data.plainLyrics) {
               const lines = data.plainLyrics.split('\n').map((l: string) => l.trim()).filter((l: string) => l.length > 0 && !l.startsWith('['));
@@ -233,7 +264,7 @@ export function initGame(
                      else if (c === '>') c = '&gt;';
                      else if (c === '&') c = '&amp;';
                      else if (c === '\n') return '<br>';
-                     return `<span style="opacity:0.25; animation: lyricReveal 0.8s forwards ${delay.toFixed(3)}s">${c}</span>`;
+                     return `<span style="opacity:0; animation: lyricReveal 0.4s forwards ${delay.toFixed(3)}s">${c}</span>`;
                   }).join('');
                   
                   lyricsDiv.innerHTML = html;
@@ -249,7 +280,9 @@ export function initGame(
               }
             }
           })
-          .catch(() => {});
+          .catch(err => {
+             // Silently hide lyrics if the fetch fails, hangs, or is aborted
+          });
       }
       
       setTimeout(() => { termBody.scrollTop = termBody.scrollHeight; }, 10);
@@ -513,6 +546,7 @@ export function initGame(
 
     if (out.innerHTML !== '') {
       interactiveOutput.appendChild(out);
+      cliReveal(out);
     }
 
     // Garbage collector: Remove old commands from the top to save space
