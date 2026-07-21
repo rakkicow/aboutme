@@ -8,16 +8,37 @@
   aria-label="Toggle dark mode"
   data-cursor-hover
 >
-  {/* Sun (shown in dark mode) */}
-  <svg class="hidden h-4 w-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <circle cx="12" cy="12" r="4" />
-    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-  </svg>
-  {/* Moon (shown in light mode) */}
-  <svg class="h-4 w-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-  </svg>
+  {/* Line-icon set (default) — sun in dark mode, moon in light mode */}
+  <span class="theme-icons theme-icons--svg">
+    <svg class="hidden h-4 w-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+    </svg>
+    <svg class="h-4 w-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+    </svg>
+  </span>
+  {/* Emoji set — revealed alongside the 🍔 once the mobile menu has been opened */}
+  <span class="theme-icons theme-icons--emoji" aria-hidden="true">
+    <span class="hidden dark:inline">☀️</span>
+    <span class="dark:hidden">🌙</span>
+  </span>
 </button>
+
+<style>
+  .theme-icons {
+    display: grid;
+    place-items: center;
+  }
+  .theme-icons--emoji {
+    display: none;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  /* Flip line-icons → emoji once the menu's been opened (see Nav's data flag) */
+  :global(html[data-menu-revealed]) .theme-icons--svg { display: none; }
+  :global(html[data-menu-revealed]) .theme-icons--emoji { display: grid; }
+</style>
 
 <script>
   const btn = document.getElementById('theme-toggle');

@@ -62,6 +62,7 @@ export type ReelEntry = {
   source?: 'youtube' | 'drive' | 'external';       // defaults to 'youtube'
   href?: string;                                    // required when source = 'external'
   thumbnail?: string;                               // overrides the auto-derived thumbnail URL
+  aspect?: string;                                  // CSS aspect-ratio for the frame; defaults to '16 / 9'. Set for cinematic clips so the player fills the frame instead of letterboxing.
   title: string;
   caption: string;
   pill?: string;
@@ -71,8 +72,12 @@ export type ReelEntry = {
 export const reel: ReelEntry[] = [
   {
     id: '1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f',
-    source: 'drive',
+    source: 'external',
+    href: 'https://drive.google.com/file/d/1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f/view',
     thumbnail: '/assets/usfna-poster.jpg',
+    // Cinematic 2.37:1 — poster fills the frame; opens the full clip in a new tab.
+    // (Drive's inline /preview player renders broken at phone-sized heights.)
+    aspect: '1280 / 539',
     title: 'AugustaENT — Ultrasound-Guided Fine-Needle Aspiration',
     caption: 'Guided USFNA walkthrough for new AugustaENT patients',
     pill: 'Healthcare',
