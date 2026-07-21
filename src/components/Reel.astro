@@ -95,18 +95,21 @@ import { reel } from '~/data/projects';
       })}
     </div>
     </div>
-    {/* Navigation buttons — positioned outside the panel at the top and bottom */}
-    <button type="button" data-reel-up class="reel-nav-btn absolute bottom-[100%] mb-4 left-1/2 -translate-x-1/2 z-30 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Previous video">
+    {/* Navigation buttons — positioned close to the viewer pane, outside the rounded border */}
+    <button type="button" data-reel-up class="reel-nav-btn absolute bottom-[100%] mb-2 sm:mb-3 left-1/2 -translate-x-1/2 z-50 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Previous video">
       <svg class="reel-cue-chevron reel-cue-chevron-up h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
     </button>
-    <div class="absolute top-[100%] mt-4 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1">
-      <button type="button" data-reel-down class="reel-nav-btn text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Next video">
-        <svg class="reel-cue-chevron reel-cue-chevron-down h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-      </button>
-      <span class="text-[#ff7a1e] text-[9px] font-semibold uppercase tracking-[0.25em] pointer-events-none whitespace-nowrap" style="text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);">
-        <span class="hidden sm:inline">scroll</span><span class="sm:hidden">swipe</span> · arrows
-      </span>
-    </div>
+    <button type="button" data-reel-down class="reel-nav-btn absolute top-[100%] mt-2 sm:mt-3 left-1/2 -translate-x-1/2 z-50 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Next video">
+      <svg class="reel-cue-chevron reel-cue-chevron-down h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+    </button>
+  </div>
+  
+  {/* The swipe/scroll text hint — pinned to the bottom of the dialog (viewport) */}
+  <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+    <span data-reel-hint class="opacity-100 text-[#ff7a1e] text-[10px] font-semibold uppercase tracking-[0.25em] whitespace-nowrap transition-opacity duration-500" style="text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);">
+      <span class="hidden sm:inline">scroll</span><span class="sm:hidden">swipe</span> · arrows
+    </span>
+  </div>
   </div>
 </dialog>
 
@@ -305,18 +308,31 @@ import { reel } from '~/data/projects';
     const mount = (slide: HTMLElement) => {
       const target = slide.querySelector<HTMLElement>('[data-reel-mount]');
       const source = slide.dataset.source ?? 'youtube';
-      if (!target || source === 'external' || target.querySelector('iframe')) return;
+      if (!target || source === 'external' || target.querySelector('iframe') || target.querySelector('video')) return;
       const id = slide.dataset.id ?? '';
+      
+      if (source === 'drive') {
+        const iframe = document.createElement('iframe');
+        iframe.src = `https://drive.google.com/file/d/${id}/preview`;
+        iframe.className = 'absolute top-0 left-0 border-0 rounded-2xl overflow-hidden';
+        iframe.style.width = '200%';
+        iframe.style.height = '200%';
+        iframe.style.transform = 'scale(0.5)';
+        iframe.style.transformOrigin = '0 0';
+        iframe.addEventListener('load', () => {
+          slide.classList.add('is-playing');
+        });
+        target.appendChild(iframe);
+        return;
+      }
+
       const iframe = document.createElement('iframe');
       // Autoplay WITH sound. Browsers may still gate unmuted autoplay, but the
       // modal opens from a click and scrolling is an active gesture, so it
       // plays in practice.
       // No loop — the video plays through so we can auto-advance on end.
       // enablejsapi lets the YouTube player postMessage its state changes.
-      iframe.src =
-        source === 'drive'
-          ? `https://drive.google.com/file/d/${id}/preview`
-          : `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
+      iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
       iframe.title = slide.dataset.title ?? '';
       iframe.allow =
         'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
@@ -325,18 +341,17 @@ import { reel } from '~/data/projects';
       iframe.className = 'absolute inset-0 h-full w-full border-0';
       iframe.addEventListener('load', () => {
         slide.classList.add('is-playing'); // hide the pill once the player is up
-        if (source === 'youtube') {
-          // Subscribe to the player's state changes (0 = ended → auto-advance)
-          iframe.contentWindow?.postMessage(
-            JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
-            '*',
-          );
-        }
+        // Subscribe to the player's state changes (0 = ended → auto-advance)
+        iframe.contentWindow?.postMessage(
+          JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
+          '*',
+        );
       });
       target.appendChild(iframe);
     };
     const unmount = (slide: HTMLElement) => {
       slide.querySelector('[data-reel-mount] iframe')?.remove();
+      slide.querySelector('[data-reel-mount] video')?.remove();
       slide.classList.remove('is-playing');
     };
 
@@ -527,5 +542,15 @@ import { reel } from '~/data/projects';
     window.addEventListener('resize', () => {
       if (modal.open) setSlideHeight();
     });
+
+    const hint = modal.querySelector<HTMLElement>('[data-reel-hint]');
+    if (hint) {
+      // Delay attaching the scroll listener so the initial scrollTo doesn't trigger it
+      setTimeout(() => {
+        scroller.addEventListener('scroll', () => {
+          hint.style.opacity = '0';
+        }, { once: true });
+      }, 1000);
+    }
   }
 </script>

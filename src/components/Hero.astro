@@ -156,6 +156,22 @@ import MeshGradient from '~/components/MeshGradient.astro';
         86% { transform: scale(1) rotate(-8deg); }
         94% { transform: scale(1) rotate(6deg); }
       }
+
+      @keyframes screen-shake {
+        0%, 100% { transform: translate(0, 0); }
+        10% { transform: translate(-0.5px, 0.5px); }
+        20% { transform: translate(0.5px, -0.5px); }
+        30% { transform: translate(-0.5px, -0.5px); }
+        40% { transform: translate(0.5px, 0.5px); }
+        50% { transform: translate(-0.5px, 0); }
+        60% { transform: translate(0.5px, 0); }
+        70% { transform: translate(0, 0.5px); }
+        80% { transform: translate(0, -0.5px); }
+        90% { transform: translate(-0.5px, 0.5px); }
+      }
+      :global(.shake-screen) {
+        animation: screen-shake 0.15s ease-in-out infinite;
+      }
     </style>
 
     <script>
@@ -279,65 +295,18 @@ import MeshGradient from '~/components/MeshGradient.astro';
     </div>
   </div>
 
-  {/* Easter egg — tapping the "cow" top-skill plays a (synthesized) moo */}
+  {/* Easter egg — tapping the "cow" top-skill plays a moo */}
   <script>
     (() => {
       const btn = document.querySelector<HTMLButtonElement>('[data-moo]');
       if (!btn) return;
-      let ctx: AudioContext | null = null;
+      const audio = new Audio('/assets/moo.mp3');
       btn.addEventListener('click', () => {
-        try {
-          const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-          ctx = ctx || new AC();
-          if (ctx.state === 'suspended') ctx.resume();
-          const t = ctx.currentTime;
+        document.body.classList.add('shake-screen');
+        setTimeout(() => document.body.classList.remove('shake-screen'), 800);
 
-          // Mellow lowpass that closes over the note — gives the vocal "moo" timbre
-          const filter = ctx.createBiquadFilter();
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(1100, t);
-          filter.frequency.exponentialRampToValueAtTime(480, t + 0.9);
-          filter.Q.value = 7;
-
-          const master = ctx.createGain();
-          master.gain.setValueAtTime(0.0001, t);
-          master.gain.exponentialRampToValueAtTime(0.5, t + 0.07);
-          master.gain.setValueAtTime(0.45, t + 0.55);
-          master.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
-          master.connect(filter);
-          filter.connect(ctx.destination);
-
-          // Two partials + a pitch contour that rises then falls: "mMOO-ooh"
-          const partials: Array<[number, number, OscillatorType]> = [
-            [1, 0.6, 'sawtooth'],
-            [2, 0.15, 'sine'],
-          ];
-          for (const [mult, g, type] of partials) {
-            const osc = ctx.createOscillator();
-            osc.type = type;
-            const og = ctx.createGain();
-            og.gain.value = g;
-            const f = 150 * mult;
-            osc.frequency.setValueAtTime(f * 0.78, t);
-            osc.frequency.exponentialRampToValueAtTime(f * 1.18, t + 0.16);
-            osc.frequency.setValueAtTime(f * 1.15, t + 0.5);
-            osc.frequency.exponentialRampToValueAtTime(f * 0.72, t + 0.92);
-            osc.connect(og);
-            og.connect(master);
-            osc.start(t);
-            osc.stop(t + 0.96);
-          }
-
-          // Gentle vibrato for a more animal-like wobble
-          const lfo = ctx.createOscillator();
-          lfo.frequency.value = 6.5;
-          const lfoGain = ctx.createGain();
-          lfoGain.gain.value = 12;
-          lfo.connect(lfoGain);
-          lfoGain.connect(filter.detune);
-          lfo.start(t);
-          lfo.stop(t + 0.96);
-        } catch {}
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
       });
     })();
   </script>
