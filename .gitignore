@@ -10,3 +10,6 @@ dist
 
 # Local-only archive of files removed from the published sites
 unused/
+
+# Claude rules
+.clauderules
