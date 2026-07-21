@@ -72,7 +72,7 @@ export type ReelEntry = {
 export const reel: ReelEntry[] = [
   {
     id: '1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f',
-    source: 'external',
+    source: 'drive',
     href: 'https://drive.google.com/file/d/1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f/view',
     thumbnail: '/assets/usfna-poster.jpg',
     // Cinematic 2.37:1 — poster fills the frame; opens the full clip in a new tab.
