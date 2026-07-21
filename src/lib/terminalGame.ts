@@ -11,13 +11,28 @@ export function initGame(
 
   // Everything tab-completable. `sudo rm -rf /` is deliberately absent — it
   // should only ever be found by someone who already had the idea.
-  const COMMANDS = ['help', 'whatsong', 'walloftext', 'hack', 'clear', 'exit'];
+  const COMMANDS = ['help', 'whatsong', 'weather', 'walloftext', 'hack', 'clear', 'exit'];
+
+  // Second-level completions, so `weather ` + Tab cycles the conditions the
+  // same way a real shell cycles a command's arguments.
+  const WEATHER_ARGS = [
+    'help', 'sunny', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy',
+  ];
 
   // Shell history. Newest last; `histPos === history.length` means "not
   // browsing", i.e. the live input line.
   const history: string[] = [];
   let histPos = 0;
   let draft = ''; // what was typed before arrowing up, restored on the way back down
+
+  // Tab-completion menu state. `tabHits` is non-empty only while the user is
+  // cycling, so a fresh Tab always recomputes from what is actually typed.
+  let tabHits: string[] = [];
+  let tabIdx = 0;
+  const resetTabCycle = () => {
+    tabHits = [];
+    tabIdx = 0;
+  };
 
   // Last.fm track metadata is third-party text — escape before it touches innerHTML.
   const esc = (s: unknown) =>
@@ -299,28 +314,54 @@ export function initGame(
     // ── Tab completion ──
     if (e.key === 'Tab') {
       e.preventDefault();
-      const typed = termInput.value.trim().toLowerCase();
+
+      // Already cycling? Tab again steps to the next candidate.
+      if (tabHits.length > 1 && termInput.value === tabHits[tabIdx]) {
+        tabIdx = (tabIdx + 1) % tabHits.length;
+        setInput(tabHits[tabIdx]);
+        return;
+      }
+
+      const raw = termInput.value;
+      const typed = raw.trim().toLowerCase();
       if (!typed) return;
 
-      const hits = COMMANDS.filter((c) => c.startsWith(typed));
-      if (hits.length === 1) {
-        setInput(hits[0]);
-      } else if (hits.length > 1) {
-        // Fill in as far as the candidates agree, then list them like a shell.
-        let prefix = hits[0];
-        for (const h of hits) {
-          while (!h.startsWith(prefix)) prefix = prefix.slice(0, -1);
-        }
-        if (prefix.length > typed.length) setInput(prefix);
-
-        const listing = document.createElement('div');
-        listing.className = 'mb-1 opacity-70';
-        listing.style.color = '#7CE57C';
-        listing.textContent = hits.join('   ');
-        interactiveOutput.appendChild(listing);
-        termBody.scrollTop = termBody.scrollHeight;
+      // Completing an argument to `weather` rather than a command name.
+      const wx = /^weather\s+(.*)$/.exec(raw.toLowerCase());
+      let hits: string[];
+      if (wx || /^weather$/.test(typed)) {
+        const partial = wx ? wx[1].trim() : '';
+        hits = WEATHER_ARGS.filter((a) => a.startsWith(partial)).map((a) => `weather ${a}`);
+      } else {
+        hits = COMMANDS.filter((c) => c.startsWith(typed));
       }
+      if (!hits.length) return;
+
+      if (hits.length === 1) {
+        resetTabCycle();
+        setInput(hits[0]);
+        return;
+      }
+
+      // More than one match: list them once, then hand the first candidate over
+      // so repeated Tab walks the menu instead of stalling on the prefix.
+      const listing = document.createElement('div');
+      listing.className = 'mb-1 opacity-70';
+      listing.style.color = '#7CE57C';
+      // Show just the varying part, so an argument menu doesn't repeat
+      // "weather" nine times.
+      listing.textContent = hits.map((h) => h.replace(/^weather /, '')).join('   ');
+      interactiveOutput.appendChild(listing);
+      termBody.scrollTop = termBody.scrollHeight;
+
+      tabHits = hits;
+      tabIdx = 0;
+      setInput(hits[0]);
+      return;
     }
+
+    // Any other key means the user has moved on — start the menu fresh next time.
+    resetTabCycle();
   });
 
   termForm.addEventListener('submit', (e) => {
@@ -380,7 +421,7 @@ export function initGame(
     } else if (cmd === 'rm -rf /' || cmd === 'rm -fr /') {
       out.innerHTML = `<span style="color:#FF5F57">rm: cannot remove '/': Permission denied</span><br/>Try again with <span style="color:#DC9BB5">sudo</span>. Or don't.`;
     } else if (cmd === 'help') {
-      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode<br/><br/><span style="opacity:0.6">↑/↓ for history · Tab to complete</span>`;
+      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">weather</span>: see the live sky of your city<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode<br/><br/><span style="opacity:0.6">↑/↓ for history · Tab to complete</span>`;
     } else if (cmd === 'walloftext') {
       out.innerHTML = `<span style="color:#DC9BB5">Redirecting via secure tunnel...</span>`;
       setTimeout(() => {
@@ -395,6 +436,19 @@ export function initGame(
       out.className = 'mb-1 whatsong-view';
       updateWhatsongView(out);
 
+
+    } else if (cmd === 'weather' || cmd.startsWith('weather ')) {
+      // The animated scene wants the whole window, same as whatsong.
+      interactiveOutput.innerHTML = '';
+      out.className = 'mb-1 weather-view';
+      out.innerHTML = `<span style="color:#DC9BB5">Reading the sky…</span>`;
+      // Take the city off the raw input — `cmd` has already been lowercased.
+      const city = rawCmd.trim().replace(/\s+/g, ' ').slice('weather '.length).trim();
+      import('./terminalWeather')
+        .then(({ renderWeather }) => renderWeather(out, termBody, city))
+        .catch(() => {
+          out.innerHTML = `<span style="color:#FF5F57">weather: forecast module failed to load.</span>`;
+        });
 
     } else if (cmd === 'hack') {
       out.innerHTML = `<span style="color:#FF5F57">WARNING: UNAUTHORIZED ACCESS DETECTED.</span><br/>Initiating override sequence...<br/><br/>To bypass the firewall, type the password. Hint: it says "moo".`;

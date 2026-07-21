@@ -4,7 +4,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-title" content="Weather">
+<meta name="description" content="A live weather card — real conditions for wherever you are, drawn in SVG.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 <title>Weather - Ria Gupta</title>
 <style>
@@ -20,6 +22,14 @@ html, body, .background {
 
 html {
   background: #fff;
+}
+
+/* Nothing on this page may ever scroll sideways. The zoomed overlay canvases
+   are fixed-position and deliberately larger than the viewport, so they get
+   clipped here rather than growing the page. */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -47,7 +57,8 @@ body {
   padding: 0;
   height: 100%;
   width: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   position: relative;
   background: #eee;
   background: linear-gradient(240deg, rgba(150, 50, 50, 0.3), rgba(0, 0, 200, 0));
@@ -62,10 +73,13 @@ nav ul {
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
           flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 100%;
 }
 nav li a {
   display: block;
-  width: 50px;
+  width: clamp(38px, 11vw, 50px);
   text-align: center;
   color: #aaa;
   cursor: pointer;
@@ -80,10 +94,12 @@ nav li a.active {
 #card {
   box-shadow: 9px 7px 40px -6px rgba(0, 0, 0, 0.25);
   overflow: hidden;
-  width: 300px;
+  /* Shrinks to fit a narrow window instead of pushing the page sideways. The
+     engine re-measures the card on resize, so the scene follows it down. */
+  width: min(300px, calc(100vw - 48px));
   padding: 0;
-  height: 400px;
-  min-height: 300px;
+  height: min(400px, calc((100vw - 48px) * 4 / 3));
+  min-height: 260px;
   margin: 20px;
   border-radius: 5px;
   position: relative;
@@ -121,6 +137,12 @@ nav li a.active {
 #card .details .temp {
   font-size: 60px;
   line-height: 60px;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease;
+}
+#card .details .temp:hover {
+  opacity: 0.65;
 }
 #card .details .temp span {
   font-size: 18px;
@@ -142,6 +164,195 @@ nav li a.active {
 }
 .sun .weather {
   background-color: #ccccff;
+}
+.cloud .weather {
+  background-color: #C4CBD6;
+}
+
+/* Location line + live badge, sitting above the temperature */
+#card .details #place {
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+#card .details #place.shown {
+  opacity: 1;
+}
+/* The place name links out to weather.com, but it should read as part of the
+   card, not as a stock blue hyperlink. */
+#card .details #place a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+#card .details #place a:hover {
+  color: #4444ff;
+  border-bottom-color: currentColor;
+}
+.thunder #card .details #place a:hover {
+  color: #fff;
+}
+#card .details .temp {
+  transition: opacity 0.6s ease;
+}
+#card .details.loading .temp,
+#card .details.loading #date {
+  opacity: 0.35;
+}
+
+/* The date has to survive "Wednesday 21 September" without wrapping, so the
+   day name is abbreviated and the line is pinned to one row. */
+#card .details #date {
+  white-space: nowrap;
+}
+/* That city's own wall clock, not the visitor's */
+#card .details #localtime {
+  white-space: nowrap;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  opacity: 0.75;
+  margin-bottom: 4px;
+}
+
+/* Search — type a city and the card flies to it */
+#search {
+  margin: 18px 20px 0 20px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  max-width: calc(100% - 40px);
+}
+/* Home — jumps back to the visitor's own city from wherever they wandered to */
+#home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  color: #888;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+#home:hover {
+  color: #4444ff;
+  border-color: #4444ff;
+  background: rgba(255, 255, 255, 0.9);
+}
+#home svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Zen — same circular affordance as home, on the other side of the field */
+#zen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.65);
+  color: #888;
+  cursor: pointer;
+  transition: color 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+}
+#zen:hover {
+  color: #4444ff;
+  border-color: #4444ff;
+  background: rgba(255, 255, 255, 0.9);
+}
+#zen svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Zen mode ──────────────────────────────────────────────────────────────
+   Everything but the sky gets out of the way. The animation keeps running and
+   refreshing underneath; a click on the background brings the UI back. */
+body.zen nav,
+body.zen #search {
+  opacity: 0;
+  pointer-events: none;
+}
+/* A literal zoom: the card and both overlay canvases scale by the same factor
+   about the same point, so the scene is pixel-for-pixel the regular view, just
+   larger. Nothing is re-laid-out, so nothing drifts or clips.
+
+   The scale lands on #card-zoom rather than #card because the lightning tween
+   writes an inline transform onto #card, which would win over this. */
+#card-zoom {
+  transform: scale(1);
+  transform-origin: 50% 50%;
+}
+#outer, #back {
+  transform-origin: var(--zoom-x, 50%) var(--zoom-y, 50%);
+}
+#card-zoom, #outer, #back {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+body.zen #card-zoom,
+body.zen #outer,
+body.zen #back {
+  transform: scale(var(--zoom-scale, 1.8));
+}
+body.zen #card {
+  cursor: pointer;
+}
+nav, #search {
+  transition: opacity 0.5s ease;
+}
+#card {
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#search input {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 12px;
+  width: min(170px, 42vw);
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.65);
+  outline: none;
+  color: #444;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+#search input:focus {
+  border-color: #4444ff;
+  box-shadow: 0 0 0 3px rgba(68, 68, 255, 0.12);
+}
+#search input::placeholder {
+  color: #999;
+}
+#search .err {
+  font-size: 12px;
+  color: #c0392b;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+#search .err.shown {
+  opacity: 1;
 }
 .weather #inner {
   background-color: white;
@@ -175,23 +386,292 @@ nav li a.active {
   position: fixed;
   pointer-events: none;
 }
+
+/* ── Night ─────────────────────────────────────────────────────────────────
+   Driven by the rendered city's own sunset, not the visitor's clock — look up
+   Reykjavik at 2am and you get Reykjavik's night. Everything shifts together:
+   page, card, controls, orb and the loading curtain. */
+#moon { display: none; }
+body.night #sun { display: none; }
+body.night #moon { display: block; }
+/* !important because #sunburst carries an inline fill from the original markup */
+body.night #sunburst { fill: url(#SVGID_moon_) !important; }
+
+body.night {
+  background: #0A0E1A;
+  background: linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0));
+}
+body.night .background {
+  background: #0A0E1A;
+  background: linear-gradient(120deg, rgba(30, 60, 90, 0.45), rgba(10, 14, 26, 0));
+}
+body.night .container {
+  background: #0A0E1A;
+  background: linear-gradient(240deg, rgba(70, 40, 90, 0.5), rgba(10, 14, 26, 0));
+}
+
+/* Card faces, one per mood, all pushed down into night */
+body.night .weather { background-color: #1B2438; }
+body.night .thunder .weather { background-color: #171B26; }
+body.night .rain .weather { background-color: #19212F; }
+body.night .snow .weather { background-color: #212B40; }
+body.night .cloud .weather { background-color: #1A2130; }
+body.night .sun .weather { background-color: #232C4A; }
+body.night .weather #inner {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0) 100%);
+}
+
+/* Clouds read as silhouettes at night rather than white puffs */
+body.night .weather #cloud1 { fill: #39445C; }
+body.night .weather #cloud2 { fill: #2E384D; }
+body.night .weather #cloud3 { fill: #242C3E; }
+body.night .thunder .weather #cloud1 { fill: #2B3040; }
+body.night .thunder .weather #cloud2 { fill: #222733; }
+body.night .thunder .weather #cloud3 { fill: #1A1E28; }
+
+body.night #card { box-shadow: 0 18px 50px -8px rgba(0, 0, 0, 0.7); }
+body.night #card .details { color: #A8B4CC; }
+body.night .thunder #card .details { color: #C9D3E6; }
+body.night #card .details #place a:hover { color: #8FB4FF; }
+
+/* The clear-sky button becomes a moon at night (weather-icons wi-night-clear) */
+body.night #button-sun .wi-day-sunny:before { content: "\f02e"; }
+
+body.night nav li a { color: #5A6684; }
+body.night nav li a:hover { color: #C3CEE6; }
+body.night nav li a.active { color: #8FB4FF; }
+
+body.night #home,
+body.night #zen,
+body.night #search input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #A8B4CC;
+}
+body.night #search input::placeholder { color: #64708C; }
+body.night #home:hover,
+body.night #zen:hover {
+  color: #8FB4FF;
+  border-color: #8FB4FF;
+  background: rgba(255, 255, 255, 0.1);
+}
+body.night #search input:focus {
+  border-color: #8FB4FF;
+  box-shadow: 0 0 0 3px rgba(143, 180, 255, 0.16);
+}
+
+/* The loading curtain matches whatever the page is about to become */
+body.night #loader {
+  background:
+    linear-gradient(240deg, rgba(70, 40, 90, 0.5), rgba(10, 14, 26, 0)),
+    linear-gradient(120deg, rgba(30, 60, 90, 0.45), rgba(10, 14, 26, 0)),
+    linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0)),
+    #0A0E1A;
+}
+body.night #loader li {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 4px 16px rgba(var(--wx-rgb), 0.45),
+    inset 0 1px 2px rgba(255, 255, 255, 0.3),
+    inset 0 -2px 6px rgba(var(--wx-rgb), 0.5);
+}
+body.night #loader.wx-snow li::after {
+  background: linear-gradient(180deg, #dce8f8 0%, #b9cbe4 100%);
+}
+
+/* ── Loading curtain ───────────────────────────────────────────────────────
+   Same bouncing-bars loader as the /ig, /li … redirect pages. It starts in a
+   neutral slate, then takes on the colour of the sky it just fetched — so the
+   loader tells you the weather a beat before the card does. */
+#loader {
+  --wx-rgb: 150, 158, 170;
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* The same gradient stack the page itself sits on, so the curtain reads as
+     the page holding its breath rather than a separate white screen. */
+  background:
+    linear-gradient(240deg, rgba(150, 50, 50, 0.3), rgba(0, 0, 200, 0)),
+    linear-gradient(120deg, rgba(50, 150, 100, 0.2), rgba(0, 0, 100, 0)),
+    linear-gradient(0deg, rgba(0, 0, 200, 0.2), rgba(0, 0, 200, 0)),
+    #eee;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+/* The bars stay invisible until the weather is known, so they only ever
+   appear already wearing the right colour and animation. */
+#loader ul, #loader .glow {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+#loader.in ul, #loader.in .glow {
+  opacity: 1;
+}
+#loader.out {
+  opacity: 0;
+  visibility: hidden;
+}
+#loader .glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--wx-rgb), 0.3) 0%, transparent 70%);
+  filter: blur(20px);
+  transition: background 0.6s ease;
+}
+#loader ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+#loader li {
+  position: relative;
+  margin: 0 7px;
+  width: 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 100%),
+              linear-gradient(180deg, rgba(var(--wx-rgb), 0.9) 0%, rgba(var(--wx-rgb), 0.6) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow:
+    0 4px 12px rgba(var(--wx-rgb), 0.3),
+    inset 0 1px 2px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 6px rgba(var(--wx-rgb), 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: loaderBar 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+  transition: background 0.6s ease, box-shadow 0.6s ease;
+}
+/* Negative delay so the wave is already mid-stride on the first frame — no
+   load-in jitter while every bar sits at the same height. */
+#loader li:nth-child(odd) { animation-delay: -0.8s; }
+#loader li:nth-child(even) { animation-delay: 0s; }
+
+@keyframes loaderBar {
+  from { height: 12px; }
+  to { height: 80px; }
+}
+
+/* Storms rattle the whole rig, and the bars strobe like distant lightning. */
+#loader.storm ul {
+  animation: loaderShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
+}
+#loader.storm li {
+  animation: loaderBar 0.45s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate,
+             loaderStrike 1.4s steps(1, end) infinite;
+}
+#loader.storm li:nth-child(odd) { animation-delay: -0.45s, 0.2s; }
+#loader.storm li:nth-child(even) { animation-delay: 0s, 0.7s; }
+
+@keyframes loaderShake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 1px) rotate(-0.6deg); }
+  50% { transform: translate(2px, -2px) rotate(0.5deg); }
+  75% { transform: translate(-1px, 2px) rotate(-0.3deg); }
+}
+@keyframes loaderStrike {
+  0%, 88% { filter: none; }
+  90%, 94% { filter: brightness(2.4) saturate(0.4); }
+  92% { filter: none; }
+}
+
+/* Wind — the whole rig leans right and shivers, bracing against a gust. */
+#loader.wx-wind ul {
+  animation: loaderLean 1.9s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+#loader.wx-wind li {
+  animation: loaderBar 0.6s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate,
+             loaderShiver 0.22s ease-in-out infinite;
+}
+#loader.wx-wind li:nth-child(odd) { animation-delay: -0.6s, -0.11s; }
+#loader.wx-wind li:nth-child(even) { animation-delay: 0s, 0s; }
+@keyframes loaderLean {
+  0%, 100% { transform: skewX(-7deg) translateX(0); }
+  50% { transform: skewX(-15deg) translateX(5px); }
+}
+@keyframes loaderShiver {
+  0%, 100% { margin-left: 7px; margin-right: 7px; }
+  50% { margin-left: 8px; margin-right: 6px; }
+}
+
+/* Snow — a cap of settled snow rides the top of every bar. */
+#loader.wx-snow li::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -3px;
+  right: -3px;
+  height: 9px;
+  border-radius: 60% 60% 45% 45% / 85% 85% 25% 25%;
+  background: linear-gradient(180deg, #ffffff 0%, #eef5fc 100%);
+  box-shadow: 0 1px 3px rgba(70, 100, 130, 0.18);
+}
+
+/* Rain — glassy bars with droplets running down the face of each one. */
+#loader.wx-rain li {
+  background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0) 100%),
+              linear-gradient(180deg, rgba(var(--wx-rgb), 0.95) 0%, rgba(var(--wx-rgb), 0.55) 100%);
+  box-shadow:
+    0 6px 16px rgba(var(--wx-rgb), 0.38),
+    inset 0 2px 3px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 8px rgba(var(--wx-rgb), 0.5);
+}
+#loader.wx-rain li::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 6px;
+  height: 7px;
+  margin-left: -3px;
+  border-radius: 60% 60% 55% 55% / 75% 75% 35% 35%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.35) 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14), inset 0 -1px 2px rgba(var(--wx-rgb), 0.55);
+  animation: loaderDrip 1.5s cubic-bezier(0.5, 0, 0.9, 0.6) infinite;
+}
+#loader.wx-rain li:nth-child(2)::before { animation-delay: 0.55s; }
+#loader.wx-rain li:nth-child(3)::before { animation-delay: 1.1s; }
+#loader.wx-rain li:nth-child(4)::before { animation-delay: 0.3s; }
+#loader.wx-rain li:nth-child(5)::before { animation-delay: 0.85s; }
+#loader.wx-rain li:nth-child(6)::before { animation-delay: 1.35s; }
+#loader.wx-rain li:nth-child(7)::before { animation-delay: 0.15s; }
+@keyframes loaderDrip {
+  0% { top: 6%; opacity: 0; transform: scale(0.6); }
+  18% { opacity: 1; transform: scale(1); }
+  80% { opacity: 1; transform: scale(1); }
+  100% { top: 88%; opacity: 0; transform: scale(0.75); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #loader li, #loader.storm ul, #loader.storm li { animation-duration: 2s; }
+  #loader.storm ul { animation: none; }
+}
 </style>
-<script>
-  window.console = window.console || function(t) {};
-</script>
-<script>
-  if (document.location.search.match(/type=embed/gi)) {
-    window.parent.postMessage("resize", "*");
-  }
-</script>
 </head>
 <body translate="no">
+<div id="loader">
+  <div class="glow"></div>
+  <ul><li></li><li></li><li></li><li></li><li></li><li></li><li></li></ul>
+</div>
 <div class="background">
 <div class="container">
 <svg id="back">
 <radialGradient id="SVGID_1_" cx="0" cy="0" r="320.8304" gradientUnits="userSpaceOnUse">
 <stop offset="0" style="stop-color:#FFDE17;stop-opacity:0.7" />
 <stop offset="1" style="stop-color:#FFF200;stop-opacity:0" />
+</radialGradient>
+<!-- Night version of the burst: cold moonlight instead of sunlight -->
+<radialGradient id="SVGID_moon_" cx="0" cy="0" r="320.8304" gradientUnits="userSpaceOnUse">
+<stop offset="0" style="stop-color:#9FB6E8;stop-opacity:0.45" />
+<stop offset="1" style="stop-color:#5C7BC0;stop-opacity:0" />
 </radialGradient>
 <path id="sunburst" style="fill:url(#SVGID_1_);" d="M0,319.7c-18.6,0-37.3-1.6-55.5-4.8L-7.8,41.4c5.1,0.9,10.6,0.9,15.7,0L56,314.8C37.6,318,18.8,319.7,0,319.7z
 	 M-160.8,276.6c-32.5-18.8-61.3-42.9-85.5-71.6L-34,26.2c3.4,4.1,7.4,7.4,12,10.1L-160.8,276.6z M161.3,276.4L22.1,36.2
@@ -205,19 +685,30 @@ nav li a.active {
 <nav>
     
 <ul>
-<li><a id="button-snow" class="active"><i class="wi wi-snow"></i></a></li>
+<li><a id="button-snow"><i class="wi wi-snow"></i></a></li>
 <li><a id="button-wind"><i class="wi wi-strong-wind"></i></a></li>
 <li><a id="button-rain"><i class="wi wi-rain"></i></a></li>
 <li><a id="button-thunder"><i class="wi wi-lightning"></i></a></li>
+<li><a id="button-cloud" class="active"><i class="wi wi-cloudy"></i></a></li>
 <li><a id="button-sun"><i class="wi wi-day-sunny"></i></a></li>
 </ul>
 </nav>
+<div id="card-zoom">
 <div id="card" class="weather">
 <svg id="inner">
 <defs>
 <path id="leaf" d="M41.9,56.3l0.1-2.5c0,0,4.6-1.2,5.6-2.2c1-1,3.6-13,12-15.6c9.7-3.1,19.9-2,26.1-2.1c2.7,0-10,23.9-20.5,25 c-7.5,0.8-17.2-5.1-17.2-5.1L41.9,56.3z" />
 </defs>
+<!-- Sun and moon ride in the same group so every existing tween moves both;
+     CSS decides which one is actually visible. The moon is a single crescent
+     path: a circle arc out, then a wider arc back to bite the shape. -->
+<g id="orb">
 <circle id="sun" style="fill: #F7ED47" cx="0" cy="0" r="50" />
+<!-- Endpoints shifted +21 so the crescent's bounding box is centred on the
+     group origin; otherwise every tween that centres the orb leaves the moon
+     sitting a third of the way off to one side. -->
+<path id="moon" style="fill: #EAF0FF" d="M29,-49.4 A50,50 0 1,0 29,49.4 A62,62 0 0,1 29,-49.4 Z" />
+</g>
 <g id="layer3"></g>
 <g id="cloud3" class="cloud"></g>
 <g id="layer2"></g>
@@ -225,18 +716,32 @@ nav li a.active {
 <g id="layer1"></g>
 <g id="cloud1" class="cloud"></g>
 </svg>
-<div class="details">
-<div class="temp">20<span>c</span></div>
+<div class="details loading">
+<div class="left">
+<div id="place"></div>
+<div class="temp">--<span>&deg;</span></div>
+</div>
 <div class="right">
-<div id="date">Monday 22 August</div>
+<div id="date"></div>
+<div id="localtime"></div>
 <div id="summary"></div>
 </div>
 </div>
 </div>
+</div>
+<div id="search">
+<button type="button" id="home" title="Back to my city" aria-label="Back to my city">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/></svg>
+</button>
+<input id="city" type="text" placeholder="another city…" autocomplete="off" spellcheck="false" aria-label="Search weather by city">
+<button type="button" id="zen" title="Hide everything but the weather" aria-label="Hide everything but the weather">
+<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/><path d="M4 20 20 4"/></svg>
+</button>
+<span class="err" id="city-err"></span>
+</div>
 <svg id="outer"></svg>
 </div>
 </div>
-<script src="https://static.codepen.io/assets/common/stopExecutionOnTimeout-157cd5b220a5c80d4ff8e0e70ac069bffd87a61252088146915e8726e5d9f147.js"></script>
 <script src='https://code.jquery.com/jquery-2.2.4.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/1.19.0/TweenMax.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.4.1/snap.svg-min.js'></script>
@@ -262,7 +767,9 @@ var innerSnowHolder = weatherContainer1.group();
 var innerLightningHolder = weatherContainer1.group();
 var leafMask = outerSVG.rect();
 var leaf = Snap.select('#leaf');
-var sun = Snap.select('#sun');
+// The orb group, not the sun itself — every position tween below drives both
+// the sun and the moon, and CSS picks which is showing.
+var sun = Snap.select('#orb');
 var sunburst = Snap.select('#sunburst');
 var outerSplashHolder = outerSVG.group();
 var outerLeafHolder = outerSVG.group();
@@ -298,6 +805,7 @@ var weather = [
 { type: 'wind', name: 'Windy' },
 { type: 'rain', name: 'Rain' },
 { type: 'thunder', name: 'Storms' },
+{ type: 'cloud', name: 'Cloudy' },
 { type: 'sun', name: 'Sunny' }];
 
 
@@ -357,8 +865,10 @@ function init()
 
   // ☀️ set initial weather
 
+  // Neutral holding state — the live fetch swaps this the moment it lands,
+  // so the card never flashes a season it isn't.
   TweenMax.set(sunburst.node, { opacity: 0 });
-  changeWeather(weather[0]);
+  changeWeather(weather[4]);
 }
 
 function onResize()
@@ -847,5 +1357,527 @@ function changeWeather(weather)
   startLightningTimer();
 }
     </script>
+
+<script id="live-weather">
+/*
+
+🌍 Live conditions.
+
+The animation above is a hand-drawn set of five (now six) moods. This script
+picks the mood that matches the sky the visitor is actually standing under.
+
+Location comes from IP rather than the browser Geolocation API — city-level
+accuracy is all a weather card needs, and it costs the visitor no permission
+prompt on arrival. Conditions come from Open-Meteo, which is keyless and
+CORS-open, so this stays a fully static page.
+
+*/
+
+(function () {
+
+  // WMO weather codes → the label we print and the mood we animate.
+  var WMO = {
+    0: ['Clear', 'sun'], 1: ['Mostly clear', 'sun'], 2: ['Partly cloudy', 'cloud'], 3: ['Overcast', 'cloud'],
+    45: ['Fog', 'cloud'], 48: ['Rime fog', 'cloud'],
+    51: ['Light drizzle', 'rain'], 53: ['Drizzle', 'rain'], 55: ['Heavy drizzle', 'rain'],
+    56: ['Freezing drizzle', 'rain'], 57: ['Freezing drizzle', 'rain'],
+    61: ['Light rain', 'rain'], 63: ['Rain', 'rain'], 65: ['Heavy rain', 'rain'],
+    66: ['Freezing rain', 'rain'], 67: ['Freezing rain', 'rain'],
+    71: ['Light snow', 'snow'], 73: ['Snow', 'snow'], 75: ['Heavy snow', 'snow'], 77: ['Snow grains', 'snow'],
+    80: ['Showers', 'rain'], 81: ['Showers', 'rain'], 82: ['Violent showers', 'rain'],
+    85: ['Snow showers', 'snow'], 86: ['Heavy snow showers', 'snow'],
+    95: ['Storms', 'thunder'], 96: ['Storms, hail', 'thunder'], 99: ['Storms, hail', 'thunder']
+  };
+
+  // The handful of countries that never took to Celsius.
+  var IMPERIAL = ['US', 'BS', 'KY', 'LR', 'PW', 'FM', 'MH'];
+
+  // Abbreviated so "Wednesday 21 September" can never wrap to a second line.
+  var DAYS = ['Sun.', 'Mon.', 'Tues.', 'Wed.', 'Thurs.', 'Fri.', 'Sat.'];
+  var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+
+  // Cities to scan when you press a mood button. Spread across both hemispheres
+  // and every climate band, so there is almost always somewhere on the list
+  // that is genuinely snowing / storming / fogged in right now.
+  var SCAN = [
+    ['Reykjavik', 64.15, -21.94], ['Longyearbyen', 78.22, 15.65], ['Nuuk', 64.18, -51.72],
+    ['Anchorage', 61.22, -149.9], ['Oslo', 59.91, 10.75], ['Helsinki', 60.17, 24.94],
+    ['Moscow', 55.76, 37.62], ['London', 51.51, -0.13], ['Dublin', 53.35, -6.26],
+    ['Paris', 48.86, 2.35], ['Berlin', 52.52, 13.4], ['Lisbon', 38.72, -9.14],
+    ['Cairo', 30.04, 31.24], ['Nairobi', -1.29, 36.82], ['Lagos', 6.52, 3.38],
+    ['Cape Town', -33.92, 18.42], ['Johannesburg', -26.2, 28.05], ['Mumbai', 19.08, 72.88],
+    ['Delhi', 28.61, 77.21], ['Bangkok', 13.76, 100.5], ['Singapore', 1.35, 103.82],
+    ['Jakarta', -6.21, 106.85], ['Manila', 14.6, 120.98], ['Tokyo', 35.69, 139.69],
+    ['Seoul', 37.57, 126.98], ['Beijing', 39.9, 116.41], ['Lhasa', 29.65, 91.14],
+    ['Kathmandu', 27.72, 85.32], ['Ulaanbaatar', 47.89, 106.91], ['Tehran', 35.69, 51.39],
+    ['Istanbul', 41.01, 28.98], ['Sydney', -33.87, 151.21], ['Melbourne', -37.81, 144.96],
+    ['Wellington', -41.29, 174.78], ['Auckland', -36.85, 174.76], ['Ushuaia', -54.8, -68.3],
+    ['Punta Arenas', -53.16, -70.91], ['Santiago', -33.45, -70.67], ['Buenos Aires', -34.6, -58.38],
+    ['Lima', -12.05, -77.04], ['Quito', -0.18, -78.47], ['Bogota', 4.71, -74.07],
+    ['La Paz', -16.5, -68.15], ['Mexico City', 19.43, -99.13], ['Denver', 39.74, -104.99],
+    ['Chicago', 41.88, -87.63], ['New York', 40.71, -74.01], ['Miami', 25.77, -80.19],
+    ['Vancouver', 49.28, -123.12], ['Toronto', 43.65, -79.38], ['Honolulu', 21.31, -157.86],
+    ['Fairbanks', 64.84, -147.72],
+    // Somewhere is always in deep winter. These keep the snow button honest
+    // in July, when the whole northern list is sunbathing.
+    ['McMurdo Station', -77.85, 166.67], ['Vostok Station', -78.46, 106.84],
+    ['Concordia Station', -75.1, 123.33], ['Amundsen-Scott', -90, 0],
+    ['Rothera Station', -67.57, -68.13], ['Casey Station', -66.28, 110.53],
+    ['Mawson Station', -67.6, 62.87], ['Summit Camp', 72.58, -38.46],
+    ['Mount Washington', 44.27, -71.3], ['Sonnblick', 47.05, 12.96],
+    // The world's thunder belts — Lake Maracaibo alone storms ~300 nights a year.
+    ['Maracaibo', 9.8, -71.55], ['Kampala', 0.31, 32.58], ['Bogor', -6.6, 106.8],
+    ['Manaus', -3.12, -60.02], ['Kinshasa', -4.32, 15.31], ['Darwin', -12.46, 130.84],
+    ['Panama City', 8.98, -79.52], ['Kuala Lumpur', 3.14, 101.69], ['Caracas', 10.48, -66.9],
+    // …and the places the wind never lets up.
+    ['Cape Horn', -55.98, -67.27], ['Torshavn', 62.01, -6.77], ['Stanley', -51.7, -57.85],
+    ['Perth', -31.95, 115.86], ['Hobart', -42.88, 147.33], ['Nuuk North', 69.22, -51.1],
+    ['Wick', 58.44, -3.09],
+    // A wide sweep of the tropics. Convective storms are always firing
+    // somewhere along this band, which is what keeps the storm button honest.
+    ['Belem', -1.46, -48.5], ['Iquitos', -3.75, -73.25], ['Santa Cruz', -17.78, -63.18],
+    ['Asuncion', -25.28, -57.64], ['Cuiaba', -15.6, -56.1], ['Cayenne', 4.92, -52.33],
+    ['Georgetown', 6.8, -58.16], ['San Juan', 18.47, -66.11], ['Havana', 23.11, -82.37],
+    ['Tegucigalpa', 14.07, -87.19], ['San Jose CR', 9.93, -84.08], ['Medellin', 6.24, -75.58],
+    ['Douala', 4.05, 9.77], ['Libreville', 0.42, 9.47], ['Bangui', 4.36, 18.56],
+    ['Abuja', 9.06, 7.49], ['Freetown', 8.48, -13.23], ['Monrovia', 6.3, -10.8],
+    ['Addis Ababa', 9.03, 38.74], ['Dar es Salaam', -6.79, 39.21], ['Lusaka', -15.39, 28.32],
+    ['Antananarivo', -18.88, 47.51], ['Dhaka', 23.81, 90.41], ['Kolkata', 22.57, 88.36],
+    ['Yangon', 16.87, 96.2], ['Ho Chi Minh City', 10.82, 106.63], ['Hanoi', 21.03, 105.85],
+    ['Phnom Penh', 11.56, 104.92], ['Medan', 3.6, 98.67], ['Makassar', -5.15, 119.43],
+    ['Port Moresby', -9.44, 147.18], ['Cairns', -16.92, 145.77], ['Suva', -18.14, 178.44],
+    ['Colombo', 6.93, 79.86], ['Chittagong', 22.36, 91.78], ['Padang', -0.95, 100.35],
+    ['Pontianak', -0.02, 109.33], ['Davao', 7.19, 125.46], ['Kuching', 1.55, 110.34]
+  ];
+
+  var $place = $('#place');
+  var $temp = $('#card .temp');
+  var $date = $('#date');
+  var $details = $('#card .details');
+  var $cityInput = $('#city');
+  var $cityErr = $('#city-err');
+
+  var currentQuery = ''; // the city we are currently showing; '' means "the visitor's own"
+  var scanCache = null;  // last world scan, so repeat button presses are instant
+  var scanAt = 0;
+
+  function byType(type) {
+    for (var i = 0; i < weather.length; i++) {
+      if (weather[i].type === type) return weather[i];
+    }
+    return weather[weather.length - 1];
+  }
+
+  /* ⏳ The loading curtain takes the colour of whatever sky we just fetched,
+     holds for a beat so you actually see it, then lifts. Storms shake. */
+  var LOADER_RGB = {
+    sun: '255, 199, 0',
+    cloud: '150, 158, 170',
+    rain: '60, 130, 220',
+    snow: '170, 205, 235',
+    thunder: '118, 110, 190',
+    wind: '120, 200, 160'
+  };
+
+  var LOADER_HOLD = 1600; // how long the bars stay up once they've faded in
+
+  /* The curtain runs blank until the sky is known. Only then do the bars fade
+     in — already the right colour, already doing the right animation — hold
+     for a beat, and lift. No neutral phase, no recolouring mid-flight. */
+  function revealLoader(type) {
+    var el = document.getElementById('loader');
+    if (!el || el.getAttribute('data-done')) return;
+    el.setAttribute('data-done', '1');
+
+    el.style.setProperty('--wx-rgb', LOADER_RGB[type] || LOADER_RGB.cloud);
+    el.classList.add('wx-' + type);
+    if (type === 'thunder') el.classList.add('storm');
+
+    // A short timeout rather than requestAnimationFrame: rAF is frozen in a
+    // backgrounded tab, which would leave the curtain up forever for anyone
+    // who opens this in a tab they aren't looking at yet.
+    setTimeout(function () {
+      el.classList.add('in');
+      setTimeout(function () { el.classList.add('out'); }, LOADER_HOLD);
+      setTimeout(function () {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, LOADER_HOLD + 700);
+    }, 30);
+  }
+
+  // Never trap the page behind the curtain, whatever goes wrong upstream.
+  setTimeout(function () { revealLoader('cloud'); }, 8000);
+  setTimeout(function () {
+    var el = document.getElementById('loader');
+    if (el && el.parentNode) el.parentNode.removeChild(el);
+  }, 12000);
+
+  // 🔖 The tab icon becomes the sky you're looking at.
+  var FAVICON = {
+    sun: '☀️', cloud: '☁️', rain: '🌧️', snow: '❄️', thunder: '⛈️', wind: '🌬️'
+  };
+  function setFavicon(type) {
+    var glyph = FAVICON[type] || FAVICON.cloud;
+    var svg =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">' +
+      '<text y="50" font-size="52">' + glyph + '</text></svg>';
+    var link = document.querySelector('link[rel="icon"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.type = 'image/svg+xml';
+    link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+  }
+
+  /* 🌙 Night is decided by the rendered city's own sunset, not the visitor's
+     clock — look up Reykjavik at 2am and you get Reykjavik's sky. All three
+     timestamps come back as local wall-clock for that spot, so they compare
+     directly. Above the arctic circle the sun may never set, in which case
+     there is no sunrise/sunset pair and we defer to Open-Meteo's is_day. */
+  function isNight(cur, daily) {
+    var sunrise = daily && daily.sunrise && daily.sunrise[0];
+    var sunset = daily && daily.sunset && daily.sunset[0];
+    if (!sunrise || !sunset) return cur.is_day === 0;
+    var now = new Date(cur.time).getTime();
+    var up = new Date(sunrise).getTime();
+    var down = new Date(sunset).getTime();
+    if (isNaN(now) || isNaN(up) || isNaN(down)) return cur.is_day === 0;
+    return now < up || now >= down;
+  }
+
+  function setNight(on) {
+    $('body').toggleClass('night', !!on);
+  }
+
+  /* Read the clock straight off the ISO string. `timezone=auto` already gives
+     local wall-clock for that city, so parsing it into a Date would only drag
+     the visitor's own offset back in. */
+  function localTime(iso) {
+    var m = /T(\d{2}):(\d{2})/.exec(iso || '');
+    if (!m) return '';
+    var h = parseInt(m[1], 10);
+    return (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'PM' : 'AM');
+  }
+
+  // Provisional guess from the visitor's own clock, applied before the first
+  // fetch lands, so the loading curtain doesn't flash light then go dark.
+  var startHour = new Date().getHours();
+  setNight(startHour < 6 || startHour >= 19);
+
+  function setError(msg) {
+    $cityErr.text(msg || '').toggleClass('shown', !!msg);
+    if (msg) setTimeout(function () { $cityErr.removeClass('shown'); }, 4000);
+  }
+
+  // 📍 Where is the visitor? Empty `city` means "ask their IP".
+  function locate(city) {
+    if (city) {
+      return $.getJSON('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=' +
+        encodeURIComponent(city)).then(function (data) {
+          var hit = data && data.results && data.results[0];
+          if (!hit) return $.Deferred().reject('nocity');
+          var region = hit.country_code === 'US' && hit.admin1 ? hit.admin1 : hit.country;
+          return {
+            lat: hit.latitude,
+            lon: hit.longitude,
+            place: region ? hit.name + ', ' + region : hit.name,
+            imperial: IMPERIAL.indexOf(hit.country_code) !== -1
+          };
+        });
+    }
+    return $.getJSON('https://get.geojs.io/v1/ip/geo.json').then(function (g) {
+      var region = g.country_code === 'US' ? g.region : g.country;
+      return {
+        lat: parseFloat(g.latitude),
+        lon: parseFloat(g.longitude),
+        place: g.city ? (region ? g.city + ', ' + region : g.city) : (region || 'Somewhere'),
+        imperial: IMPERIAL.indexOf(g.country_code) !== -1
+      };
+    });
+  }
+
+  function fetchWeather(city) {
+    return locate(city).then(function (loc) {
+      return $.getJSON('https://api.open-meteo.com/v1/forecast', {
+        latitude: loc.lat,
+        longitude: loc.lon,
+        current: 'temperature_2m,weather_code,wind_speed_10m,is_day',
+        daily: 'sunrise,sunset',
+        forecast_days: 1,
+        timezone: 'auto'
+      }).then(function (data) {
+        var cur = data && data.current;
+        if (!cur) return $.Deferred().reject('noweather');
+        var known = WMO[cur.weather_code] || ['Unknown', 'cloud'];
+        var type = known[1];
+
+        // A blustery clear day is more fun as wind than as another still sky.
+        if (cur.wind_speed_10m >= 30 && (type === 'sun' || type === 'cloud')) type = 'wind';
+
+        return {
+          place: loc.place,
+          lat: loc.lat,
+          lon: loc.lon,
+          imperial: loc.imperial,
+          celsius: cur.temperature_2m,
+          label: known[0],
+          type: type,
+          night: isNight(cur, data.daily),
+          // `timezone=auto` hands back local wall-clock time for that spot,
+          // so the date reads correctly even for a city ten hours away.
+          time: cur.time
+        };
+      });
+    });
+  }
+
+  var lastReading = null;
+  var unitOverride = null; // null = use whatever that city uses; else 'F' or 'C'
+
+  function paintTemp(reading) {
+    var useF = unitOverride ? unitOverride === 'F' : reading.imperial;
+    var deg = useF ? Math.round(reading.celsius * 9 / 5 + 32) : Math.round(reading.celsius);
+    $temp.html(deg + '<span>&deg;' + (useF ? 'F' : 'C') + '</span>');
+  }
+
+  // Click the temperature to swap units. Each new city starts in its own
+  // local convention again.
+  $temp.on('click', function () {
+    if (!lastReading) return;
+    var showingF = unitOverride ? unitOverride === 'F' : lastReading.imperial;
+    unitOverride = showingF ? 'C' : 'F';
+    paintTemp(lastReading);
+  });
+
+  // 🎨 Push a reading into the card and animate to its mood.
+  function render(reading) {
+    lastReading = reading;
+    unitOverride = null;
+    setNight(reading.night);
+
+    // The place name opens that city's forecast on weather.com.
+    $place.html($('<a>', {
+      href: 'https://weather.com/weather/today/l/' +
+            encodeURIComponent(reading.lat + ',' + reading.lon),
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      text: reading.place
+    })).addClass('shown');
+
+    paintTemp(reading);
+
+    var d = new Date(reading.time);
+    if (!isNaN(d)) $date.text(DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()]);
+    $('#localtime').text(localTime(reading.time));
+
+    $details.removeClass('loading');
+
+    // Print the specific label ("Heavy rain") rather than the mood's generic
+    // name ("Rain") — the engine reads `.name` when it animates the summary in.
+    var mood = byType(reading.type);
+    mood.name = reading.label;
+    changeWeather(mood);
+    // Set it directly too: the engine only writes the label from a tween's
+    // onComplete, and a second changeWeather within that second kills the tween
+    // before it ever fires, leaving the label blank.
+    $('#summary').html(reading.label);
+    setFavicon(reading.type);
+  }
+
+  function load(city, isRetry, isInitial) {
+    $details.addClass('loading');
+    fetchWeather(city).then(function (reading) {
+      currentQuery = city;
+      render(reading);
+      setError('');
+      // The curtain belongs to whatever the page opened on — your own sky
+      // normally, or the city a ?q= link pointed at. Later navigation happens
+      // behind an already-lifted curtain.
+      if (isInitial) revealLoader(reading.type);
+    }, function (why) {
+      $details.removeClass('loading');
+      if (why === 'nocity') setError('no city by that name');
+      else if (!isRetry) setError('could not reach the weather');
+      if (isInitial) revealLoader('cloud');
+    });
+  }
+
+  /* 🌐 One request, fifty-odd cities. Open-Meteo accepts comma-separated
+     coordinate lists and answers with an array in the same order, so a whole
+     world scan costs a single round trip. Cached for ten minutes. */
+  function scanWorld() {
+    if (scanCache && Date.now() - scanAt < 600000) return $.Deferred().resolve(scanCache);
+    return $.getJSON('https://api.open-meteo.com/v1/forecast', {
+      latitude: SCAN.map(function (c) { return c[1]; }).join(','),
+      longitude: SCAN.map(function (c) { return c[2]; }).join(','),
+      current: 'temperature_2m,weather_code,wind_speed_10m,is_day',
+      daily: 'sunrise,sunset',
+      forecast_days: 1,
+      timezone: 'auto'
+    }).then(function (list) {
+      if (!$.isArray(list)) list = [list];
+      scanCache = list.map(function (entry, i) {
+        var cur = entry && entry.current;
+        if (!cur) return null;
+        var known = WMO[cur.weather_code] || ['Unknown', 'cloud'];
+        var type = known[1];
+        if (cur.wind_speed_10m >= 30 && (type === 'sun' || type === 'cloud')) type = 'wind';
+        return {
+          place: SCAN[i][0],
+          lat: SCAN[i][1],
+          lon: SCAN[i][2],
+          imperial: false, // every scan city is reported in Celsius
+          celsius: cur.temperature_2m,
+          label: known[0],
+          type: type,
+          night: isNight(cur, entry.daily),
+          time: cur.time
+        };
+      }).filter(Boolean);
+      scanAt = Date.now();
+      return scanCache;
+    });
+  }
+
+  /* 🖱 Pressing a mood button doesn't fake the weather — it goes and finds a
+     city that is genuinely having it right now. The engine's own click handler
+     animates the mood; this fills the card with a real place to match. */
+  var lastPick = {}; // per mood, so the same button never repeats a city back to back
+
+  // If nothing on the list is doing the exact thing, fall back to the nearest
+  // relative rather than telling you the world is out of weather.
+  var NEIGHBOURS = {
+    thunder: ['rain', 'wind'],
+    snow: ['rain', 'cloud'],
+    wind: ['cloud', 'rain'],
+    rain: ['thunder', 'cloud'],
+    sun: ['cloud'],
+    cloud: ['sun', 'rain']
+  };
+
+  function pickFor(readings, type) {
+    var order = [type].concat(NEIGHBOURS[type] || []);
+    for (var i = 0; i < order.length; i++) {
+      var pool = readings.filter(function (r) { return r.type === order[i]; });
+      if (!pool.length) continue;
+      // Drop the city this button showed last time, so repeat presses travel.
+      var fresh = pool.filter(function (r) { return r.place !== lastPick[type]; });
+      if (fresh.length) pool = fresh;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+    return null;
+  }
+
+  $('nav a').on('click', function () {
+    var type = this.id.replace('button-', '');
+    $details.addClass('loading');
+    scanWorld().then(function (readings) {
+      var pick = pickFor(readings, type);
+      if (!pick) { $details.removeClass('loading'); return; }
+      lastPick[type] = pick.place;
+      currentQuery = pick.place;
+      render(pick);
+      setError('');
+      $cityInput.val('');
+    }, function () {
+      $details.removeClass('loading');
+      setError('could not reach the weather');
+    });
+  });
+
+  /* 🧘 Zen mode. The card grows, everything else fades, and the animation keeps
+     running and refreshing. Snap SVG sizes its canvases from measured pixels,
+     so nudge onResize across the whole growth transition rather than once at
+     the end — otherwise the rain falls outside the card for half a second. */
+  /* Applied as inline styles rather than a class: GSAP is also writing
+     transforms around here, and inline is the only layer guaranteed to win. */
+  function setZen(on) {
+    var zoom = document.getElementById('card-zoom');
+    var outer = document.getElementById('outer');
+    var back = document.getElementById('back');
+
+    // Only measure on the way in from an unzoomed card. Measuring while
+    // already scaled reads the scaled box back and collapses the zoom to 1x.
+    if (on && !$('body').hasClass('zen')) {
+      var box = document.getElementById('card').getBoundingClientRect();
+      var scale = Math.min(
+        (window.innerWidth * 0.82) / box.width,
+        (window.innerHeight * 0.80) / box.height
+      );
+      scale = Math.max(1, Math.min(scale, 2.8));
+      var ox = (box.left + box.width / 2) + 'px';
+      var oy = (box.top + box.height / 2) + 'px';
+
+      zoom.style.transformOrigin = '50% 50%';
+      outer.style.transformOrigin = ox + ' ' + oy;
+      back.style.transformOrigin = ox + ' ' + oy;
+      zoom.style.transform = outer.style.transform = back.style.transform = 'scale(' + scale + ')';
+    } else if (!on) {
+      zoom.style.transform = outer.style.transform = back.style.transform = 'scale(1)';
+    }
+
+    $('nav, #search').css({ opacity: on ? 0 : 1, pointerEvents: on ? 'none' : '' });
+    $('body').toggleClass('zen', on);
+  }
+
+  // A resize invalidates the measured zoom, so drop back to the normal view
+  // rather than hold a stale scale.
+  $(window).on('resize', function () {
+    if ($('body').hasClass('zen')) setZen(false);
+  });
+
+  $('#zen').on('click', function (e) {
+    e.stopPropagation();
+    $cityInput.blur();
+    setZen(true);
+  });
+
+  // Any click on the background lifts it; the card itself is the artwork.
+  $(document).on('click', function (e) {
+    if (!$('body').hasClass('zen')) return;
+    if ($(e.target).closest('#card').length) return;
+    setZen(false);
+  });
+
+  $(document).on('keydown', function (e) {
+    if (e.which === 27 && $('body').hasClass('zen')) setZen(false);
+  });
+
+  // 🏠 Back to wherever the visitor actually is.
+  $('#home').on('click', function () {
+    $cityInput.val('');
+    load('');
+  });
+
+  // 🔎 City search — Enter loads it, and the city sticks in the URL so the
+  // view is linkable.
+  $cityInput.on('keydown', function (e) {
+    if (e.which !== 13) return;
+    var q = $cityInput.val().trim();
+    $cityInput.blur();
+    load(q);
+  });
+
+  /* A ?q= link (the terminal's "see full screen") opens on that city, curtain
+     and all. The parameter is then stripped, so a refresh still resets to
+     home rather than pinning you to wherever you arrived from. */
+  var deepLink = (new URLSearchParams(window.location.search).get('q') || '').trim();
+  if (window.history && history.replaceState && window.location.search) {
+    history.replaceState(null, '', window.location.pathname);
+  }
+  if (deepLink) $cityInput.val(deepLink);
+  load(deepLink, false, true);
+
+  // Conditions drift slowly; a refresh every 10 minutes is plenty, and only
+  // while the tab is actually being looked at.
+  setInterval(function () {
+    if (!document.hidden && !$live.hasClass('manual')) load(currentQuery, true);
+  }, 600000);
+
+})();
+</script>
 </body>
 </html>

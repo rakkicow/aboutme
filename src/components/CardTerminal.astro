@@ -74,6 +74,7 @@
 <span style="color:#DC9BB5;">Host</span><span style="color:#7CE57C;">: MacBook Air M5</span>
 <span style="color:#DC9BB5;">Uptime</span><span style="color:#7CE57C;">: </span><span data-uptime style="color:#7CE57C;">…</span>
 <span style="color:#DC9BB5;">Resolution</span><span style="color:#7CE57C;">: </span><span data-resolution style="color:#7CE57C;">…</span>
+<span style="color:#DC9BB5;">Weather</span><span style="color:#7CE57C;">: </span><span data-weather style="color:#7CE57C;">…</span>
 <span style="color:#DC9BB5;">Coffee</span><span style="color:#7CE57C;">: </span><span style="color:#FFB37A;">critical</span>
 <span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
     </div>
@@ -121,6 +122,13 @@
   }
   .term-cow {
     font-size: 1.08em;
+  }
+  /* The sysinfo block is unwrappable <pre> text, and the weather line is the
+     longest of them. Let its grid cell shrink and clip instead of letting the
+     line dictate how wide the card has to be. */
+  .term-grid > pre:last-child {
+    min-width: 0;
+    overflow: hidden;
   }
   /* Narrow cards: stack the cow above the sysinfo and trim the title bar */
   @container (max-width: 400px) {
@@ -246,6 +254,43 @@
   if (resEls.length) {
     updateRes();
     window.addEventListener('resize', updateRes);
+  }
+
+  // Weather line — this panel is *my* machine, so it reports my sky rather than
+  // the visitor's. Open-Meteo is keyless and CORS-open, so it stays a static page.
+  const wxEls = document.querySelectorAll<HTMLElement>('[data-weather]');
+  if (wxEls.length) {
+    // WMO weather code → emoji. Second entry is the night-time face where it differs.
+    const wxEmoji = (code: number, isDay: boolean): string => {
+      if (code === 0) return isDay ? '☀️' : '🌙';
+      if (code <= 2) return isDay ? '🌤️' : '☁️';
+      if (code === 3) return '☁️';
+      if (code <= 48) return '🌫️';
+      if (code <= 57) return '🌦️';
+      if (code <= 67) return '🌧️';
+      if (code <= 77) return '❄️';
+      if (code <= 82) return '🌧️';
+      if (code <= 86) return '🌨️';
+      return '⛈️';
+    };
+
+    const loadWeather = async () => {
+      try {
+        const res = await fetch(
+          'https://api.open-meteo.com/v1/forecast?latitude=40.4259&longitude=-86.9081' +
+            '&current=temperature_2m,weather_code,is_day&temperature_unit=fahrenheit&timezone=auto'
+        );
+        if (!res.ok) return;
+        const cur = (await res.json())?.current;
+        if (!cur) return;
+        const text = `${Math.round(cur.temperature_2m)}°${wxEmoji(Number(cur.weather_code), cur.is_day === 1)} in W. Lafayette, IN`;
+        wxEls.forEach((el) => (el.textContent = text));
+      } catch {
+        /* offline — the placeholder stays */
+      }
+    };
+    loadWeather();
+    setInterval(loadWeather, 900000); // every 15 min
   }
 
   // Now playing — straight from Last.fm (user.getrecenttracks marks the live

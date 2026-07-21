@@ -54,17 +54,19 @@ import { bio, skills, tools, languages, frameworks, coursework } from '~/data/re
           <p class="text-[11px] uppercase tracking-[0.2em]" style="color: var(--ink-faint);">
             <span class="text-cow-600 dark:text-cow-300">relevant</span> Coursework
           </p>
+          {/* Rows are sized down on narrow screens — at 320px the full-size
+              row runs the grade pill off the edge. Unchanged from sm: up. */}
           <ul class="mt-4 grid gap-2 sm:grid-cols-2">
             {coursework.map((c) => (
-              <li class="flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm gap-2" style="border-color: var(--hair); background: var(--surface-soft);">
+              <li class="flex items-center justify-between rounded-xl border px-2.5 py-2 text-xs gap-1.5 sm:px-3.5 sm:py-2.5 sm:text-sm sm:gap-2" style="border-color: var(--hair); background: var(--surface-soft);">
                 <span class="truncate min-w-0">
-                  <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
-                  <span class="ml-2" style="color: var(--ink-soft);">{c.name}</span>
+                  <span class="font-mono text-[10px] sm:text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
+                  <span class="ml-1.5 sm:ml-2" style="color: var(--ink-soft);">{c.name}</span>
                 </span>
                 {c.grade ? (
-                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full bg-cow-300/20 px-2 py-0.5 font-mono text-[10px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full bg-cow-300/20 px-1.5 py-0.5 font-mono text-[9px] font-medium text-cow-700 sm:px-2 sm:text-[10px] dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
                 ) : (
-                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px]" style="border-color: var(--hair); color: var(--ink-faint);" title="grade pending">…</span>
+                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full border px-1.5 py-0.5 font-mono text-[9px] sm:px-2 sm:text-[10px]" style="border-color: var(--hair); color: var(--ink-faint);" title="grade pending">…</span>
                 )}
               </li>
             ))}
