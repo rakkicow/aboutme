@@ -159,18 +159,33 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
       @keyframes screen-shake {
         0%, 100% { transform: translate(0, 0); }
-        10% { transform: translate(-0.5px, 0.5px); }
-        20% { transform: translate(0.5px, -0.5px); }
-        30% { transform: translate(-0.5px, -0.5px); }
-        40% { transform: translate(0.5px, 0.5px); }
-        50% { transform: translate(-0.5px, 0); }
-        60% { transform: translate(0.5px, 0); }
-        70% { transform: translate(0, 0.5px); }
-        80% { transform: translate(0, -0.5px); }
-        90% { transform: translate(-0.5px, 0.5px); }
+        10% { transform: translate(-1.5px, 1.5px); }
+        20% { transform: translate(1.5px, -1.5px); }
+        30% { transform: translate(-1.5px, -1.5px); }
+        40% { transform: translate(1.5px, 1.5px); }
+        50% { transform: translate(-1.5px, 0); }
+        60% { transform: translate(1.5px, 0); }
+        70% { transform: translate(0, 1.5px); }
+        80% { transform: translate(0, -1.5px); }
+        90% { transform: translate(-1.5px, 1.5px); }
       }
       :global(.shake-screen) {
         animation: screen-shake 0.15s ease-in-out infinite;
+      }
+      @keyframes shout-effect {
+        0% { transform: scale(1); }
+        15% { transform: scale(1.8); }
+        25% { transform: scale(1.8) rotate(-4deg); }
+        35% { transform: scale(1.8) rotate(4deg); }
+        45% { transform: scale(1.8) rotate(-3deg); }
+        55% { transform: scale(1.8) rotate(3deg); }
+        75% { transform: scale(1.1); }
+        100% { transform: scale(1); }
+      }
+      .shout-anim {
+        animation: shout-effect 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        display: inline-block;
+        transform-origin: left center;
       }
     </style>
 
@@ -257,7 +272,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         { k: 'Based', v: 'West Lafayette, IN' },
         { k: 'Grad', v: 'May 2028' },
         { k: 'Stack', v: 'Full :)', href: '#languages' },
-        { k: 'Top skill', v: 'cow 🐄', moo: true },
+        { k: 'Fav skill', v: 'cow 🐄', moo: true },
       ].map((m) => (
         m.href ? (
           <a
@@ -282,7 +297,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
           >
             <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium transition-transform duration-200 group-active:scale-90" style="color: var(--ink-soft);">
-              <span>{m.v}</span>
+              <span data-moo-emoji>{m.v}</span>
             </p>
           </button>
         ) : (
@@ -300,9 +315,15 @@ import MeshGradient from '~/components/MeshGradient.astro';
     (() => {
       const btn = document.querySelector<HTMLButtonElement>('[data-moo]');
       if (!btn) return;
+      const emojiSpan = btn.querySelector<HTMLElement>('[data-moo-emoji]');
       const audio = new Audio('/assets/moo.mp3');
       btn.addEventListener('click', () => {
         document.body.classList.add('shake-screen');
+        if (emojiSpan) {
+          emojiSpan.classList.remove('shout-anim');
+          void emojiSpan.offsetWidth; // trigger reflow
+          emojiSpan.classList.add('shout-anim');
+        }
         setTimeout(() => document.body.classList.remove('shake-screen'), 800);
 
         audio.currentTime = 0;
