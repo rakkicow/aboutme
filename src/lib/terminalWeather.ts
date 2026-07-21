@@ -4,7 +4,7 @@
 // Location comes from IP (geojs), not the browser Geolocation API: city-level
 // conditions come from Open-Meteo, which is keyless and CORS-open.
 
-import { cliReveal } from './terminalGame';
+import { cliReveal } from './terminalPlus';
 
 type Scene = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunder' | 'wind';
 
