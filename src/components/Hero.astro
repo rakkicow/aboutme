@@ -272,7 +272,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         { k: 'Based', v: 'West Lafayette, IN' },
         { k: 'Grad', v: 'May 2028' },
         { k: 'Stack', v: 'Full :)', href: '#languages' },
-        { k: 'Fav skill', v: 'cow 🐄', moo: true },
+        { k: 'Fav skill', v: 'cow', emoji: '🐄', moo: true },
       ].map((m) => (
         m.href ? (
           <a
@@ -292,12 +292,13 @@ import MeshGradient from '~/components/MeshGradient.astro';
           <button
             type="button"
             data-moo
-            aria-label={`${m.k}: ${m.v} — press for a moo`}
+            aria-label={`${m.k}: ${m.v} ${m.emoji} — press for a moo`}
             class="group block w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus:outline-none"
           >
             <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium transition-transform duration-200 group-active:scale-90" style="color: var(--ink-soft);">
-              <span data-moo-emoji>{m.v}</span>
+              <span>{m.v}</span>
+              <span data-moo-emoji class="inline-block origin-bottom">{m.emoji}</span>
             </p>
           </button>
         ) : (
