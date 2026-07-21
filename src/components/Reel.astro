@@ -95,11 +95,17 @@ import { reel } from '~/data/projects';
       })}
     </div>
     </div>
-    {/* Animated scroll cue — a bouncing chevron; fades out after the first scroll */}
-    <div class="reel-cue" data-reel-cue aria-hidden="true">
-      <svg class="reel-cue-chevron reel-cue-chevron-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
-      <span>scroll · arrows</span>
-      <svg class="reel-cue-chevron reel-cue-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+    {/* Navigation buttons — positioned outside the panel at the top and bottom */}
+    <button type="button" data-reel-up class="reel-nav-btn absolute bottom-[100%] mb-4 left-1/2 -translate-x-1/2 z-30 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Previous video">
+      <svg class="reel-cue-chevron reel-cue-chevron-up h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6" /></svg>
+    </button>
+    <div class="absolute top-[100%] mt-4 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1">
+      <button type="button" data-reel-down class="reel-nav-btn text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Next video">
+        <svg class="reel-cue-chevron reel-cue-chevron-down h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+      </button>
+      <span class="text-[#ff7a1e] text-[9px] font-semibold uppercase tracking-[0.25em] pointer-events-none whitespace-nowrap" style="text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);">
+        <span class="hidden sm:inline">scroll</span><span class="sm:hidden">swipe</span> · arrows
+      </span>
     </div>
   </div>
 </dialog>
@@ -179,29 +185,13 @@ import { reel } from '~/data/projects';
     background: var(--cow-pink-soft);
   }
 
-  /* Scroll cue — pinned to the bottom of the window, an up + down chevron
-     framing the label, both pulsing forever so the hint never disappears */
-  .reel-cue {
-    position: fixed;
-    left: 50%;
-    bottom: 0.85rem;
-    transform: translateX(-50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    color: #ff7a1e;
-    font-size: 9px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.25em;
-    pointer-events: none;
-    z-index: 20;
-    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+  /* Navigation buttons */
+  .reel-nav-btn {
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
   }
   .reel-cue-chevron {
-    width: 20px;
-    height: 20px;
     filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.45));
   }
   .reel-cue-chevron-up {
@@ -506,6 +496,20 @@ import { reel } from '~/data/projects';
       lenis()?.start();
       cursorFx.forEach(({ el, home }) => home?.appendChild(el));
       realSlides.forEach(unmount);
+    });
+
+    // Arrow buttons (click) page through the reel
+    modal.querySelectorAll('[data-reel-up]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!slideH) return;
+        scroller.scrollBy({ top: -slideH, behavior: 'smooth' });
+      });
+    });
+    modal.querySelectorAll('[data-reel-down]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (!slideH) return;
+        scroller.scrollBy({ top: slideH, behavior: 'smooth' });
+      });
     });
 
     // Arrow keys page through the reel while it's open
