@@ -12,7 +12,7 @@ export const bio = {
   email: 'rakgupta@purdue.edu',
   phone: '(414) 526-2678',
   linkedin: 'https://www.linkedin.com/in/rakshita-gupta-4571a7251',
-  github: 'https://github.com/',
+  github: 'https://github.com/rakkicow',
   youtube: 'https://www.youtube.com/c/cdiofficial',
   summary: 'I make the moves up as I go.',
   longBio: `I'm Ria — a Computer Engineering Technology student at Purdue with minors in Psychology, Entrepreneurship, and Computer Engineering. My background is a strange but useful mix: cell-phone repair, 3D modeling, web and mobile app development, and professional video editing.
