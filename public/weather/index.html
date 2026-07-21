@@ -1823,8 +1823,8 @@ CORS-open, so this stays a fully static page.
     if (wasNight && !on) $b.addClass('sunrise');
 
     if (visible) {
-      if (orb) TweenMax.to(orb, SINK_MS / 1000, { y: restY, ease: Sine.easeIn, overwrite: 'auto' });
-      if (sunburstEl) TweenMax.to(sunburstEl, SINK_MS / 1000, { y: burstRestY, ease: Sine.easeIn, overwrite: 'auto' });
+      if (orb) TweenMax.to(orb, SINK_MS / 1000, { y: restY, ease: Back.easeIn, overwrite: 'auto' });
+      if (sunburstEl) TweenMax.to(sunburstEl, SINK_MS / 1000, { y: burstRestY, ease: Back.easeIn, overwrite: 'auto' });
     }
 
     duskTimer = setTimeout(function () {
@@ -1832,10 +1832,10 @@ CORS-open, so this stays a fully static page.
       $b.removeClass('dusk sunrise').toggleClass('night', on);
       // Whatever is now showing climbs back up out of the horizon.
       if (visible) {
-        if (orb) TweenMax.fromTo(orb, RISE_MS / 1000, { y: restY }, { y: midY, ease: Sine.easeOut, overwrite: 'auto' });
-        if (sunburstEl) TweenMax.fromTo(sunburstEl, RISE_MS / 1000, { y: burstRestY }, { y: burstMidY, ease: Sine.easeOut, overwrite: 'auto' });
+        if (orb) TweenMax.fromTo(orb, RISE_MS / 1000, { y: restY }, { y: midY, ease: Back.easeOut, overwrite: 'auto' });
+        if (sunburstEl) TweenMax.fromTo(sunburstEl, RISE_MS / 1000, { y: burstRestY }, { y: burstMidY, ease: Back.easeOut, overwrite: 'auto' });
       }
-    }, SINK_MS + 400);
+    }, SINK_MS);
   }
 
   /* 🌒 Real lunar phase.
