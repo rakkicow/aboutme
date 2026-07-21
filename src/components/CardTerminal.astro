@@ -93,7 +93,9 @@
     {/* Prompt with typer */}
     <div class="mt-2 text-cow-300 flex items-center cursor-text" id="term-prompt-line">
       <span class="shrink-0">~/</span> <span class="text-cow-400 shrink-0 mx-1.5">$</span> 
-      <span class="typer shrink-0" id="auto-typer" style="color:#39FF14;"></span>
+      {/* white-space:pre — this span mirrors the real input to push the caret
+          along, and without it a trailing space collapses and the caret stalls. */}
+      <span class="typer shrink-0" id="auto-typer" style="color:#39FF14; white-space:pre;"></span>
       <div class="relative flex-1 m-0 flex items-center">
         <span class="inline-block h-3 w-[7px] shrink-0 animate-caret absolute left-0 pointer-events-none" id="term-caret" style="background:#39FF14;"></span>
         <form id="term-form" class="hidden w-full m-0">

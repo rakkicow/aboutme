@@ -7,6 +7,17 @@ export function initGame(
   onExit: () => void
 ) {
   let inGame = false;
+  let destructing = false;
+
+  // Everything tab-completable. `sudo rm -rf /` is deliberately absent — it
+  // should only ever be found by someone who already had the idea.
+  const COMMANDS = ['help', 'whatsong', 'walloftext', 'hack', 'clear', 'exit'];
+
+  // Shell history. Newest last; `histPos === history.length` means "not
+  // browsing", i.e. the live input line.
+  const history: string[] = [];
+  let histPos = 0;
+  let draft = ''; // what was typed before arrowing up, restored on the way back down
 
   // Last.fm track metadata is third-party text — escape before it touches innerHTML.
   const esc = (s: unknown) =>
@@ -252,12 +263,82 @@ export function initGame(
     if (autoTyper) autoTyper.textContent = termInput.value;
   });
 
+  // Keep the mirrored typer in sync when we set the value programmatically
+  // (history recall, tab completion) — plain assignment fires no input event.
+  const setInput = (value: string) => {
+    termInput.value = value;
+    if (autoTyper) autoTyper.textContent = value;
+    // Park the caret at the end, after the browser has applied the value.
+    requestAnimationFrame(() => {
+      termInput.setSelectionRange(value.length, value.length);
+    });
+  };
+
+  termInput.addEventListener('keydown', (e) => {
+    if (destructing) {
+      e.preventDefault();
+      return;
+    }
+
+    // ── History: ArrowUp walks back, ArrowDown walks forward to the draft ──
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      if (!history.length) return;
+      e.preventDefault();
+
+      if (e.key === 'ArrowUp') {
+        if (histPos === history.length) draft = termInput.value; // stash the live line
+        histPos = Math.max(0, histPos - 1);
+        setInput(history[histPos]);
+      } else {
+        histPos = Math.min(history.length, histPos + 1);
+        setInput(histPos === history.length ? draft : history[histPos]);
+      }
+      return;
+    }
+
+    // ── Tab completion ──
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const typed = termInput.value.trim().toLowerCase();
+      if (!typed) return;
+
+      const hits = COMMANDS.filter((c) => c.startsWith(typed));
+      if (hits.length === 1) {
+        setInput(hits[0]);
+      } else if (hits.length > 1) {
+        // Fill in as far as the candidates agree, then list them like a shell.
+        let prefix = hits[0];
+        for (const h of hits) {
+          while (!h.startsWith(prefix)) prefix = prefix.slice(0, -1);
+        }
+        if (prefix.length > typed.length) setInput(prefix);
+
+        const listing = document.createElement('div');
+        listing.className = 'mb-1 opacity-70';
+        listing.style.color = '#7CE57C';
+        listing.textContent = hits.join('   ');
+        interactiveOutput.appendChild(listing);
+        termBody.scrollTop = termBody.scrollHeight;
+      }
+    }
+  });
+
   termForm.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (destructing) return; // input is dead once the countdown starts
+
     const rawCmd = termInput.value;
-    const cmd = rawCmd.trim().toLowerCase();
+    // Collapse runs of whitespace so `sudo   rm  -rf  /` still matches.
+    const cmd = rawCmd.trim().toLowerCase().replace(/\s+/g, ' ');
     termInput.value = '';
     if (autoTyper) autoTyper.textContent = '';
+
+    // Record history, skipping blanks and immediate repeats.
+    if (cmd && history[history.length - 1] !== rawCmd.trim()) {
+      history.push(rawCmd.trim());
+    }
+    histPos = history.length;
+    draft = '';
 
 
 
@@ -272,8 +353,34 @@ export function initGame(
     out.className = 'mb-1';
     out.style.color = '#7CE57C';
 
-    if (cmd === 'help') {
-      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode`;
+    // Matches `sudo rm -rf /`, `sudo rm -fr /`, and the `/*` variant.
+    const isNuke = /^sudo rm -(rf|fr) \/\*?$/.test(cmd);
+
+    if (isNuke) {
+      destructing = true;
+      out.innerHTML =
+        `<span style="color:#FF5F57; font-weight:bold;">rm: it is dangerous to operate recursively on '/'</span><br/>` +
+        `<span style="color:#FF5F57;">rm: --no-preserve-root not specified... but you seem confident.</span><br/><br/>` +
+        `<span style="color:#FEBC2E;">SELF DESTRUCT INITIATED.</span><br/>` +
+        `<span style="color:#7CE57C;">Wiping / in <span class="rg-count" style="color:#FF5F57; font-weight:bold;">10</span>s...</span>`;
+
+      const counter = () => out.querySelector<HTMLElement>('.rg-count');
+      import('./selfDestruct')
+        .then(({ selfDestruct }) => {
+          selfDestruct((secondsLeft) => {
+            const el = counter();
+            if (el) el.textContent = String(secondsLeft);
+            termBody.scrollTop = termBody.scrollHeight;
+          });
+        })
+        .catch(() => {
+          destructing = false;
+          out.innerHTML += `<br/><span style="color:#FF5F57">...the payload failed to load. Lucky.</span>`;
+        });
+    } else if (cmd === 'rm -rf /' || cmd === 'rm -fr /') {
+      out.innerHTML = `<span style="color:#FF5F57">rm: cannot remove '/': Permission denied</span><br/>Try again with <span style="color:#DC9BB5">sudo</span>. Or don't.`;
+    } else if (cmd === 'help') {
+      out.innerHTML = `Commands:<br/>- <span style="color:#DC9BB5">whatsong</span>: view current track & album art<br/>- <span style="color:#DC9BB5">walloftext</span>: visit my public text wall<br/>- <span style="color:#DC9BB5">hack</span>: launch mainframe override<br/>- <span style="color:#DC9BB5">clear</span>: clear terminal<br/>- <span style="color:#DC9BB5">exit</span>: return to auto mode<br/><br/><span style="opacity:0.6">↑/↓ for history · Tab to complete</span>`;
     } else if (cmd === 'walloftext') {
       out.innerHTML = `<span style="color:#DC9BB5">Redirecting via secure tunnel...</span>`;
       setTimeout(() => {
