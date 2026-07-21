@@ -1605,8 +1605,8 @@ CORS-open, so this stays a fully static page.
   var WMO = {
     0: ['Clear', 'sun'], 1: ['Mostly clear', 'sun'], 2: ['Partly cloudy', 'cloud'], 3: ['Overcast', 'cloud'],
     45: ['Fog', 'cloud'], 48: ['Rime fog', 'cloud'],
-    51: ['Light drizzle', 'rain'], 53: ['Drizzle', 'rain'], 55: ['Heavy drizzle', 'rain'],
-    56: ['Freezing drizzle', 'rain'], 57: ['Freezing drizzle', 'rain'],
+    51: ['Light drizzle', 'cloud'], 53: ['Drizzle', 'cloud'], 55: ['Heavy drizzle', 'rain'],
+    56: ['Freezing drizzle', 'cloud'], 57: ['Freezing drizzle', 'rain'],
     61: ['Light rain', 'rain'], 63: ['Rain', 'rain'], 65: ['Heavy rain', 'rain'],
     66: ['Freezing rain', 'rain'], 67: ['Freezing rain', 'rain'],
     71: ['Light snow', 'snow'], 73: ['Snow', 'snow'], 75: ['Heavy snow', 'snow'], 77: ['Snow grains', 'snow'],
@@ -2113,13 +2113,14 @@ CORS-open, so this stays a fully static page.
   /* Flash the pressed button red and shake it, then put the card back the way
      it was — the engine's own click handler has already animated to the mood
      we could not actually find a city for. */
-  function rejectButton(el) {
+  function rejectButton(el, fallback) {
     var $el = $(el);
     $el.removeClass('notfound');
     void el.offsetWidth; // restart the animation if it is pressed twice
     $el.addClass('notfound');
     setTimeout(function () { $el.removeClass('notfound'); }, 900);
-    if (lastReading) render(lastReading);
+    if (fallback) render(fallback);
+    else if (lastReading) render(lastReading);
   }
 
   $('nav a').on('click', function () {
@@ -2130,7 +2131,8 @@ CORS-open, so this stays a fully static page.
       var pick = pickFor(readings, type);
       if (!pick) {
         $details.removeClass('loading');
-        rejectButton(btn);
+        var fallback = readings[Math.floor(Math.random() * readings.length)];
+        rejectButton(btn, fallback);
         return;
       }
       lastPick[type] = pick.place;

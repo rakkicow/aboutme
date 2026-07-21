@@ -198,6 +198,11 @@ const CONDITIONS: Record<string, Scene> = {
   foggy: 'fog', fog: 'fog', mist: 'fog', misty: 'fog',
 };
 
+const SCENE_VERB: Record<Scene, string> = {
+  clear: 'clear', cloudy: 'cloudy', rain: 'raining', drizzle: 'drizzling',
+  snow: 'snowing', thunder: 'storming', wind: 'windy', fog: 'foggy'
+};
+
 /** The canonical word we print for each scene, in the help listing. */
 const CONDITION_WORDS = ['sunny', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy'];
 
@@ -913,8 +918,8 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
         </div>
         ${
           cond.fellBackFrom
-            ? `<div style="color:#FEBC2E; opacity:0.8; margin-bottom:6px;">nowhere on the list is ${esc(
-                cond.fellBackFrom
+            ? `<div style="color:#FEBC2E; opacity:0.8; margin-bottom:6px;">no big city is ${esc(
+                SCENE_VERB[cond.fellBackFrom as Scene] || cond.fellBackFrom
               )} right now</div>`
             : ''
         }
@@ -1031,7 +1036,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
         err?.message === 'nocity'
           ? `<span style="color:#FF5F57">weather: no place called "${esc(city)}". Try <span style="color:${C.pink}">weather help</span>.</span>`
           : err?.message === 'nocondition'
-            ? `<span style="color:#FF5F57">weather: nowhere on the list is ${esc(arg)} right now.</span>`
+            ? `<span style="color:#FF5F57">weather: no big city is ${esc(CONDITIONS[arg] ? SCENE_VERB[CONDITIONS[arg]] : arg)} right now.</span>`
             : `<span style="color:#FF5F57">weather: could not reach the sky. Check your connection and retry.</span>`;
     });
 }
