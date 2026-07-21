@@ -6,8 +6,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-title" content="Weather">
-<meta name="description" content="A live weather card — real conditions for wherever you are, drawn in SVG.">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="description" content="A live 24/7 weather card">
+
+<!-- Sun by default; the script swaps this for the condition once it knows one,
+     so the tab never sits on the generic site icon while loading. -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20y%3D%2250%22%20font-size%3D%2252%22%3E%E2%98%80%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E" />
+
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="rakshita.me" />
+<meta property="og:title" content="Weather — Ria Gupta" />
+<meta property="og:description" content="A live 24/7 weather card" />
+<meta property="og:url" content="https://rakshita.me/weather" />
+<meta property="og:image" content="https://rakshita.me/weather/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="A weather card showing 84°F and clear skies in Milwaukee, Wisconsin" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Weather — Ria Gupta" />
+<meta name="twitter:description" content="A live 24/7 weather card" />
+<meta name="twitter:image" content="https://rakshita.me/weather/og.png" />
+<link rel="canonical" href="https://rakshita.me/weather" />
+
 <title>Weather - Ria Gupta</title>
 <style>
 @import "https://fonts.googleapis.com/css?family=Lato:300";
