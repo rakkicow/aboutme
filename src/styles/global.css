@@ -101,20 +101,7 @@
     body input, body textarea, body [contenteditable='true'] { cursor: text; }
   }
 
-  /* Skip layout/paint cost for sections that aren't on-screen yet.
-     `contain-intrinsic-size: auto <length>` reserves a placeholder so the
-     scrollbar/scroll position stays stable; the browser remembers the real
-     size after first paint. */
-  #about,
-  #work,
-  #reel,
-  #in-the-works,
-  #experience,
-  #contact,
-  footer {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 1200px;
-  }
+
 
   ::selection {
     background-color: var(--ember-300);
