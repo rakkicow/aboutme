@@ -80,7 +80,7 @@ export const reel: ReelEntry[] = [
   {
     id: 'LDBWADBBxIE',
     title: 'Unlock Your Potential — HOSA PSA 2021',
-    caption: 'submission for the 2021 HOSA PSA competition',
+    caption: 'Submission for the 2021 HOSA PSA competition',
     pill: 'HOSA · 2021',
   },
   {
@@ -102,19 +102,19 @@ export const reel: ReelEntry[] = [
   {
     id: 'uwbs5RD84T0',
     title: 'CIFR Promotional',
-    caption: 'promotional video for Community Initiative First Response (CIFR), a student-led, simulation-based emergency response training program',
+    caption: 'Promotional video for Community Initiative First Response (CIFR), a student-led, simulation-based emergency response training program',
     pill: 'CIFR',
   },
   {
     id: '295pjCG2cmM',
     title: 'AU Medical Simulation Introduction',
-    caption: 'created for the Augusta University Medical Simulation Center. training material for medical students on the simualtion manequins',
+    caption: 'Created for the Augusta University Medical Simulation Center. training material for medical students on the simualtion manequins',
     pill: 'Healthcare',
   },
   {
     id: 'QDxZOwXWNTQ',
     title: 'Channel Trailer',
-    caption: 'official channel trailer (2020)',
+    caption: 'Official channel trailer (2020)',
     pill: 'CDI Official',
   },
 ];
