@@ -601,8 +601,47 @@
     color: var(--ember-700, #E45200);
   }
 
+  /* No backdrop-blur — these pills sit on effectively solid backgrounds where
+     the blur is invisible but costs a per-frame backdrop repaint on scroll.
+     Slightly higher bg opacity keeps them looking identical. */
   .pill {
-    @apply inline-flex items-center gap-2 rounded-full border border-ink/[0.06] bg-white/70 px-3 py-1 text-xs font-medium text-ink/70 backdrop-blur;
+    @apply inline-flex items-center gap-2 rounded-full border border-ink/[0.06] bg-white/80 px-3 py-1 text-xs font-medium text-ink/70;
+  }
+
+  /* Prominent "open the reel / shelf" call-to-action on the project cards —
+     a pulsing burnt-orange pill that pops on both the peach and dark cards
+     so it catches a scrolling recruiter's eye. */
+  .card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: #fff;
+    background: linear-gradient(180deg, #ff7a1e 0%, #b44000 100%);
+    box-shadow: 0 8px 22px -8px rgba(255, 106, 5, 0.6);
+    animation: card-cta-pulse 2.4s ease-in-out infinite;
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .card-cta:hover {
+    transform: translateY(-2px);
+  }
+  .card-cta-arrow {
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .card-cta:hover .card-cta-arrow {
+    transform: translateX(3px);
+  }
+  @keyframes card-cta-pulse {
+    0%, 100% {
+      box-shadow: 0 8px 22px -8px rgba(255, 106, 5, 0.5), 0 0 0 0 rgba(255, 122, 30, 0.4);
+    }
+    50% {
+      box-shadow: 0 10px 26px -8px rgba(255, 106, 5, 0.72), 0 0 0 6px rgba(255, 122, 30, 0.14);
+    }
   }
 
   .marker-dot {

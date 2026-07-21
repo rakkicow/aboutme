@@ -29,7 +29,7 @@ const themes: Record<Project['theme'], ThemeStyles> = {
     title: 'text-white',
     tagline: 'text-[#D5E9FF]',
     blurb: 'text-[#D5E9FF]',
-    pill: 'bg-[#D8E8FF] border-[#1E7AFF]/35 text-[#0846B8] backdrop-blur',
+    pill: 'bg-[#D8E8FF] border-[#1E7AFF]/35 text-[#0846B8]',
     link: 'text-[#E8F2FF]',
     linkHover: 'hover:text-white',
   },
@@ -39,7 +39,7 @@ const themes: Record<Project['theme'], ThemeStyles> = {
     title: 'text-ink',
     tagline: 'text-ember-700',
     blurb: 'text-ink/75',
-    pill: 'bg-[rgba(180,64,0,0.16)] border-ember-700/30 text-ember-800 backdrop-blur',
+    pill: 'bg-[rgba(180,64,0,0.2)] border-ember-700/30 text-ember-800',
     link: 'text-ink/85',
     linkHover: 'hover:text-ember-700',
   },
@@ -49,7 +49,7 @@ const themes: Record<Project['theme'], ThemeStyles> = {
     title: 'text-white',
     tagline: 'text-cow-300',
     blurb: 'text-white/80',
-    pill: 'bg-[#F6E0E9] border-[#DC9BB5]/45 text-[#9A4267] backdrop-blur',
+    pill: 'bg-[#F6E0E9] border-[#DC9BB5]/45 text-[#9A4267]',
     link: 'text-white',
     linkHover: 'hover:text-cow-300',
   },
@@ -100,15 +100,27 @@ const s = themes[project.theme];
     ))}
   </div>
 
-  {/* Links — skip the auto ↗ when the label already ends with an arrow glyph */}
-  <div class="relative mt-7 flex flex-wrap items-center gap-x-5 gap-y-2">
+  {/* Links — hash links (open the reel / shelf) render as a prominent, pulsing
+      CTA so they read as an action; everything else is a plain text link. */}
+  <div class="relative mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
     {project.links.map((l) => {
+      const isCta = l.href.startsWith('#');
       const hasOwnArrow = /[→←↑↓↗↘↙↖]$/.test(l.label.trim());
+      if (isCta) {
+        return (
+          <a href={l.href} class="card-cta group/cta" data-cursor-hover>
+            {l.label.replace(/\s*[→↓]\s*$/, '')}
+            <svg class="card-cta-arrow h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M13 6l6 6-6 6" />
+            </svg>
+          </a>
+        );
+      }
       return (
         <a
           href={l.href}
-          target={l.href.startsWith('#') ? undefined : '_blank'}
-          rel={l.href.startsWith('#') ? undefined : 'noopener noreferrer'}
+          target="_blank"
+          rel="noopener noreferrer"
           class={`group/link inline-flex items-center gap-1.5 text-sm font-medium ${s.link} transition-colors ${s.linkHover}`}
         >
           {l.label}

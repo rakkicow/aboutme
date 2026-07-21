@@ -185,8 +185,9 @@ import { reel } from '~/data/projects';
     flex-direction: column;
     align-items: center;
     gap: 2px;
-    color: rgba(246, 240, 250, 0.55);
+    color: #ff7a1e;
     font-size: 9px;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.25em;
     pointer-events: none;
@@ -415,29 +416,30 @@ import { reel } from '~/data/projects';
     // step + cooldown). This also guarantees you can always move past every
     // slide, including the external (click-through) one. Touch still uses
     // native scroll-snap, which is already one-per-swipe.
-    // One video per continuous wheel gesture: after a step we stay LOCKED until
-    // the wheel has been quiet for ~160ms (the gesture — including trackpad
-    // momentum — has fully ended), so a long flick can never skip extra videos.
+    // One video per scroll — then a hard 1s cooldown that swallows all further
+    // wheel input (including trackpad momentum), so a single flick can never
+    // skip past a video. Touch uses native scroll-snap (already one-per-swipe).
     let wheelLocked = false;
     let wheelAcc = 0;
-    let wheelEnd: number | null = null;
     scroller.addEventListener(
       'wheel',
       (e) => {
         e.preventDefault();
         if (!slideH) return;
-        if (wheelEnd !== null) clearTimeout(wheelEnd);
-        wheelEnd = window.setTimeout(() => {
-          wheelLocked = false;
-          wheelAcc = 0;
-        }, 160);
-        if (wheelLocked) return;
+        if (wheelLocked) {
+          wheelAcc = 0; // keep momentum from banking a second step
+          return;
+        }
         wheelAcc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
         if (Math.abs(wheelAcc) > 24) {
           const dir = wheelAcc > 0 ? 1 : -1;
           wheelAcc = 0;
           wheelLocked = true;
           scroller.scrollBy({ top: dir * slideH, behavior: 'smooth' });
+          window.setTimeout(() => {
+            wheelLocked = false;
+            wheelAcc = 0;
+          }, 1000);
         }
       },
       { passive: false },

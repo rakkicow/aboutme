@@ -119,6 +119,7 @@ export const roles: Role[] = [
     title: 'Bachelor of Science in Computer Engineering Technology',
     years: 'Aug 2023 — May 2028',
     kind: 'edu',
+    location: 'West Lafayette, IN',
     bullets: ['Minors: Psychology, Entrepreneurship, and Computer Engineering.'],
   },
   {
