@@ -555,7 +555,7 @@
         minimizeBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
-          const workSection = document.getElementById('work');
+          const workSection = document.getElementById('eras');
           if (workSection) {
              workSection.scrollIntoView({ behavior: 'smooth' });
           }
