@@ -7,7 +7,7 @@ import { bio, skills, tools, languages, frameworks, coursework } from '~/data/re
   <div class="container-x">
     <div class="grid gap-16 lg:grid-cols-[1fr,1.4fr] lg:gap-24">
       {/* zinger */}
-      <div class="reveal">
+      <div class="reveal min-w-0">
         <p class="eyebrow">About <span class="h-script text-gradient-pink">me</span></p>
         <h2 class="h2 mt-4 max-w-[14ch]">
           long story <span class="text-gradient-pink-animated">short</span>.
@@ -20,14 +20,14 @@ import { bio, skills, tools, languages, frameworks, coursework } from '~/data/re
 
         {/* Quote */}
         <div class="mt-10 [container-type:inline-size]">
-          <blockquote class="border-l-2 pl-5 font-display italic leading-tight whitespace-nowrap text-[clamp(1.25rem,6.3cqw,3rem)]" style="border-color: var(--cow-pink); color: var(--ink-soft);">
+          <blockquote class="border-l-2 pl-5 font-display italic leading-tight whitespace-nowrap max-[400px]:whitespace-normal text-[clamp(1.25rem,6.3cqw,3rem)]" style="border-color: var(--cow-pink); color: var(--ink-soft);">
             "{bio.summary}"
           </blockquote>
         </div>
       </div>
 
       {/* Body */}
-      <div class="reveal space-y-7 text-[17px] leading-relaxed sm:text-lg" style="color: var(--ink-muted);">
+      <div class="reveal space-y-7 text-[17px] leading-relaxed sm:text-lg min-w-0" style="color: var(--ink-muted);">
         <p>
           I'm Ria — a <span style="color: var(--ink);">Computer Engineering Technology</span> student
           at Purdue with minors in <span style="color: var(--ink);">Psychology, Entrepreneurship, and Computer Engineering</span>. My background is a strange but useful mix consisting of cell phone repair,
@@ -56,15 +56,15 @@ import { bio, skills, tools, languages, frameworks, coursework } from '~/data/re
           </p>
           <ul class="mt-4 grid gap-2 sm:grid-cols-2">
             {coursework.map((c) => (
-              <li class="flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm" style="border-color: var(--hair); background: var(--surface-soft);">
-                <span class="whitespace-nowrap">
+              <li class="flex items-center justify-between rounded-xl border px-3.5 py-2.5 text-sm gap-2" style="border-color: var(--hair); background: var(--surface-soft);">
+                <span class="truncate min-w-0">
                   <span class="font-mono text-[11px] text-cow-600 dark:text-cow-300">{c.code}</span>
                   <span class="ml-2" style="color: var(--ink-soft);">{c.name}</span>
                 </span>
                 {c.grade ? (
-                  <span class="ml-3 inline-flex items-center rounded-full bg-cow-300/20 px-2 py-0.5 font-mono text-[10px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
+                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full bg-cow-300/20 px-2 py-0.5 font-mono text-[10px] font-medium text-cow-700 dark:bg-cow-300/15 dark:text-cow-200">{c.grade}</span>
                 ) : (
-                  <span class="ml-3 inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px]" style="border-color: var(--hair); color: var(--ink-faint);" title="grade pending">…</span>
+                  <span class="shrink-0 ml-1 inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px]" style="border-color: var(--hair); color: var(--ink-faint);" title="grade pending">…</span>
                 )}
               </li>
             ))}

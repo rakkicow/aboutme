@@ -14,17 +14,18 @@ const links = [
 <header
   data-nav
   data-scrolled="false"
-  class="fixed inset-x-0 top-0 z-50 transition-all duration-500 data-[scrolled=true]:py-2 py-5"
+  class="fixed inset-x-0 top-0 z-50 transition-all duration-500 py-4 sm:py-5"
 >
   <div class="container-x">
     <div class="relative">
       <div
         class="liquid-glass flex items-center justify-between gap-3 rounded-full px-4 py-2 transition-all duration-500"
       >
-        <a href="#top" class="group flex items-center gap-2.5 px-2 py-1">
+        <a href="#top" class="group flex items-center gap-2.5 px-2 py-1 whitespace-nowrap">
           <Monogram size={34} stroke={1.1} className="nav-mono-rotate transition-transform duration-500" />
           {/* Short name on narrow screens — a nod to the shorter name when the screen is shorter */}
-          <span class="font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 min-[520px]:hidden" style="color: var(--ink);">Ria</span>
+          <span class="font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 max-[400px]:hidden min-[520px]:hidden" style="color: var(--ink);">Ria G.</span>
+          <span class="hidden font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 max-[400px]:inline" style="color: var(--ink);">Ria</span>
           <span class="hidden font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 min-[520px]:inline" style="color: var(--ink);">Rakshita&nbsp;Gupta</span>
         </a>
 
@@ -58,11 +59,17 @@ const links = [
           </button>
 
           <ThemeToggle />
-          <a href="#contact" class="btn-primary whitespace-nowrap !py-2 !px-4 !text-xs" data-magnetic="0.25">
-            Get in touch
-            <svg class="h-3 w-3" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <a href="#contact" class="btn-primary whitespace-nowrap !py-2 !px-4 !text-xs max-[400px]:!p-0 max-[400px]:!w-9 max-[400px]:!h-9 max-[400px]:justify-center max-[400px]:!rounded-full" data-magnetic="0.25">
+            <span class="max-[400px]:hidden">Get in touch</span>
+            <svg class="h-3 w-3 max-[400px]:hidden" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M7 2v10M3 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
+            <span class="hidden max-[400px]:grid place-items-center contact-icons--svg">
+              <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+            </span>
+            <span class="hidden place-items-center contact-icons--emoji text-base leading-none">
+              💌
+            </span>
           </a>
         </div>
       </div>
@@ -166,6 +173,11 @@ const links = [
   :global(html[data-menu-revealed]) .menu-btn[aria-expanded='false'] .menu-burger {
     opacity: 1;
     transform: scale(1);
+  }
+
+  @media (max-width: 400px) {
+    :global(html[data-menu-revealed]) .contact-icons--svg { display: none !important; }
+    :global(html[data-menu-revealed]) .contact-icons--emoji { display: grid !important; }
   }
 
   /* Dropdown panel — springs open from the top-right, echoing the toggle */
