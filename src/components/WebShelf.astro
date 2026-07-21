@@ -13,7 +13,7 @@ import { webShelf } from '~/data/projects';
   {/* Panel wrapped in a shell so the close button floats just outside the corner */}
   <div class="relative w-full max-w-5xl">
     <button type="button" data-shelf-close class="shelf-arrow absolute -right-3 -top-3 z-30" aria-label="Close shelf">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
     </button>
     <div class="relative max-h-[88vh] w-full overflow-y-auto rounded-[28px] border p-6 sm:p-10" style="border-color: var(--hair); background: var(--canvas); color: var(--ink); box-shadow: var(--shadow-glow-sm);">
 
@@ -32,10 +32,10 @@ import { webShelf } from '~/data/projects';
       {/* Arrow controls */}
       <div class="flex items-end justify-end gap-2">
         <button type="button" data-shelf-prev class="shelf-arrow" aria-label="Scroll shelf left">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
         </button>
         <button type="button" data-shelf-next class="shelf-arrow" aria-label="Scroll shelf right">
-          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
         </button>
       </div>
     </div>

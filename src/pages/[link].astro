@@ -1,0 +1,225 @@
+---
+export function getStaticPaths() {
+  const redirects = [
+    { 
+      keys: ['instagram', 'ig', 'insta'], 
+      url: 'https://www.instagram.com/rakhicow/', 
+      colorLight: '225, 48, 108',
+      colorDark: '253, 29, 29',
+      brand: 'instagram'
+    },
+    { 
+      keys: ['linkedin', 'li'], 
+      url: 'https://www.linkedin.com/in/rakshita-gupta-4571a7251', 
+      colorLight: '10, 102, 194',
+      colorDark: '10, 102, 194',
+      brand: 'linkedin'
+    },
+    { 
+      keys: ['youtube', 'yt'], 
+      url: 'https://www.youtube.com/c/cdiofficial', 
+      colorLight: '255, 0, 0',
+      colorDark: '255, 0, 0',
+      brand: 'youtube'
+    },
+    { 
+      keys: ['ResumeFull', 'Resume', 'rf'], 
+      url: '/RGupta-ResumeFull.pdf', 
+      colorLight: '0, 0, 0',
+      colorDark: '245, 243, 245',
+      brand: 'resume'
+    },
+    { 
+      keys: ['ResumeVis', 'rv'], 
+      url: '/RGupta-ResumeVis.pdf', 
+      colorLight: '0, 0, 0',
+      colorDark: '245, 243, 245',
+      brand: 'resume'
+    }
+  ];
+
+  const paths = [];
+  for (const group of redirects) {
+    for (const key of group.keys) {
+      paths.push({
+        params: { link: key },
+        props: { 
+          url: group.url,
+          colorLight: group.colorLight,
+          colorDark: group.colorDark,
+          brand: group.brand
+        }
+      });
+    }
+  }
+  return paths;
+}
+
+const { url, colorLight, colorDark, brand } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting...</title>
+    <script is:inline>
+      const theme = (() => {
+        if (typeof localStorage !== 'undefined' && localStorage.getItem('rg-theme')) {
+          return localStorage.getItem('rg-theme');
+        }
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          return 'dark';
+        }
+        return 'light';
+      })();
+      if (theme === 'dark') document.documentElement.classList.add('dark');
+      else document.documentElement.classList.remove('dark');
+    </script>
+    <meta http-equiv="refresh" content={`2;url=${url}`} />
+    
+    <style define:vars={{ colorLight, colorDark }}>
+      :root {
+        --brand-rgb: var(--colorLight);
+      }
+      html.dark {
+        --brand-rgb: var(--colorDark);
+      }
+
+      * { margin: 0; padding: 0; }
+      body {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #FAFAFA;
+        transition: opacity 0.4s ease;
+        overflow: hidden;
+      }
+      html.dark body {
+        background-color: #0A0E1A; /* exact site dark mode canvas */
+      }
+      
+      body.fade-out {
+        opacity: 0;
+      }
+
+      /* Subtle glowing orb behind the loader */
+      .background-glow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(var(--brand-rgb), 0.25) 0%, transparent 70%);
+        filter: blur(20px);
+        z-index: 0;
+        pointer-events: none;
+      }
+      html.dark .background-glow {
+        background: radial-gradient(circle, rgba(var(--brand-rgb), 0.2) 0%, transparent 70%);
+      }
+
+      .section-loading {
+        position: relative;
+        z-index: 1;
+      }
+
+      ul.list-bars {
+        list-style: none;
+        display: flex;
+        align-items: center;
+      }
+      
+      ul.list-bars li {
+        margin: 0 7px;
+        width: 12px;
+        border-radius: 12px;
+        
+        /* High-saturation liquid glass base */
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%),
+                    linear-gradient(180deg, rgba(var(--brand-rgb), 0.9) 0%, rgba(var(--brand-rgb), 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        box-shadow: 
+          0 4px 12px rgba(var(--brand-rgb), 0.3),
+          inset 0 1px 2px rgba(255, 255, 255, 0.9),
+          inset 0 -2px 6px rgba(var(--brand-rgb), 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        
+        animation: animate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+      }
+      
+      html.dark ul.list-bars li {
+        /* Dark mode specific tweaks for glass borders/shadows */
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%),
+                    linear-gradient(180deg, rgba(var(--brand-rgb), 0.9) 0%, rgba(var(--brand-rgb), 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 
+          0 8px 24px rgba(var(--brand-rgb), 0.3),
+          inset 0 1px 1px rgba(255, 255, 255, 0.2),
+          inset 0 -2px 6px rgba(var(--brand-rgb), 0.4);
+      }
+
+      ul.list-bars li:nth-child(odd) {
+        height: 80px;
+        animation-delay: 0.6s;
+      }
+      ul.list-bars li:nth-child(even) {
+        height: 20px;
+      }
+
+      /* Instagram specific multi-color flowing liquid glass override */
+      @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+
+      body[data-brand="instagram"] ul.list-bars li {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 100%),
+                    linear-gradient(45deg, #FFDD55, #FF543E, #C837AB, #833AB4);
+        background-size: 100% 100%, 300% 300%;
+        animation: animate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate, gradientFlow 3s ease infinite;
+      }
+      
+      html.dark body[data-brand="instagram"] ul.list-bars li {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 100%),
+                    linear-gradient(45deg, #FFDD55, #FF543E, #C837AB, #833AB4);
+        background-size: 100% 100%, 300% 300%;
+        animation: animate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate, gradientFlow 3s ease infinite;
+      }
+
+      /* Restore the staggered waveform effect that the shorthand animation overrode */
+      body[data-brand="instagram"] ul.list-bars li:nth-child(odd) {
+        animation-delay: 0.6s, 0s;
+      }
+
+      @keyframes animate {
+        from { height: 12px; }
+        to { height: 80px; }
+      }
+    </style>
+  </head>
+  <body data-brand={brand}>
+    <div class="background-glow"></div>
+    <div class="section-loading">
+      <ul class="list-bars">
+        <li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+      </ul>
+    </div>
+    <script define:vars={{ url }}>
+      setTimeout(() => {
+        document.body.classList.add('fade-out');
+      }, 1100);
+
+      setTimeout(() => {
+        window.location.replace(url);
+      }, 1500);
+    </script>
+  </body>
+</html>
