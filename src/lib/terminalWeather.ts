@@ -288,8 +288,8 @@ let scanAt = 0;
 const SCAN_TTL = 10 * 60 * 1000;
 
 /** Finds a city somewhere on earth that is currently having `want`. */
-async function fetchByCondition(want: Scene): Promise<Conditions> {
-  if (scanCache && Date.now() - scanAt < SCAN_TTL) return choosePick(scanCache, want);
+async function fetchByCondition(want: Scene, arg: string): Promise<Conditions> {
+  if (scanCache && Date.now() - scanAt < SCAN_TTL) return choosePick(scanCache, want, arg);
 
   const res = await fetch(
     'https://api.open-meteo.com/v1/forecast?' +
@@ -332,13 +332,17 @@ async function fetchByCondition(want: Scene): Promise<Conditions> {
 
   scanCache = readings;
   scanAt = Date.now();
-  return choosePick(readings, want);
+  return choosePick(readings, want, arg);
 }
 
 /** Picks a city for `want`, avoiding an immediate repeat of the last one. */
-function choosePick(readings: Conditions[], want: Scene): Conditions {
+function choosePick(readings: Conditions[], want: Scene, arg: string): Conditions {
   const targetGroup = GROUPS[want];
-  let pool = readings.filter((r) => GROUPS[r.scene] === targetGroup);
+  let pool = readings.filter((r) => {
+    if (GROUPS[r.scene] !== targetGroup) return false;
+    if ((arg === 'sunny' || arg === 'sun') && !r.isDay) return false;
+    return true;
+  });
 
   if (pool.length > 0) {
     const fresh = pool.filter((r) => r.place !== lastCondPick[want]);
@@ -880,7 +884,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
     wantScene ? `Looking for somewhere ${esc(arg)}…` : `Reading the sky${city ? ` over ${esc(city)}` : ''}…`
   }</span>`;
 
-  (wantScene ? fetchByCondition(wantScene) : fetchConditions(city))
+  (wantScene ? fetchByCondition(wantScene, arg) : fetchConditions(city))
     .then((cond) => {
       if (!document.body.contains(out)) return;
 
