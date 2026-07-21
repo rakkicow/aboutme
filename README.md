@@ -2,57 +2,69 @@
 
 **Computer Engineer**
 
-(414) 526-2678 · rakgupta@purdue.edu
+(414) 526-2678 · rakgupta@purdue.edu · [rakshita.me](https://rakshita.me)
+
+[Visual résumé](https://rakshita.me/ResumeVis) · [Full résumé](https://rakshita.me/ResumeFull) · [LinkedIn](https://www.linkedin.com/in/rakshita-gupta-4571a7251)
 
 ---
 
-As a junior at Purdue University, I am fervently passionate about technology and have amassed diverse work experience in fields such as cell phone repair, 3D modeling, web and mobile application development, and professional video editing. This hands-on background has instilled in me a meticulous and detail-oriented approach, enabling me to troubleshoot and problem-solve effectively. My dedication to user-friendly design, innovative 3D modeling, and content creation drives me to excel and make a significant impact in the world of technology as I continue my academic and professional journey.
+Computer Engineering Technology student with a strong foundation in hardware design and repair, circuit design, and full-stack software development. Proven track record of developing cross-platform applications, automating complex data workflows, and leading detail-oriented technical projects. Adept at leveraging both microelectronics expertise and modern developer tools to design user-centric solutions and streamline operations.
 
 ## Skills
 
-- Video Editing and Content Creation
-- Collaboration and Project Management
-- UX/UI Design and Implementation
-- Product Development and Customization
-- Device Repair Skills, Soldering and Microelectronics
-- Customer Service, Communication and Conflict Resolution
-- Upselling Accessories or Services and Educating Customers
+- Product Development & Prototyping
+- Circuit Design & PCB Layout
+- Device Repair, Soldering & Microelectronics
+- UX/UI Design & Implementation
+- Web & Mobile App Development
+- Software Testing & Debugging
+- 3D Modeling & 3D Printing
+- Video Editing & Content Creation
 
-## Languages
+**Languages:** Java · Python · C/C++ · Swift · VBS · Dart · HTML/CSS/JS · SQL · MATLAB · SystemVerilog
 
-Java · MATLAB · C/C++ · Python · HTML/CSS/JS · Dart · Swift
+**Tools:** KiCad · LTSpice · Git/GitHub · VS Code · Xcode · Figma · Blender · Fusion · Adobe Suite · MS Suite
 
 ## Education
 
-**Bachelor of Computer Engineering**
-Minors in Psychology, Entrepreneurship, and AI
+**Bachelor of Science in Computer Engineering Technology**
+Minors in Psychology, Entrepreneurship, and Computer Engineering
 Purdue University — *expected May 2028*
 
 **Relevant coursework:**
 
-- ECE 20875 — Python for Data Science (A+)
-- ECE 368 — Data Structures (A−)
-- ECE 264 — Advanced C Programming (A+)
-- ENGR 131/132 — Ideas to Innovation (A)
+- ECE 20875 — Python for Data Science
+- ECE 26400 — Advanced C Programming
+- ECE 20001 — Electrical Engineering Fundamentals
+- ECE 36800 — Data Structures
+- ECE 27000 — Intro to Digital System Design
+- CNIT 18000 — Intro to Systems Development
 
 ## Work
 
-### Freelance Video Editor
-**CDI Official** · 2014–2023
+### Legal Automation Consultant
+**Freelance** · Remote · Jun 2026 – Jul 2026
 
-- Collaborated with Augusta University Medical Simulation Center to produce immersive simulation videos using VR headsets and 360° cameras.
-- Filmed and edited an informative video for Ultrasound-Guided Fine-Needle Aspiration Biopsy patients at AugustaENT.
-- Contributed to patient care by reducing anxiety and providing clear guidance for medical procedures, while leveraging video editing skills to convey complex medical information effectively.
+- Developed a Visual Basic Script (VBS) tool to automate the extraction and conversion of complex tables from HIPAA-compliant Word documents into Excel spreadsheets.
+- Designed an intuitive interface enabling legal professionals to efficiently review structured data and seamlessly append company recommendations, significantly reducing manual data entry time.
+- Operated under a strict NDA with a locked-down, access-restricted document that could not be shared with any external or cloud services, building and testing the entire automation locally within the client's secure environment.
 
-### Electronics Technician / Sales Associate
-**CPR Cell Phone Repair** · 2022–2023
+### UI/UX Design Contributor
+**BlueBubbles (Open Source)** · Remote · Jun 2020 – Aug 2023
 
-- Repaired electronic devices, including smartphones, tablets, and laptops.
-- Assisted customers with their repair needs and provided top-quality service at the front desk.
-- Collaborated with fellow technicians and team members to effectively troubleshoot and repair electronic devices.
+- Contributed UI/UX design to an open-source Flutter app bringing iMessage to Android — 100K+ downloads, 4.6★ on Google Play.
+- Streamlined the core chat interface and helped design the app's robust theming engine, which became a headline feature.
+- Worked directly with the 5-person core developer team, iterating on feedback from a 13,000+ member Discord community and GitHub beta testers.
 
-### Lead Software Designer
-**BlueBubbles** · 2020–2023
+### Electronics Technician & Sales Associate
+**CPR Cell Phone Repair** · Augusta, GA · Sep 2022 – Aug 2023
 
-- Spearheaded the development of BlueBubbles, an innovative app that bridges the communication gap between iOS and Android, enabling iMessage functionality on Android devices.
-- Actively incorporated user feedback into the design process for BlueBubbles, making iterative improvements based on real-world usage to enhance the app's functionality and user experience.
+- Completed 200+ repairs per month across smartphones, tablets, laptops, and game consoles, consisting of screen and battery replacements, board-level soldering, and lead responsibility for software-based repairs.
+- Ranked top of the shop in service speed and customer satisfaction, earning the highest tips among technicians; upsold 150+ screen protectors and 3–5 full device sales monthly.
+
+### Founder
+**CDI Official** · Augusta, GA · Nov 2014 – Jun 2023
+
+- Founded a media production studio delivering 50+ professionally edited videos plus apps, websites, event videography, and photography that built clients' brand identities and online presence, including healthcare clients under NDA.
+- Produced immersive 360°/VR simulation videos for the Augusta University Medical Simulation Center, later adapted by the department into interactive VR training apps for medical students.
+- Filmed and edited clinical procedure explainers for AugustaENT patients (e.g., Ultrasound-Guided Fine-Needle Aspiration Biopsy, pediatric surgery prep), credited with measurably easing patient anxiety.
