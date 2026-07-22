@@ -445,11 +445,22 @@ const { isStandalone = false } = Astro.props;
 
   // Typing prompt loop — only runs while the terminal is on-screen
   const commands = [
+    'npm run dev',
+    'git status',
     'git push origin main',
-    'astro dev',
-    'open rakshita.me',
+    'ssh cow@rakshita.me',
+    'ls -la',
+    'astro build',
+    'chmod +x moo.sh',
+    'sudo apt-get update',
+    'sbx run',
+    'whatsong',
+    'weather',
+    'walloftext',
+    'hack',
+    'sudo rm -rf /',
     'echo "moo 🐄"',
-    'cat skills.txt',
+    'cat milk.txt'
   ];
 
   const typerEls = document.querySelectorAll<HTMLElement>('.typer');
@@ -458,7 +469,7 @@ const { isStandalone = false } = Astro.props;
     let running = false;
     let interactive = false;
     let inGame = false;
-    let i = 0;
+    let lastCmdIdx = -1;
 
     const termWindow = document.querySelector('.term-window') as HTMLElement;
     const autoTyper = document.getElementById('auto-typer') as HTMLElement;
@@ -485,7 +496,12 @@ const { isStandalone = false } = Astro.props;
       while (onScreen && !interactive) {
         for (const el of typerEls) {
           if (interactive) break;
-          const cmd = commands[i % commands.length];
+          let cmdIdx;
+          do {
+            cmdIdx = Math.floor(Math.random() * commands.length);
+          } while (cmdIdx === lastCmdIdx && commands.length > 1);
+          lastCmdIdx = cmdIdx;
+          const cmd = commands[cmdIdx];
           el.textContent = '';
           for (let c = 0; c < cmd.length; c++) {
             if (!onScreen || interactive) break;
@@ -500,7 +516,6 @@ const { isStandalone = false } = Astro.props;
           }
           await wait(400);
         }
-        i++;
       }
       running = false;
     };
