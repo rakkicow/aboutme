@@ -9,20 +9,53 @@ import CardTerminal from '~/components/CardTerminal.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Terminal</title>
     <style>
-      @keyframes bootPulse {
-        0% { opacity: 0; }
-        50% { opacity: 1; }
-        100% { opacity: 0; }
+      #loader {
+        --brand-rgb: 57, 255, 20;
       }
-      .boot-text {
-        color: #39FF14;
-        font-family: monospace;
-        font-size: 1.5rem;
+      .background-glow {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        animation: bootPulse 1s infinite;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(var(--brand-rgb), 0.2) 0%, transparent 70%);
+        filter: blur(20px);
+        z-index: 0;
+        pointer-events: none;
+      }
+      .section-loading {
+        position: relative;
+        z-index: 1;
+      }
+      ul.list-bars {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+      }
+      ul.list-bars li {
+        margin: 0 7px;
+        width: 12px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 100%),
+                    linear-gradient(180deg, rgba(var(--brand-rgb), 0.9) 0%, rgba(var(--brand-rgb), 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 
+          0 8px 24px rgba(var(--brand-rgb), 0.3),
+          inset 0 1px 1px rgba(255, 255, 255, 0.2),
+          inset 0 -2px 6px rgba(var(--brand-rgb), 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        animation: loader-animate 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
+      }
+      ul.list-bars li:nth-child(odd) { animation-delay: -0.8s; }
+      ul.list-bars li:nth-child(even) { animation-delay: 0s; }
+      @keyframes loader-animate {
+        from { height: 12px; }
+        to { height: 80px; }
       }
       .cursor-fx { display: none; }
       @media (hover: hover) and (pointer: fine) {
@@ -33,7 +66,12 @@ import CardTerminal from '~/components/CardTerminal.astro';
   </head>
   <body class="h-full w-full m-0 p-0 overflow-hidden text-cow-300 bg-black">
     <div id="loader" class="absolute inset-0 bg-black z-50 flex flex-col justify-center items-center">
-      <div class="boot-text">Loading OS...</div>
+      <div class="background-glow"></div>
+      <div class="section-loading">
+        <ul class="list-bars">
+          <li></li><li></li><li></li><li></li><li></li><li></li><li></li>
+        </ul>
+      </div>
     </div>
     <div class="w-full h-full p-0 sm:p-0">
       <CardTerminal isStandalone={true} />
