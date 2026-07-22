@@ -404,6 +404,10 @@ body.zen #back {
 body.zen #card {
   cursor: pointer;
 }
+body.zen .country-flag {
+  opacity: 0;
+  pointer-events: none;
+}
 nav, #search {
   transition: opacity 0.5s ease;
 }
@@ -1954,6 +1958,8 @@ CORS-open, so this stays a fully static page.
             lat: hit.latitude,
             lon: hit.longitude,
             place: region ? hit.name + ', ' + region : hit.name,
+            countryCode: hit.country_code,
+            countryName: hit.country,
             imperial: IMPERIAL.indexOf(hit.country_code) !== -1
           };
         });
@@ -1964,6 +1970,8 @@ CORS-open, so this stays a fully static page.
         lat: parseFloat(g.latitude),
         lon: parseFloat(g.longitude),
         place: g.city ? (region ? g.city + ', ' + region : g.city) : (region || 'Somewhere'),
+        countryCode: g.country_code,
+        countryName: g.country,
         imperial: IMPERIAL.indexOf(g.country_code) !== -1
       };
     });
@@ -2032,13 +2040,33 @@ CORS-open, so this stays a fully static page.
     setNight(reading.night);
     if (reading.night) drawMoon(Date.now());
 
-    // The place name opens that city's forecast on merrysky.net (Open-Meteo UI).
-    $place.html($('<a>', {
+    var $link = $('<a>', {
       href: 'https://merrysky.net/forecast/' + reading.lat + ',' + reading.lon,
       target: '_blank',
       rel: 'noopener noreferrer',
       text: reading.place
-    })).addClass('shown');
+    });
+    
+    $place.empty().append($link);
+    
+    if (reading.countryCode && reading.countryCode !== 'US') {
+       var flagEmoji = reading.countryCode.toUpperCase().replace(/./g, function(char) {
+         return String.fromCodePoint(char.charCodeAt(0) + 127397);
+       });
+       var $flag = $('<span>', {
+         text: ' ' + flagEmoji,
+         title: reading.countryName,
+         class: 'country-flag',
+         css: { cursor: 'pointer', transition: 'opacity 0.3s' }
+       }).on('click', function(e) {
+         e.preventDefault();
+         e.stopPropagation();
+         alert(reading.countryName);
+       });
+       $place.append($flag);
+    }
+    
+    $place.addClass('shown');
 
     paintTemp(reading);
 
@@ -2302,41 +2330,41 @@ CORS-open, so this stays a fully static page.
      what makes a completion appear the moment you start typing. From two
      characters on, live results replace these. */
   var LOCAL = [
-    ['Amsterdam','Netherlands',52.37,4.90,0], ['Athens','Greece',37.98,23.73,0],
-    ['Atlanta','Georgia',33.75,-84.39,1], ['Auckland','New Zealand',-36.85,174.76,0],
-    ['Bangkok','Thailand',13.76,100.50,0], ['Barcelona','Spain',41.39,2.17,0],
-    ['Beijing','China',39.90,116.41,0], ['Berlin','Germany',52.52,13.40,0],
-    ['Boston','Massachusetts',42.36,-71.06,1], ['Buenos Aires','Argentina',-34.60,-58.38,0],
-    ['Cairo','Egypt',30.04,31.24,0], ['Cape Town','South Africa',-33.92,18.42,0],
-    ['Chicago','Illinois',41.88,-87.63,1], ['Copenhagen','Denmark',55.68,12.57,0],
-    ['Delhi','India',28.61,77.21,0], ['Denver','Colorado',39.74,-104.99,1],
-    ['Dubai','United Arab Emirates',25.20,55.27,0], ['Dublin','Ireland',53.35,-6.26,0],
-    ['Edinburgh','Scotland',55.95,-3.19,0], ['Helsinki','Finland',60.17,24.94,0],
-    ['Hong Kong','China',22.32,114.17,0], ['Houston','Texas',29.76,-95.37,1],
-    ['Istanbul','Turkey',41.01,28.98,0], ['Jakarta','Indonesia',-6.21,106.85,0],
-    ['Kyoto','Japan',35.01,135.77,0], ['Lagos','Nigeria',6.52,3.38,0],
-    ['Lima','Peru',-12.05,-77.04,0], ['Lisbon','Portugal',38.72,-9.14,0],
-    ['London','United Kingdom',51.51,-0.13,0], ['Los Angeles','California',34.05,-118.24,1],
-    ['Madrid','Spain',40.42,-3.70,0], ['Melbourne','Australia',-37.81,144.96,0],
-    ['Mexico City','Mexico',19.43,-99.13,0], ['Miami','Florida',25.77,-80.19,1],
-    ['Moscow','Russia',55.76,37.62,0], ['Mumbai','India',19.08,72.88,0],
-    ['Nairobi','Kenya',-1.29,36.82,0], ['Naples','Italy',40.85,14.27,0],
-    ['New York','New York',40.71,-74.01,1], ['Oslo','Norway',59.91,10.75,0],
-    ['Paris','France',48.86,2.35,0], ['Perth','Australia',-31.95,115.86,0],
-    ['Prague','Czechia',50.08,14.44,0], ['Reykjavik','Iceland',64.15,-21.94,0],
-    ['Rio de Janeiro','Brazil',-22.91,-43.17,0], ['Rome','Italy',41.90,12.50,0],
-    ['San Francisco','California',37.77,-122.42,1], ['Seattle','Washington',47.61,-122.33,1],
-    ['Seoul','South Korea',37.57,126.98,0], ['Singapore','Singapore',1.35,103.82,0],
-    ['Stockholm','Sweden',59.33,18.07,0], ['Sydney','Australia',-33.87,151.21,0],
-    ['Tehran','Iran',35.69,51.39,0], ['Tokyo','Japan',35.69,139.69,0],
-    ['Toronto','Canada',43.65,-79.38,0], ['Vancouver','Canada',49.28,-123.12,0],
-    ['Venice','Italy',45.44,12.32,0], ['Vienna','Austria',48.21,16.37,0],
-    ['Warsaw','Poland',52.23,21.01,0], ['Washington','District of Columbia',38.91,-77.04,1],
-    ['Wellington','New Zealand',-41.29,174.78,0], ['Zurich','Switzerland',47.38,8.54,0]
+    ['Amsterdam','Netherlands',52.37,4.90,0,'NL','Netherlands'], ['Athens','Greece',37.98,23.73,0,'GR','Greece'],
+    ['Atlanta','Georgia',33.75,-84.39,1,'US','United States'], ['Auckland','New Zealand',-36.85,174.76,0,'NZ','New Zealand'],
+    ['Bangkok','Thailand',13.76,100.50,0,'TH','Thailand'], ['Barcelona','Spain',41.39,2.17,0,'ES','Spain'],
+    ['Beijing','China',39.90,116.41,0,'CN','China'], ['Berlin','Germany',52.52,13.40,0,'DE','Germany'],
+    ['Boston','Massachusetts',42.36,-71.06,1,'US','United States'], ['Buenos Aires','Argentina',-34.60,-58.38,0,'AR','Argentina'],
+    ['Cairo','Egypt',30.04,31.24,0,'EG','Egypt'], ['Cape Town','South Africa',-33.92,18.42,0,'ZA','South Africa'],
+    ['Chicago','Illinois',41.88,-87.63,1,'US','United States'], ['Copenhagen','Denmark',55.68,12.57,0,'DK','Denmark'],
+    ['Delhi','India',28.61,77.21,0,'IN','India'], ['Denver','Colorado',39.74,-104.99,1,'US','United States'],
+    ['Dubai','United Arab Emirates',25.20,55.27,0,'AE','United Arab Emirates'], ['Dublin','Ireland',53.35,-6.26,0,'IE','Ireland'],
+    ['Edinburgh','Scotland',55.95,-3.19,0,'GB','Scotland'], ['Helsinki','Finland',60.17,24.94,0,'FI','Finland'],
+    ['Hong Kong','China',22.32,114.17,0,'CN','China'], ['Houston','Texas',29.76,-95.37,1,'US','United States'],
+    ['Istanbul','Turkey',41.01,28.98,0,'TR','Turkey'], ['Jakarta','Indonesia',-6.21,106.85,0,'ID','Indonesia'],
+    ['Kyoto','Japan',35.01,135.77,0,'JP','Japan'], ['Lagos','Nigeria',6.52,3.38,0,'NG','Nigeria'],
+    ['Lima','Peru',-12.05,-77.04,0,'PE','Peru'], ['Lisbon','Portugal',38.72,-9.14,0,'PT','Portugal'],
+    ['London','United Kingdom',51.51,-0.13,0,'GB','United Kingdom'], ['Los Angeles','California',34.05,-118.24,1,'US','United States'],
+    ['Madrid','Spain',40.42,-3.70,0,'ES','Spain'], ['Melbourne','Australia',-37.81,144.96,0,'AU','Australia'],
+    ['Mexico City','Mexico',19.43,-99.13,0,'MX','Mexico'], ['Miami','Florida',25.77,-80.19,1,'US','United States'],
+    ['Moscow','Russia',55.76,37.62,0,'RU','Russia'], ['Mumbai','India',19.08,72.88,0,'IN','India'],
+    ['Nairobi','Kenya',-1.29,36.82,0,'KE','Kenya'], ['Naples','Italy',40.85,14.27,0,'IT','Italy'],
+    ['New York','New York',40.71,-74.01,1,'US','United States'], ['Oslo','Norway',59.91,10.75,0,'NO','Norway'],
+    ['Paris','France',48.86,2.35,0,'FR','France'], ['Perth','Australia',-31.95,115.86,0,'AU','Australia'],
+    ['Prague','Czechia',50.08,14.44,0,'CZ','Czechia'], ['Reykjavik','Iceland',64.15,-21.94,0,'IS','Iceland'],
+    ['Rio de Janeiro','Brazil',-22.91,-43.17,0,'BR','Brazil'], ['Rome','Italy',41.90,12.50,0,'IT','Italy'],
+    ['San Francisco','California',37.77,-122.42,1,'US','United States'], ['Seattle','Washington',47.61,-122.33,1,'US','United States'],
+    ['Seoul','South Korea',37.57,126.98,0,'KR','South Korea'], ['Singapore','Singapore',1.35,103.82,0,'SG','Singapore'],
+    ['Stockholm','Sweden',59.33,18.07,0,'SE','Sweden'], ['Sydney','Australia',-33.87,151.21,0,'AU','Australia'],
+    ['Tehran','Iran',35.69,51.39,0,'IR','Iran'], ['Tokyo','Japan',35.69,139.69,0,'JP','Japan'],
+    ['Toronto','Canada',43.65,-79.38,0,'CA','Canada'], ['Vancouver','Canada',49.28,-123.12,0,'CA','Canada'],
+    ['Venice','Italy',45.44,12.32,0,'IT','Italy'], ['Vienna','Austria',48.21,16.37,0,'AT','Austria'],
+    ['Warsaw','Poland',52.23,21.01,0,'PL','Poland'], ['Washington','District of Columbia',38.91,-77.04,1,'US','United States'],
+    ['Wellington','New Zealand',-41.29,174.78,0,'NZ','New Zealand'], ['Zurich','Switzerland',47.38,8.54,0,'CH','Switzerland']
   ].map(function (c) {
     return {
       name: c[0], region: c[1],
-      loc: { lat: c[2], lon: c[3], place: c[0] + ', ' + c[1], imperial: !!c[4] }
+      loc: { lat: c[2], lon: c[3], place: c[0] + ', ' + c[1], imperial: !!c[4], countryCode: c[5], countryName: c[6] }
     };
   });
 
@@ -2348,11 +2376,11 @@ CORS-open, so this stays a fully static page.
   }
 
   var STARTERS = [
-    { name: 'Tokyo', region: 'Japan', lat: 35.69, lon: 139.69, imp: false },
-    { name: 'Reykjavik', region: 'Iceland', lat: 64.15, lon: -21.94, imp: false },
-    { name: 'Cairo', region: 'Egypt', lat: 30.04, lon: 31.24, imp: false },
-    { name: 'Sydney', region: 'Australia', lat: -33.87, lon: 151.21, imp: false },
-    { name: 'New York', region: 'New York', lat: 40.71, lon: -74.01, imp: true }
+    { name: 'Tokyo', region: 'Japan', lat: 35.69, lon: 139.69, imp: false, countryCode: 'JP', countryName: 'Japan' },
+    { name: 'Reykjavik', region: 'Iceland', lat: 64.15, lon: -21.94, imp: false, countryCode: 'IS', countryName: 'Iceland' },
+    { name: 'Cairo', region: 'Egypt', lat: 30.04, lon: 31.24, imp: false, countryCode: 'EG', countryName: 'Egypt' },
+    { name: 'Sydney', region: 'Australia', lat: -33.87, lon: 151.21, imp: false, countryCode: 'AU', countryName: 'Australia' },
+    { name: 'New York', region: 'New York', lat: 40.71, lon: -74.01, imp: true, countryCode: 'US', countryName: 'United States' }
   ];
 
   function showStarters() {
@@ -2360,7 +2388,7 @@ CORS-open, so this stays a fully static page.
       return {
         name: s.name,
         region: s.region,
-        loc: { lat: s.lat, lon: s.lon, place: s.name + ', ' + s.region, imperial: s.imp }
+        loc: { lat: s.lat, lon: s.lon, place: s.name + ', ' + s.region, imperial: s.imp, countryCode: s.countryCode, countryName: s.countryName }
       };
     });
     renderSuggest();
@@ -2402,6 +2430,8 @@ CORS-open, so this stays a fully static page.
               lat: r.latitude,
               lon: r.longitude,
               place: region ? r.name + ', ' + region : r.name,
+              countryCode: r.country_code,
+              countryName: r.country,
               imperial: IMPERIAL.indexOf(r.country_code) !== -1
             }
           };
