@@ -268,7 +268,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
       })();
     </script>
 
-    <div class="mt-14 grid w-fit mx-auto grid-cols-2 gap-x-36 gap-y-11 sm:mt-14 sm:flex sm:w-full sm:justify-between">
+    <div class="mt-14 grid w-fit mx-auto grid-cols-2 gap-x-36 gap-y-11 sm:mt-14 sm:flex sm:w-full sm:gap-x-0 sm:justify-between">
       {[
         { k: 'Based', v: 'W. Lafayette, IN', href: 'https://www.google.com/maps/search/?api=1&query=West+Lafayette%2C+IN', external: true },
         { k: 'Grad', v: 'May 2028', href: '#experience', jump: 'experience' },
@@ -281,7 +281,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`${m.k}: ${m.v} — open in Google Maps`}
-            class="group block w-fit focus:outline-none"
+            class="group block w-fit whitespace-nowrap focus:outline-none"
           >
             <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium" style="color: var(--ink-soft);">
@@ -295,7 +295,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
           <a
             href={m.href}
             aria-label={`${m.k}: ${m.v} — jump to ${m.jump}`}
-            class="group block w-fit focus:outline-none"
+            class="group block w-fit whitespace-nowrap focus:outline-none"
           >
             <p class:list={["text-[11px] uppercase tracking-[0.18em]", m.cowInk && "cow-ink"]} style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium" style="color: var(--ink-soft);">
@@ -310,7 +310,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
             type="button"
             data-moo
             aria-label={`${m.k}: ${m.v} ${m.emoji} — press for a moo`}
-            class="group block w-fit cursor-pointer appearance-none border-0 bg-transparent p-0 text-left focus:outline-none"
+            class="group block w-fit cursor-pointer appearance-none whitespace-nowrap border-0 bg-transparent p-0 text-left focus:outline-none"
           >
             <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium transition-transform duration-200 group-active:scale-90" style="color: var(--ink-soft);">
