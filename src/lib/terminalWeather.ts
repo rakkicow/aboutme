@@ -124,6 +124,17 @@ const US_STATES: Record<string, string> = {
   pr: 'Puerto Rico',
 };
 
+function getStateAbbr(name: string): string {
+  if (!name) return name;
+  const lower = name.toLowerCase();
+  for (const [abbr, full] of Object.entries(US_STATES)) {
+    if (full.toLowerCase() === lower || abbr.toLowerCase() === lower) {
+      return abbr.toUpperCase();
+    }
+  }
+  return name;
+}
+
 /**
  * Splits a trailing US state off a query — `augusta ga`, `augusta, ga` and
  * `augusta,ga` all become `{ name: 'augusta', state: 'Georgia' }`. A bare state
@@ -163,7 +174,7 @@ async function locate(city: string): Promise<{ lat: number; lon: number; place: 
         ) ?? results[0]
       : results[0];
     if (!hit) throw new Error('nocity');
-    const region = hit.admin1 && hit.country_code === 'US' ? hit.admin1 : hit.country;
+    const region = hit.admin1 && hit.country_code === 'US' ? getStateAbbr(hit.admin1) : hit.country;
     return {
       lat: hit.latitude,
       lon: hit.longitude,
@@ -176,7 +187,7 @@ async function locate(city: string): Promise<{ lat: number; lon: number; place: 
   const res = await fetch('https://get.geojs.io/v1/ip/geo.json');
   if (!res.ok) throw new Error('geoip');
   const g = await res.json();
-  const region = g.country_code === 'US' ? g.region : g.country;
+  const region = g.country_code === 'US' ? getStateAbbr(g.region) : g.country;
   return {
     lat: parseFloat(g.latitude),
     lon: parseFloat(g.longitude),
