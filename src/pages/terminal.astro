@@ -24,6 +24,11 @@ import CardTerminal from '~/components/CardTerminal.astro';
         transform: translate(-50%, -50%);
         animation: bootPulse 1s infinite;
       }
+      .cursor-fx { display: none; }
+      @media (hover: hover) and (pointer: fine) {
+        .cursor-fx { display: block; }
+        html, body, .term-window, input, a, button, [data-cursor-hover], .term-body { cursor: none !important; }
+      }
     </style>
   </head>
   <body class="h-full w-full m-0 p-0 overflow-hidden text-cow-300 bg-black">
@@ -33,6 +38,10 @@ import CardTerminal from '~/components/CardTerminal.astro';
     <div class="w-full h-full p-0 sm:p-0">
       <CardTerminal isStandalone={true} />
     </div>
+
+    <div id="term-cursor" class="cursor-fx pointer-events-none fixed left-0 top-0 z-[60] h-8 w-8 -translate-x-1/2 -translate-y-1/2 rounded-full" style="background: radial-gradient(circle, rgba(57,255,20,0.18) 0%, rgba(57,255,20,0) 70%); transition: width 280ms cubic-bezier(0.16, 1, 0.3, 1), height 280ms cubic-bezier(0.16, 1, 0.3, 1);"></div>
+    <div id="term-cursor-dot" class="cursor-fx pointer-events-none fixed left-0 top-0 z-[60] h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full" style="background: #39FF14; box-shadow: 0 0 12px rgba(57,255,20,0.6);"></div>
+
     <script>
       window.addEventListener('load', () => {
         setTimeout(() => {
@@ -44,6 +53,58 @@ import CardTerminal from '~/components/CardTerminal.astro';
           }
         }, 800);
       });
+
+      const cursor = document.getElementById('term-cursor');
+      const dot = document.getElementById('term-cursor-dot');
+      const hasFinePointer = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      if (cursor && dot && hasFinePointer) {
+        let mouseX = 0, mouseY = 0;
+        let curX = 0, curY = 0;
+        let rafId: number | null = null;
+
+        const animate = () => {
+          const dx = mouseX - curX;
+          const dy = mouseY - curY;
+          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+            curX = mouseX; curY = mouseY;
+            cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+            rafId = null; return;
+          }
+          curX += dx * 0.18; curY += dy * 0.18;
+          cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
+          rafId = requestAnimationFrame(animate);
+        };
+
+        const kick = () => { if (rafId === null) rafId = requestAnimationFrame(animate); };
+
+        window.addEventListener('mousemove', (e) => {
+          mouseX = e.clientX; mouseY = e.clientY;
+          dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+          kick();
+        }, { passive: true });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } 
+          else if (!document.hidden) { kick(); }
+        });
+
+        // Event delegation for enlarging cursor on hoverable elements
+        document.body.addEventListener('mouseover', (e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest('a, button, [data-cursor-hover], input, .cursor-text, #term-prompt-line')) {
+            cursor.style.width = '64px';
+            cursor.style.height = '64px';
+          }
+        });
+        document.body.addEventListener('mouseout', (e) => {
+          const target = e.target as HTMLElement;
+          if (target.closest('a, button, [data-cursor-hover], input, .cursor-text, #term-prompt-line')) {
+            cursor.style.width = '32px';
+            cursor.style.height = '32px';
+          }
+        });
+      }
     </script>
   </body>
 </html>
