@@ -2,7 +2,7 @@ name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, beta-builds ]
   workflow_dispatch:
 
 permissions:
@@ -14,10 +14,51 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout your repository using git
+      - name: Checkout main
         uses: actions/checkout@v4
-      - name: Install, build, and upload your site
-        uses: withastro/action@v3
+        with:
+          ref: main
+          path: main-branch
+
+      - name: Checkout beta-builds
+        id: checkout-beta
+        uses: actions/checkout@v4
+        continue-on-error: true
+        with:
+          ref: beta-builds
+          path: beta-branch
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build main
+        run: |
+          cd main-branch
+          npm ci
+          npm run build
+
+      - name: Build beta-builds
+        if: steps.checkout-beta.outcome == 'success'
+        run: |
+          cd beta-branch
+          npm ci
+          ASTRO_BASE="/beta" npm run build
+
+      - name: Merge Artifacts
+        run: |
+          mkdir -p final-dist
+          cp -r main-branch/dist/* final-dist/
+          if [ -d "beta-branch/dist" ]; then
+            mkdir -p final-dist/beta
+            cp -r beta-branch/dist/* final-dist/beta/
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: final-dist
 
   deploy:
     needs: build

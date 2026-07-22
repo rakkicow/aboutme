@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://rakshita.me',
+  base: process.env.ASTRO_BASE || '/',
   trailingSlash: 'ignore',
   integrations: [
     tailwind({ applyBaseStyles: false }),
