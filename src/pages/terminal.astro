@@ -8,7 +8,7 @@ import CardTerminal from '~/components/CardTerminal.astro';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Terminal</title>
-    <style>
+    <style is:global>
       #loader {
         --brand-rgb: 57, 255, 20;
       }
@@ -60,7 +60,13 @@ import CardTerminal from '~/components/CardTerminal.astro';
       .cursor-fx { display: none; }
       @media (hover: hover) and (pointer: fine) {
         .cursor-fx { display: block; }
-        html, body, .term-window, input, a, button, [data-cursor-hover], .term-body { cursor: none !important; }
+        /* Globally hide all native cursors to prevent glitches */
+        * { cursor: none !important; }
+      }
+      /* Scale the terminal caret proportionally to the much larger standalone text */
+      #term-caret {
+        height: 1.25em !important;
+        width: 1ch !important;
       }
     </style>
   </head>
@@ -97,49 +103,38 @@ import CardTerminal from '~/components/CardTerminal.astro';
       const hasFinePointer = typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
       if (cursor && dot && hasFinePointer) {
-        let mouseX = 0, mouseY = 0;
-        let curX = 0, curY = 0;
-        let rafId: number | null = null;
-
-        const animate = () => {
-          const dx = mouseX - curX;
-          const dy = mouseY - curY;
-          if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
-            curX = mouseX; curY = mouseY;
-            cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
-            rafId = null; return;
-          }
-          curX += dx * 0.18; curY += dy * 0.18;
-          cursor.style.transform = `translate(${curX}px, ${curY}px) translate(-50%, -50%)`;
-          rafId = requestAnimationFrame(animate);
-        };
-
-        const kick = () => { if (rafId === null) rafId = requestAnimationFrame(animate); };
-
         window.addEventListener('mousemove', (e) => {
-          mouseX = e.clientX; mouseY = e.clientY;
-          dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-          kick();
+          const x = e.clientX;
+          const y = e.clientY;
+          dot.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+          cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
         }, { passive: true });
 
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden && rafId !== null) { cancelAnimationFrame(rafId); rafId = null; } 
-          else if (!document.hidden) { kick(); }
-        });
-
-        // Event delegation for enlarging cursor on hoverable elements
+        // Event delegation for morphing cursor on hoverable elements
         document.body.addEventListener('mouseover', (e) => {
           const target = e.target as HTMLElement;
-          if (target.closest('a, button, [data-cursor-hover], input, .cursor-text, #term-prompt-line')) {
+          if (target.closest('input, .cursor-text, #term-prompt-line')) {
+            // Morph into a text I-beam
+            cursor.style.width = '4px';
+            cursor.style.height = '24px';
+            cursor.style.borderRadius = '2px';
+            dot.style.opacity = '0'; // Hide the inner dot for I-beam
+          } else if (target.closest('a, button, [data-cursor-hover], .cursor-pointer')) {
+            // Enlarge for links/buttons
             cursor.style.width = '64px';
             cursor.style.height = '64px';
+            cursor.style.borderRadius = '50%';
+            dot.style.opacity = '1';
           }
         });
         document.body.addEventListener('mouseout', (e) => {
           const target = e.target as HTMLElement;
-          if (target.closest('a, button, [data-cursor-hover], input, .cursor-text, #term-prompt-line')) {
+          if (target.closest('input, .cursor-text, #term-prompt-line, a, button, [data-cursor-hover], .cursor-pointer')) {
+            // Restore default green dot
             cursor.style.width = '32px';
             cursor.style.height = '32px';
+            cursor.style.borderRadius = '50%';
+            dot.style.opacity = '1';
           }
         });
       }
