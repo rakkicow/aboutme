@@ -270,20 +270,36 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
     <div class="mt-14 grid w-fit mx-auto grid-cols-2 gap-x-36 gap-y-11 sm:mt-14 sm:flex sm:w-full sm:justify-between">
       {[
-        { k: 'Based', v: 'West Lafayette, IN' },
-        { k: 'Grad', v: 'May 2028' },
-        { k: 'Stack', v: 'Full :)', href: '#languages' },
+        { k: 'Based', v: 'W. Lafayette, IN', href: 'https://www.google.com/maps/search/?api=1&query=West+Lafayette%2C+IN', external: true },
+        { k: 'Grad', v: 'May 2028', href: '#experience', jump: 'experience' },
+        { k: 'Stack', v: 'Full :)', href: '#languages', jump: 'languages', cowInk: true },
         { k: 'Fav skill', v: 'cow', emoji: '🐄', moo: true, last: true },
       ].map((m, i) => (
-        m.href ? (
+        m.external ? (
           <a
             href={m.href}
-            aria-label={`${m.k}: ${m.v} — jump to languages`}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${m.k}: ${m.v} — open in Google Maps`}
             class="group block w-fit focus:outline-none"
           >
-            <p class="cow-ink text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
+            <p class="text-[11px] uppercase tracking-[0.18em]" style="color: var(--ink-faint);">{m.k}</p>
+            <p class="mt-1.5 inline-flex items-center gap-1 whitespace-nowrap text-sm font-medium" style="color: var(--ink-soft);">
+              <span>{m.v}</span>
+              <svg class="h-3 w-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-[#DC9BB5]" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M4 10L10 4M5 4h5v5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </p>
+          </a>
+        ) : m.href ? (
+          <a
+            href={m.href}
+            aria-label={`${m.k}: ${m.v} — jump to ${m.jump}`}
+            class="group block w-fit focus:outline-none"
+          >
+            <p class:list={["text-[11px] uppercase tracking-[0.18em]", m.cowInk && "cow-ink"]} style="color: var(--ink-faint);">{m.k}</p>
             <p class="mt-1.5 inline-flex items-center gap-1 text-sm font-medium" style="color: var(--ink-soft);">
-              <span class="cow-ink">{m.v}</span>
+              <span class:list={[m.cowInk && "cow-ink"]}>{m.v}</span>
               <svg class="h-3 w-3 -translate-x-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-hover:text-[#DC9BB5]" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M7 2v10M3 8l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
