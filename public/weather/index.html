@@ -1946,6 +1946,17 @@ CORS-open, so this stays a fully static page.
     'District of Columbia': 'DC'
   };
 
+  function getStateAbbr(name) {
+    if (!name) return name || '';
+    var lower = String(name).toLowerCase();
+    for (var full in US_STATES) {
+      if (full.toLowerCase() === lower || US_STATES[full].toLowerCase() === lower) {
+        return US_STATES[full];
+      }
+    }
+    return name;
+  }
+
   // 📍 Where is the visitor? Empty `city` means "ask their IP".
   function locate(city) {
     if (city) {
@@ -1953,7 +1964,7 @@ CORS-open, so this stays a fully static page.
         encodeURIComponent(city)).then(function (data) {
           var hit = data && data.results && data.results[0];
           if (!hit) return $.Deferred().reject('nocity');
-          var region = hit.country_code === 'US' && hit.admin1 ? (US_STATES[hit.admin1] || hit.admin1) : hit.country_code;
+          var region = hit.country_code === 'US' && hit.admin1 ? getStateAbbr(hit.admin1) : hit.country_code;
           return {
             lat: hit.latitude,
             lon: hit.longitude,
@@ -1965,7 +1976,7 @@ CORS-open, so this stays a fully static page.
         });
     }
     return $.getJSON('https://get.geojs.io/v1/ip/geo.json').then(function (g) {
-      var region = g.country_code === 'US' ? (US_STATES[g.region] || g.region) : g.country_code;
+      var region = g.country_code === 'US' ? getStateAbbr(g.region) : g.country_code;
       return {
         lat: parseFloat(g.latitude),
         lon: parseFloat(g.longitude),
@@ -2364,9 +2375,10 @@ CORS-open, so this stays a fully static page.
     ['Warsaw','Poland',52.23,21.01,0,'PL','Poland'], ['Washington','District of Columbia',38.91,-77.04,1,'US','United States'],
     ['Wellington','New Zealand',-41.29,174.78,0,'NZ','New Zealand'], ['Zurich','Switzerland',47.38,8.54,0,'CH','Switzerland']
   ].map(function (c) {
+    var mappedRegion = c[5] === 'US' ? getStateAbbr(c[1]) : c[1];
     return {
-      name: c[0], region: c[1],
-      loc: { lat: c[2], lon: c[3], place: c[0] + ', ' + c[1], imperial: !!c[4], countryCode: c[5], countryName: c[6] }
+      name: c[0], region: mappedRegion,
+      loc: { lat: c[2], lon: c[3], place: c[0] + ', ' + mappedRegion, imperial: !!c[4], countryCode: c[5], countryName: c[6] }
     };
   });
 
@@ -2390,7 +2402,7 @@ CORS-open, so this stays a fully static page.
       return {
         name: s.name,
         region: s.region,
-        loc: { lat: s.lat, lon: s.lon, place: s.name + ', ' + s.region, imperial: s.imp, countryCode: s.countryCode, countryName: s.countryName }
+        loc: { lat: s.lat, lon: s.lon, place: s.name + ', ' + (s.countryCode === 'US' ? getStateAbbr(s.region) : s.region), imperial: s.imp, countryCode: s.countryCode, countryName: s.countryName }
       };
     });
     renderSuggest();
@@ -2424,7 +2436,7 @@ CORS-open, so this stays a fully static page.
         // The field may have moved on while this was in flight.
         if ($cityInput.val().trim() !== q) return;
         hits = (data && data.results ? data.results : []).map(function (r) {
-          var region = r.country_code === 'US' && r.admin1 ? r.admin1 : r.country;
+          var region = r.country_code === 'US' && r.admin1 ? getStateAbbr(r.admin1) : r.country;
           return {
             name: r.name,
             region: region || '',
