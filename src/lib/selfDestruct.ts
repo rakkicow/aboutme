@@ -145,7 +145,7 @@ function renderDeadSite() {
     btn.disabled = true;
     btn.setAttribute('aria-label', 'Reloading…');
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    window.location.replace('/');
+    window.location.replace(window.location.pathname === '/terminal' ? '/terminal' : '/');
   });
 
   document.documentElement.style.overflow = 'hidden';
