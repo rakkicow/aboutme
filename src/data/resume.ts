@@ -1,5 +1,4 @@
-// Source of truth for bio, courses, languages, experience.
-// Pulled from "RGupta - ResumeProV2.0.pdf" (ATS resume), 2026-07-15.
+// resume data
 
 export const bio = {
   name: 'Rakshita Gupta',
@@ -22,13 +21,11 @@ That hands-on history made me meticulous about details and stubborn about troubl
 Outside class I tinker — circuits, enclosures, small web builds for family and friends. I'm at my best when I get to design something end-to-end: from the schematic to the splash screen.`,
 };
 
-// Downloadable resumes (kept in /public). Visual = designed one-pager, Full = ATS two-pager.
-// Filenames contain spaces, so the URLs are pre-encoded.
+// resume pdfs
 export const resumeVisualPdf = '/RGupta%20-%20ResumeVis.pdf';
 export const resumeFullPdf = '/RGupta%20-%20ResumeFull.pdf';
 
-// Relevant coursework. Grade omitted = course taken, grade still pending.
-// Names are kept compact so each row stays on one line at every screen size.
+// coursework
 export const coursework: { code: string; name: string; grade?: string }[] = [
   { code: 'ECE 36800', name: 'Data Structures', grade: 'A−' },
   { code: 'ECE 26400', name: 'Advanced C Programming', grade: 'A+' },
@@ -106,13 +103,13 @@ export type Role = {
   years: string;
   kind: 'edu' | 'work' | 'volunteer';
   location?: string;
-  // Bullet wording mirrors the ATS resume PDF exactly — keep them in sync.
+  // from resume
   bullets?: string[];
-  // Prose for roles that aren't on the resume.
+  // extra roles
   body?: string;
 };
 
-// Newest first. Education first (for the timeline header), then work.
+// newest first
 export const roles: Role[] = [
   {
     org: 'Purdue University',

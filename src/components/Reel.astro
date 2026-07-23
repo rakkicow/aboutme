@@ -1,20 +1,13 @@
 ---
-// Reel — a TikTok/Shorts-style popup viewer.
-// Opens from any `a[href="#reel"]` (CDI card "Reel ↓", nav link). A vertical
-// scroll-snap scroller flips one video per gesture; the active video's embed
-// mounts + autoplays while everything off-screen stays torn down. The loop is
-// infinite (edge clones wrap seamlessly) and each slide hugs its own content
-// so the panel stays tight instead of leaving big letterbox bars.
+// reel
 import { reel } from '~/data/projects';
 ---
 
 <dialog id="reel" data-reel-modal aria-label="Video reel">
-  {/* Backdrop — clicking it closes the reel */}
+  {/* backdrop */}
   <div data-reel-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
 
-  {/* Panel — height is set by JS to hug one slide. Width grows with the screen
-      (up to ~2x on desktop) but is capped by viewport height so the video never
-      overflows the slide. */}
+  {/* panel */}
   <div class="relative" style="width: min(90vw, 1100px, 100vh); max-width: 100%;">
     <button type="button" data-reel-close class="reel-x absolute -right-3 -top-3 z-30" aria-label="Close reel">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
@@ -43,8 +36,7 @@ import { reel } from '~/data/projects';
             data-title={v.title}
           >
             <div class="reel-slide-inner w-full px-4">
-              {/* Video frame — aspect defaults to 16:9 but a clip can declare its own
-                  (e.g. a 2.4:1 cinematic edit) so the player fills it instead of letterboxing. */}
+              {/* video */}
               <div class="reel-frame relative w-full overflow-hidden rounded-2xl bg-black" style={`aspect-ratio: ${v.aspect ?? '16 / 9'};`}>
                 <img
                   src={thumbnail}
@@ -77,7 +69,7 @@ import { reel } from '~/data/projects';
                 )}
               </div>
 
-              {/* Meta — title, then caption, then award badges */}
+              {/* meta */}
               <div class="reel-meta mt-5" data-reel-meta>
                 <h3 class="font-display text-xl font-medium tracking-tight" style="color: var(--ink);">{v.title}</h3>
                 <p class="mt-2 text-sm" style="color: var(--ink-muted);">{v.caption}</p>
@@ -95,7 +87,7 @@ import { reel } from '~/data/projects';
       })}
     </div>
     </div>
-    {/* Navigation buttons — positioned close to the viewer pane, outside the rounded border */}
+    {/* nav buttons */}
     <button type="button" data-reel-up class="reel-nav-btn absolute bottom-[100%] mb-2 sm:mb-3 left-1/2 -translate-x-1/2 z-50 text-[#ff7a1e] hover:text-[#ff9043] transition-colors" aria-label="Previous video">
       <svg class="reel-cue-chevron reel-cue-chevron-up h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
     </button>
@@ -104,7 +96,7 @@ import { reel } from '~/data/projects';
     </button>
   </div>
   
-  {/* The swipe/scroll text hint — pinned to the bottom of the dialog (viewport) */}
+  {/* hint */}
   <div class="absolute bottom-2 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
     <span data-reel-hint class="opacity-100 text-[#ff7a1e] text-[10px] font-semibold uppercase tracking-[0.25em] whitespace-nowrap transition-opacity duration-500" style="text-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);">
       <span class="hidden sm:inline">scroll</span><span class="sm:hidden">swipe</span> · arrows
@@ -114,7 +106,7 @@ import { reel } from '~/data/projects';
 </dialog>
 
 <style>
-  /* Native <dialog> in the top layer — same treatment as the web shelf */
+  /* dialog */
   dialog[data-reel-modal] {
     position: fixed;
     inset: 0;
@@ -147,8 +139,7 @@ import { reel } from '~/data/projects';
     max-height: 92vh;
   }
 
-  /* TikTok-style scroller: one full slide per gesture. Height is a JS-set
-     px value (--slide-h) so the panel hugs the video + meta with no big bars. */
+  /* scroller */
   .reel-scroller {
     height: var(--slide-h, 78vh);
     overflow-y: auto;
@@ -162,10 +153,10 @@ import { reel } from '~/data/projects';
     height: var(--slide-h, 78vh);
     scroll-snap-align: start;
     scroll-snap-stop: always;
-    /* Clip so a slide's content can never bleed over its neighbours */
+    /* clip */
     overflow: hidden;
   }
-  /* Once the player loads, fade the category pill out of the way */
+  /* hide pill */
   .reel-slide.is-playing .reel-pill {
     opacity: 0;
   }
@@ -188,7 +179,7 @@ import { reel } from '~/data/projects';
     background: var(--cow-pink-soft);
   }
 
-  /* Navigation buttons */
+  /* nav buttons */
   .reel-nav-btn {
     display: inline-grid;
     place-items: center;
@@ -214,7 +205,7 @@ import { reel } from '~/data/projects';
 </style>
 
 <style is:global>
-  /* Open/visit affordance — dark glass, pulsing orange ring */
+  /* play button */
   .reel-play {
     display: grid;
     place-items: center;
@@ -245,7 +236,7 @@ import { reel } from '~/data/projects';
     }
   }
 
-  /* Award chips */
+  /* chips */
   .reel-stat {
     display: inline-flex;
     align-items: center;
@@ -263,7 +254,7 @@ import { reel } from '~/data/projects';
 </style>
 
 <script>
-  // YouTube thumbnail upgrade — maxresdefault when it exists
+  // thumbnail
   document.querySelectorAll<HTMLImageElement>('.reel-thumb').forEach((img) => {
     const maxres = img.dataset.maxres;
     if (!maxres) return;
@@ -281,18 +272,17 @@ import { reel } from '~/data/projects';
     const realSlides = [...scroller.querySelectorAll<HTMLElement>('[data-reel-slide]')];
     const n = realSlides.length;
 
-    // Keep the custom cursor visible above the top-layer dialog
+    // cursor
     const cursorFx = ['cursor', 'cursor-dot']
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => !!el)
       .map((el) => ({ el, home: el.parentElement }));
 
-    // ── Infinite loop via edge clones ────────────────────────────────
-    // DOM order becomes: [lastClone, R0..R(n-1), firstClone].
+    // infinite loop
     const makeClone = (src: HTMLElement) => {
       const c = src.cloneNode(true) as HTMLElement;
       c.setAttribute('data-clone', '');
-      c.removeAttribute('data-reel-slide'); // observers/mount ignore it
+      c.removeAttribute('data-reel-slide'); // ignore
       c.removeAttribute('data-id');
       return c;
     };
@@ -302,9 +292,9 @@ import { reel } from '~/data/projects';
     scroller.appendChild(firstClone);
 
     let slideH = 0;
-    let domIndex = 1; // start on the first real slide (index 0 is lastClone)
+    let domIndex = 1; // first slide
 
-    // ── Mount / unmount players ──────────────────────────────────────
+    // mount
     const mount = (slide: HTMLElement) => {
       const target = slide.querySelector<HTMLElement>('[data-reel-mount]');
       const source = slide.dataset.source ?? 'youtube';
@@ -327,11 +317,7 @@ import { reel } from '~/data/projects';
       }
 
       const iframe = document.createElement('iframe');
-      // Autoplay WITH sound. Browsers may still gate unmuted autoplay, but the
-      // modal opens from a click and scrolling is an active gesture, so it
-      // plays in practice.
-      // No loop — the video plays through so we can auto-advance on end.
-      // enablejsapi lets the YouTube player postMessage its state changes.
+      // autoplay
       iframe.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=${encodeURIComponent(location.origin)}`;
       iframe.title = slide.dataset.title ?? '';
       iframe.allow =
@@ -340,8 +326,8 @@ import { reel } from '~/data/projects';
       iframe.referrerPolicy = 'strict-origin-when-cross-origin';
       iframe.className = 'absolute inset-0 h-full w-full border-0';
       iframe.addEventListener('load', () => {
-        slide.classList.add('is-playing'); // hide the pill once the player is up
-        // Subscribe to the player's state changes (0 = ended → auto-advance)
+        slide.classList.add('is-playing'); // hide pill
+        // track state
         iframe.contentWindow?.postMessage(
           JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'] }),
           '*',
@@ -355,7 +341,7 @@ import { reel } from '~/data/projects';
       slide.classList.remove('is-playing');
     };
 
-    // The real slide filling the viewport gets its player; the rest torn down
+    // active only
     const activeIO = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -368,16 +354,11 @@ import { reel } from '~/data/projects';
     );
     realSlides.forEach((s) => activeIO.observe(s));
 
-    // ── Responsive slide height — hug the video + meta, cap at the panel ──
-    // Returns false when the scroller has no layout yet (dialog just opened),
-    // so the caller can retry. The `next === slideH` guard stops the
-    // ResizeObserver from looping (changing --slide-h resizes the scroller).
+    // slide height
     const setSlideHeight = () => {
-      const frameW = scroller.clientWidth - 32; // px-4 both sides
+      const frameW = scroller.clientWidth - 32; // padding
       if (frameW <= 0) return false;
-      // Frames can declare their own aspect ratio (e.g. a 2.4:1 cinematic clip),
-      // so budget height from the TALLEST actual frame — and the TALLEST caption —
-      // so no slide's content is clipped or bleeds.
+      // tallest frame
       let videoH = 0;
       let maxMetaH = 0;
       realSlides.forEach((s) => {
@@ -386,33 +367,31 @@ import { reel } from '~/data/projects';
         const mh = s.querySelector('[data-reel-meta]')?.getBoundingClientRect().height ?? 0;
         if (mh > maxMetaH) maxMetaH = mh;
       });
-      if (videoH <= 0) videoH = (frameW * 9) / 16; // pre-layout fallback
-      const contentH = videoH + (maxMetaH || 130) + 44; // gap + breathing room
+      if (videoH <= 0) videoH = (frameW * 9) / 16; // fallback
+      const contentH = videoH + (maxMetaH || 130) + 44; // spacing
       const next = Math.min(Math.round(contentH), Math.round(window.innerHeight * 0.9));
       if (next !== slideH) {
         slideH = next;
         scroller.style.setProperty('--slide-h', `${slideH}px`);
-        scroller.scrollTop = slideH * domIndex; // stay anchored
+        scroller.scrollTop = slideH * domIndex; // keep position
       }
       return true;
     };
 
-    // Re-measure whenever the scroller gets or changes size — this is what
-    // reliably fixes the height once the dialog actually has a layout
-    // (openModal's first frame can measure a zero-width scroller on mobile).
+    // re-measure
     new ResizeObserver(() => {
       if (modal.open) setSlideHeight();
     }).observe(scroller);
 
-    // ── Seamless wrap when a clone settles into view ─────────────────
+    // wrap
     const onSettle = () => {
       if (!slideH) return;
       const idx = Math.round(scroller.scrollTop / slideH);
       if (idx <= 0) {
-        domIndex = n; // lastClone → real last
+        domIndex = n; // real last
         scroller.scrollTop = slideH * n;
       } else if (idx >= n + 1) {
-        domIndex = 1; // firstClone → real first
+        domIndex = 1; // real first
         scroller.scrollTop = slideH;
       } else {
         domIndex = idx;
@@ -429,14 +408,7 @@ import { reel } from '~/data/projects';
     );
     if ('onscrollend' in window) scroller.addEventListener('scrollend', onSettle);
 
-    // Wheel — advance exactly ONE video per gesture no matter how hard the
-    // trackpad is flicked (native momentum scroll is replaced by a controlled
-    // step + cooldown). This also guarantees you can always move past every
-    // slide, including the external (click-through) one. Touch still uses
-    // native scroll-snap, which is already one-per-swipe.
-    // One video per scroll — then a hard 1s cooldown that swallows all further
-    // wheel input (including trackpad momentum), so a single flick can never
-    // skip past a video. Touch uses native scroll-snap (already one-per-swipe).
+    // wheel
     let wheelLocked = false;
     let wheelAcc = 0;
     scroller.addEventListener(
@@ -445,7 +417,7 @@ import { reel } from '~/data/projects';
         e.preventDefault();
         if (!slideH) return;
         if (wheelLocked) {
-          wheelAcc = 0; // keep momentum from banking a second step
+          wheelAcc = 0; // reset
           return;
         }
         wheelAcc += Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
@@ -463,9 +435,7 @@ import { reel } from '~/data/projects';
       { passive: false },
     );
 
-    // Auto-advance when a YouTube video finishes. Only the active slide has a
-    // mounted player, so an ENDED (info 0) state change comes from the current
-    // video → glide to the next one.
+    // auto advance
     window.addEventListener('message', (e) => {
       if (!modal.open || !slideH) return;
       if (!e.origin || !e.origin.includes('youtube')) return;
@@ -476,11 +446,11 @@ import { reel } from '~/data/projects';
           scroller.scrollBy({ top: slideH, behavior: 'smooth' });
         }
       } catch {
-        /* not a JSON YT message */
+        /* ignore */
       }
     });
 
-    // ── Open / close ─────────────────────────────────────────────────
+    // open
     const openModal = (e: Event) => {
       e.preventDefault();
       modal.showModal();
@@ -488,8 +458,7 @@ import { reel } from '~/data/projects';
       lenis()?.stop();
       cursorFx.forEach(({ el }) => modal.appendChild(el));
       domIndex = 1;
-      // Measure as soon as the dialog has a layout; retry until it does
-      // (mobile can take a couple of frames), then land on the first slide.
+      // measure
       const prime = (tries = 0) => {
         if (setSlideHeight()) {
           scroller.scrollTop = slideH;
@@ -513,7 +482,7 @@ import { reel } from '~/data/projects';
       realSlides.forEach(unmount);
     });
 
-    // Arrow buttons (click) page through the reel
+    // arrows
     modal.querySelectorAll('[data-reel-up]').forEach((btn) => {
       btn.addEventListener('click', () => {
         if (!slideH) return;
@@ -527,7 +496,7 @@ import { reel } from '~/data/projects';
       });
     });
 
-    // Arrow keys page through the reel while it's open
+    // arrow keys
     modal.addEventListener('keydown', (e) => {
       if (!slideH) return;
       if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
@@ -545,7 +514,7 @@ import { reel } from '~/data/projects';
 
     const hint = modal.querySelector<HTMLElement>('[data-reel-hint]');
     if (hint) {
-      // Delay attaching the scroll listener so the initial scrollTo doesn't trigger it
+      // delay
       setTimeout(() => {
         scroller.addEventListener('scroll', () => {
           hint.style.opacity = '0';

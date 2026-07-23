@@ -2,14 +2,14 @@
 @import '@fontsource-variable/fraunces/standard.css';
 @import '@fontsource-variable/fraunces/standard-italic.css';
 
-/* Allura — subset to the monogram's R + G glyphs plus m + e for the cursive "me" (1.8KB vs 55KB) */
+/* allura font */
 @font-face {
   font-family: 'Allura';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url('/assets/allura-rgme.woff2') format('woff2');
-  unicode-range: U+0047, U+0052, U+0065, U+006D; /* G R e m */
+  unicode-range: U+0047, U+0052, U+0065, U+006D; /* glyphs */
 }
 
 @tailwind base;
@@ -48,7 +48,7 @@
       0 0 120px -30px rgba(255, 168, 100, 0.55);
   }
 
-  /* Dark mode — deep slate canvas, brighter accents */
+  /* dark */
   .dark {
     --canvas: #0A0E1A;
     --surface: #131826;
@@ -94,7 +94,7 @@
     transition: background-color 600ms ease, color 600ms ease;
   }
 
-  /* Hide system cursor on hover devices — custom dot takes over */
+  /* hide cursor */
   @media (hover: hover) and (pointer: fine) {
     body { cursor: none; }
     body * { cursor: none; }
@@ -143,8 +143,7 @@
     font-variation-settings: 'opsz' 144, 'SOFT' 80;
   }
 
-  /* Cursive "me" — the logo's Allura script, reclined the opposite way from an italic.
-     Overrides the eyebrow's uppercase + tracking so the script connects and reads lowercase. */
+  /* script me */
   .h-script {
     font-family: 'Allura', cursive;
     font-style: normal;
@@ -173,12 +172,7 @@
     max-width: 1400px;
   }
 
-  /* ─── Apple "Liquid Glass" (iOS 26) — navigation bar only ────────────────────
-     Two distinct materials, one per theme:
-     • DARK (base): a cool, smoky translucency — darker & more see-through, high
-       saturation so color behind pops, a cool blue-white specular rim, deep shadow.
-     • LIGHT (:root:not(.dark)): a bright, glossy, milk-white material with a warm
-       white rim. Both thicken a touch on scroll for legibility over content. */
+  /* liquid glass */
   .liquid-glass {
     position: relative;
     background:
@@ -193,7 +187,7 @@
       0 18px 44px -14px rgba(0, 0, 0, 0.72),
       0 3px 10px -5px rgba(0, 0, 0, 0.5);
   }
-  /* Specular rim — a cool blue-white edge, brightest top-left as if lit from above. */
+  /* rim */
   .liquid-glass::after {
     content: '';
     position: absolute;
@@ -234,8 +228,7 @@
     backdrop-filter: blur(26px) saturate(195%) brightness(1.04);
   }
 
-  /* "Stack" stat — the words wash pink→orange on hover, a wipe echoing the neon
-     cow's ink (#DC9BB5 → #FF7A1E). Only the text animates; it returns on mouse-out. */
+  /* stack stat */
   .cow-ink {
     background-image: linear-gradient(90deg, #DC9BB5 0%, #FF7A1E 25%, #DC9BB5 50%, currentColor 50%, currentColor 100%);
     background-size: 200% 100%;
@@ -251,7 +244,7 @@
     background-position: 0 0;
   }
 
-  /* Featured project cards — steady glowing orange edge that intensifies on hover */
+  /* cards */
   .project-card {
     position: relative;
     isolation: isolate;
@@ -339,16 +332,14 @@
     mask-image: linear-gradient(180deg, rgba(0,0,0,0) 0%, #000 30%, #000 70%, rgba(0,0,0,0) 100%);
   }
 
-  /* The drifting mesh blobs are huge blurred layers animated inside
-     3D-tilted cards — pin each to its own compositor layer so they get
-     rasterized once instead of flickering through re-rasters. */
+  /* mesh layers */
   .animate-mesh-drift,
   .animate-mesh-drift-2,
   .animate-mesh-drift-3 {
     will-change: transform;
   }
 
-  /* Punchier ember-to-pink gradient — high contrast on canvas */
+  /* gradient */
   .text-gradient {
     background: linear-gradient(96deg, #B44000 0%, #FF6A05 30%, #FF7A1E 55%, #DC9BB5 100%);
     -webkit-background-clip: text;
@@ -365,9 +356,7 @@
     color: transparent;
   }
 
-  /* Animated variants — same palettes, endlessly scrolling. First and last
-     stop match so the repeating tile loops seamlessly (0% → 150% of a 300%
-     tile shifts exactly one tile width). */
+  /* animated */
   .text-gradient-animated {
     background: linear-gradient(90deg, #B44000, #FF6A05, #FF7A1E, #DC9BB5, #B44000);
     background-size: 300% 100%;
@@ -388,13 +377,13 @@
     animation: text-gradient-scroll 1.4s linear infinite;
   }
 
-  /* Negative sweep = the color bands travel to the right */
+  /* sweep */
   @keyframes text-gradient-scroll {
     0% { background-position: 0% 50%; }
     100% { background-position: -150% 50%; }
   }
 
-  /* Hero "Ria" — bold display, per-letter color shift on hover */
+  /* hero name */
   .hero-name {
     display: inline-flex;
     gap: 0;
@@ -439,21 +428,21 @@
     }
   }
 
-  /* Cow-spot decorative shapes: organic black blobs on transparent */
+  /* cow spots */
   .cow-spot {
     background-color: var(--ink);
     border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
     animation: blobMorph 14s ease-in-out infinite;
   }
 
-  /* Used inside dark cards / contrast areas */
+  /* dark cards */
   .cow-spot-pink {
     background-color: var(--cow-pink);
     border-radius: 63% 37% 54% 46% / 55% 48% 52% 45%;
     animation: blobMorph 18s ease-in-out infinite;
   }
 
-  /* iMessage typing dots — used in "In the Works" heading */
+  /* typing dots */
   .imsg-dots {
     display: inline-flex;
     align-items: center;
@@ -479,7 +468,7 @@
     30% { transform: translateY(-4px); opacity: 1; }
   }
 
-  /* Section dividers — thin animated rule */
+  /* dividers */
   .divider-glow {
     height: 1px;
     background: linear-gradient(90deg, transparent 0%, var(--cow-pink) 35%, #FF7A1E 50%, var(--cow-pink) 65%, transparent 100%);
@@ -487,7 +476,7 @@
     animation: shimmer 6s linear infinite;
   }
 
-  /* Theme toggle button base */
+  /* toggle */
   .theme-toggle {
     @apply inline-grid h-9 w-9 place-items-center rounded-full border;
     border-color: var(--hair);
@@ -501,14 +490,14 @@
     }
   }
 
-  /* Nav logo monogram tilt — hover-gated so a tap on touch can't latch it on */
+  /* logo tilt */
   @media (hover: hover) and (pointer: fine) {
     .group:hover .nav-mono-rotate {
       transform: rotate(8deg);
     }
   }
 
-  /* Hide scrollbars on horizontal scrollers */
+  /* no scrollbar */
   .no-scrollbar {
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -517,8 +506,7 @@
     display: none;
   }
 
-  /* Language pill — dark pink text on light pink chip in light mode,
-     light pink text on dark pink chip in dark mode */
+  /* lang pill */
   .lang-pill {
     background: #F6E0E9;
     border-color: rgba(220, 155, 181, 0.45);
@@ -530,7 +518,7 @@
     color: var(--cow-pink);
   }
 
-  /* Obvious camera REC blink — pronounced opacity drop with red halo */
+  /* rec blink */
   @keyframes recDotBlink {
     0%, 45%, 100% {
       opacity: 1;
@@ -546,7 +534,7 @@
   }
 
 
-  /* Shimmer text for marquees */
+  /* shimmer */
   .text-shimmer {
     background: linear-gradient(
       90deg,
@@ -600,16 +588,12 @@
     color: var(--ember-700, #E45200);
   }
 
-  /* No backdrop-blur — these pills sit on effectively solid backgrounds where
-     the blur is invisible but costs a per-frame backdrop repaint on scroll.
-     Slightly higher bg opacity keeps them looking identical. */
+  /* no blur */
   .pill {
     @apply inline-flex items-center gap-2 rounded-full border border-ink/[0.06] bg-white/80 px-3 py-1 text-xs font-medium text-ink/70;
   }
 
-  /* Prominent "open the reel / shelf" call-to-action on the project cards —
-     a pulsing burnt-orange pill that pops on both the peach and dark cards
-     so it catches a scrolling recruiter's eye. */
+  /* cta */
   .card-cta {
     display: inline-flex;
     align-items: center;
@@ -661,15 +645,7 @@
     opacity: 0.5;
   }
 
-  /* Backdrop grid for the shelf cards.
-
-     Anchored to the centre by the browser rather than by script. An SVG
-     <pattern> tiles from its own origin, so the leftover space piles up on one
-     side; offsetting it in JS fixes the centring but makes the whole grid jump
-     by half a cell every time the width crosses a multiple of the cell size.
-     background-position does the same job continuously and for free.
-
-     Cell size per card via --grid-cell. */
+  /* grid */
   .card-grid {
     background-image:
       linear-gradient(to right, rgba(255, 255, 255, 0.5) 1px, transparent 1px),
@@ -679,7 +655,7 @@
   }
 }
 
-/* Reduce motion respects */
+/* reduce motion */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -691,7 +667,7 @@
   }
 }
 
-/* Respect reduced-motion: freeze the decorative animation layer wholesale */
+/* freeze */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

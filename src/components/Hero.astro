@@ -7,7 +7,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
 
   <div class="container-x relative">
-    {/* Status */}
+    {/* status */}
     <div class="mb-6 inline-flex sm:mb-8">
       <div class="group relative" data-cursor-hover>
         <span class="inline-flex items-center justify-center gap-2.5 rounded-full border px-3.5 py-1.5 text-xs font-medium backdrop-blur" style="border-color: var(--hair); background: var(--surface-soft); color: var(--ink-soft);">
@@ -37,13 +37,13 @@ import MeshGradient from '~/components/MeshGradient.astro';
 
             <circle cx="10.8" cy="10.8" r="1" fill="#86EFAC" opacity="0.95"/>
           </svg>
-          {/* Sup? */}
+          {/* label */}
           <span>Open to Summer '27 Internships</span>
         </span>
       </div>
     </div>
 
-    {/* Display */}
+    {/* display */}
     <h1 class="display max-w-none pr-4" style="color: var(--ink); padding-bottom:0.12em;">
       <span class="block" data-scramble="Hi, I'm">Hi, I'm</span>
       <span class="hero-name mt-1 block text-[clamp(3.5rem,9vw,7.5rem)]">
@@ -56,7 +56,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
       <span style="color: var(--ink);">Purdue University</span> with minors in <span style="color: var(--ink);">Psychology</span>, <span style="color: var(--ink);">Entrepreneurship</span>, and <span style="color: var(--ink);">Computer Engineering</span>. <span class="inline-block min-w-[10.5rem] whitespace-nowrap align-baseline sm:min-w-[11.5rem]"><span data-typewriter style="color: var(--ink);">I write code.</span><span class="typewriter-caret" aria-hidden="true">|</span></span>
     </p>
 
-    {/* CTAs */}
+    {/* ctas */}
     <div class="mt-8 flex flex-wrap items-center gap-4 sm:mt-10">
       <a href="#eras" class="btn-primary" data-magnetic="0.18">
         See selected works
@@ -82,9 +82,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         50% { opacity: 0; }
       }
 
-      /* "Say hi" — orange-outlined by default; on hover the label slides out and
-         a waving hand takes its place. Width stays fixed (emoji is absolute) so
-         there's no layout shift. */
+      /* say hi */
       .say-hi {
         position: relative;
         display: inline-flex;
@@ -328,7 +326,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
     </div>
   </div>
 
-  {/* Easter egg — tapping the "cow" top-skill plays a moo */}
+  {/* easter egg */}
   <script>
     (() => {
       const btn = document.querySelector<HTMLButtonElement>('[data-moo]');
@@ -339,7 +337,7 @@ import MeshGradient from '~/components/MeshGradient.astro';
         document.body.classList.add('shake-screen');
         if (emojiSpan) {
           emojiSpan.classList.remove('shout-anim');
-          void emojiSpan.offsetWidth; // trigger reflow
+          void emojiSpan.offsetWidth; // reflow
           emojiSpan.classList.add('shout-anim');
         }
         setTimeout(() => document.body.classList.remove('shake-screen'), 1800);

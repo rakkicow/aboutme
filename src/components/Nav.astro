@@ -2,7 +2,7 @@
 import Monogram from '~/components/Monogram.astro';
 import ThemeToggle from '~/components/ThemeToggle.astro';
 
-// Order matches the page flow. Contact lives in the "Get in touch" CTA.
+// nav links
 const links = [
   { href: '#about', label: 'About' },
   { href: '#reel', label: 'Reel' },
@@ -23,7 +23,7 @@ const links = [
       >
         <a href="#top" class="group flex items-center gap-2.5 px-2 py-1 whitespace-nowrap">
           <Monogram size={34} stroke={1.1} className="nav-mono-rotate transition-transform duration-500" />
-          {/* Short name on narrow screens — a nod to the shorter name when the screen is shorter */}
+          {/* short name */}
           <span class="font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 max-[400px]:hidden min-[520px]:hidden" style="color: var(--ink);">Ria G.</span>
           <span class="hidden font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 max-[400px]:inline" style="color: var(--ink);">Ria</span>
           <span class="hidden font-display text-xl tracking-tight transition-colors group-hover:text-ember-600 dark:group-hover:text-cow-300 min-[520px]:inline" style="color: var(--ink);">Rakshita&nbsp;Gupta</span>
@@ -43,8 +43,7 @@ const links = [
         </nav>
 
         <div class="flex items-center gap-2">
-          {/* Mobile menu toggle — mirrors the theme toggle's silhouette; the two
-              bars morph into an X when open. Hidden once the desktop nav appears. */}
+          {/* menu toggle */}
           <button
             type="button"
             data-menu-btn
@@ -74,8 +73,7 @@ const links = [
         </div>
       </div>
 
-      {/* Mobile dropdown — same liquid-glass material as the bar so it reads as one
-          surface. JS toggles data-open; rows fade in with a slight stagger. */}
+      {/* dropdown */}
       <div
         id="mobile-menu"
         data-mobile-menu
@@ -101,7 +99,7 @@ const links = [
 </header>
 
 <style>
-  /* Mobile menu toggle — same footprint + hover feel as the theme toggle */
+  /* menu toggle */
   .menu-btn {
     position: relative;
     display: inline-grid;
@@ -145,7 +143,7 @@ const links = [
     transform: translateY(-2.2px) rotate(-45deg);
   }
 
-  /* Pun — hovering the closed hamburger swaps the bars for an actual 🍔 */
+  /* burger */
   .menu-burger {
     position: absolute;
     inset: 0;
@@ -157,8 +155,7 @@ const links = [
     transition: opacity 180ms ease, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: none;
   }
-  /* Desktop: reveal the 🍔 on hover (gated to real pointers so touch's sticky
-     :hover can't latch it before the menu has ever been opened). */
+  /* hover burger */
   @media (hover: hover) and (pointer: fine) {
     .menu-btn[aria-expanded='false']:hover .menu-ico { opacity: 0; }
     .menu-btn[aria-expanded='false']:hover .menu-burger {
@@ -166,9 +163,7 @@ const links = [
       transform: scale(1);
     }
   }
-  /* Once the menu has been opened, the 🍔 sticks in place of the bars whenever
-     it's closed — on every device, until the page is refreshed. The same
-     `data-menu-revealed` flag flips the theme toggle to emoji (see ThemeToggle). */
+  /* sticky burger */
   :global(html[data-menu-revealed]) .menu-btn[aria-expanded='false'] .menu-ico { opacity: 0; }
   :global(html[data-menu-revealed]) .menu-btn[aria-expanded='false'] .menu-burger {
     opacity: 1;
@@ -180,13 +175,12 @@ const links = [
     :global(html[data-menu-revealed]) .contact-icons--emoji { display: grid !important; }
   }
 
-  /* Dropdown panel — springs open from the top-right, echoing the toggle */
+  /* dropdown */
   [data-mobile-menu] {
     transform-origin: top right;
     opacity: 0;
     visibility: hidden;
-    /* Non-interactive the instant it starts closing — otherwise the panel keeps
-       catching taps through the 300ms fade-out. */
+    /* closing */
     pointer-events: none;
     transform: translateY(-8px) scale(0.97);
     transition:
@@ -205,7 +199,7 @@ const links = [
       visibility 0s;
   }
 
-  /* Rows fade + rise in with a small per-row stagger once the panel opens */
+  /* stagger */
   .menu-row {
     opacity: 0;
     transform: translateY(6px);
@@ -234,8 +228,7 @@ const links = [
       menu.dataset.open = String(open);
       btn.setAttribute('aria-expanded', String(open));
       btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-      // Opening once "reveals" the 🍔 (and the theme-toggle emojis) for good,
-      // until the page is refreshed — see the CSS here + in ThemeToggle.
+      // reveal burger
       if (open) document.documentElement.dataset.menuRevealed = 'true';
     };
     const isOpen = () => menu.dataset.open === 'true';
@@ -245,19 +238,19 @@ const links = [
       setOpen(!isOpen());
     });
 
-    // Tapping a link closes the menu (and lets the Reel / Web-Shelf modals take over)
+    // close on tap
     menu.querySelectorAll('[data-menu-link]').forEach((a) => {
       a.addEventListener('click', () => setOpen(false));
     });
 
-    // Click / tap anywhere outside the menu or button closes it
+    // outside click
     document.addEventListener('click', (e) => {
       if (!isOpen()) return;
       const t = e.target as Node;
       if (!menu.contains(t) && !btn.contains(t)) setOpen(false);
     });
 
-    // Escape closes and returns focus to the toggle
+    // escape
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && isOpen()) {
         setOpen(false);
@@ -265,7 +258,7 @@ const links = [
       }
     });
 
-    // Crossing into desktop widths resets the menu so its state stays sane
+    // desktop reset
     const mq = window.matchMedia('(min-width: 768px)');
     mq.addEventListener('change', (e) => {
       if (e.matches) setOpen(false);

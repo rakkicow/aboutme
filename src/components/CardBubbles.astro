@@ -1,6 +1,5 @@
 ---
-// BlueBubbles card — a mini iMessage conversation walking through the app's
-// features, with clickable "Sent with Confetti" / "Sent with Slam" effects.
+// bubbles card
 ---
 
 <div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[28px]">
@@ -10,7 +9,7 @@
   <div class="absolute -right-16 bottom-0 h-80 w-80 rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(140,255,225,0.5), transparent 65%); filter: blur(50px);"></div>
   <div class="absolute left-1/3 top-1/2 h-64 w-64 rounded-full animate-mesh-drift-3" style="background: radial-gradient(circle, rgba(220,155,181,0.4), transparent 70%); filter: blur(55px);"></div>
 
-  {/* Grid — same treatment as the terminal card */}
+  {/* grid */}
   <div class="card-grid absolute inset-0 opacity-[0.08]" style="--grid-cell: 22px;" aria-hidden="true"></div>
 
   <div class="absolute -top-1/2 left-1/2 h-[140%] w-[180%] -translate-x-1/2 rotate-12 opacity-25 animate-mesh-drift-2" style="background: linear-gradient(75deg, transparent 40%, rgba(255,255,255,0.6) 50%, transparent 60%);"></div>
@@ -18,7 +17,7 @@
   <div class="absolute inset-0 rounded-[28px]" style="box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.2);"></div>
 </div>
 
-{/* Conversation — 16/10 minimum (62.5cqw), grows with content on narrow cards */}
+{/* conversation */}
 <div class="relative w-full" style="container-type: inline-size;">
   <div class="bb-conversation flex flex-col justify-evenly px-4 py-2 font-semibold">
     <div class="flex justify-start"><span class="bb-bubble bb-in">iMessage on Android?</span></div>
@@ -30,7 +29,7 @@
     <div class="flex justify-start">
       <span class="bb-bubble bb-in bb-has-tapback">
         Reactions?
-        {/* Heart tapback, pinned to the bubble's top-right corner */}
+        {/* tapback */}
         <span class="bb-tapback" aria-hidden="true">
           <svg class="bb-tapback-heart" viewBox="0 0 24 24">
             <defs>
@@ -45,12 +44,12 @@
       </span>
     </div>
 
-    {/* Reply thread: quoted bubble, connector line, and the reply stay one tight unit */}
+    {/* reply */}
     <div>
       <div class="flex justify-start"><span class="bb-bubble bb-in">Replies?</span></div>
       <div class="-mt-2 flex items-start justify-between">
         <svg class="bb-reply-line" viewBox="0 0 60 28" aria-hidden="true">
-          {/* One continuous quarter-circle bend, like an iMessage thread line */}
+          {/* thread line */}
           <path d="M4 1 A22 22 0 0 0 26 23 H36" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="2.5" stroke-linecap="round" />
         </svg>
         <span class="bb-bubble bb-out translate-y-[0.5em] self-end">For sure!</span>
@@ -83,13 +82,11 @@
 </div>
 
 <style is:global>
-  /* Everything inside the conversation is sized in em so it scales with the
-     card: the base font tracks the container width (clamped), which keeps the
-     whole thread fitting inside the 16/10 area even in the 3-column grid. */
+  /* scaling */
   .bb-conversation {
     font-size: clamp(9px, 2.4cqw, 12px);
     gap: 0.5em;
-    /* Preferred height = 16/10 of the card; content can stretch it taller */
+    /* min height */
     min-height: 62.5cqw;
   }
   .bb-bubble {
@@ -115,10 +112,10 @@
     box-shadow: 0 12px 32px -8px rgba(0, 30, 80, 0.55);
   }
   .bb-rainbow {
-    /* First and last stop match so the repeating tile loops seamlessly */
+    /* seamless */
     background: linear-gradient(90deg, #ff5e5e, #ff9f43, #ffd166, #4ade80, #38bdf8, #a855f7, #ff5e5e);
     background-size: 300% 100%;
-    /* 0% → 150% shifts exactly one tile width, so the wave cycles forever in one direction */
+    /* loop */
     animation: bb-rainbow-shift 3s linear infinite;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
     box-shadow: 0 12px 32px -8px rgba(60, 10, 120, 0.55);
@@ -152,7 +149,7 @@
     height: 1em;
     flex-shrink: 0;
   }
-  /* Reply thread line, dropping from the quoted bubble toward the reply */
+  /* thread line */
   .bb-reply-line {
     width: 5em;
     height: 2.33em;
@@ -160,7 +157,7 @@
     flex-shrink: 0;
   }
 
-  /* Heart tapback badge, iMessage style */
+  /* tapback */
   .bb-has-tapback {
     position: relative;
   }
@@ -217,7 +214,7 @@
 </style>
 
 <script>
-  // Full-viewport confetti, iMessage style. No libraries — one throwaway canvas.
+  // confetti
   const confettiBurst = () => {
     if (document.querySelector('[data-bb-confetti-canvas]')) return;
     const canvas = document.createElement('canvas');
@@ -282,11 +279,10 @@
     const card = trigger.closest<HTMLElement>('article');
     if (bubble) {
       bubble.classList.remove('bb-slamming');
-      void bubble.offsetWidth; // restart the animation on repeat clicks
+      void bubble.offsetWidth; // restart
       bubble.classList.add('bb-slamming');
 
-      // Shockwave: ripple the neighboring bubbles outward from the slam.
-      // WAAPI instead of a class so it composes with the rainbow bubble's CSS animation.
+      // shockwave
       const origin = bubble.getBoundingClientRect();
       const cx = origin.left + origin.width / 2;
       const cy = origin.top + origin.height / 2;
@@ -302,7 +298,7 @@
             { transform: `translateY(${-amp * 0.5}px) scale(1.005)`, offset: 0.7 },
             { transform: 'translateY(0) scale(1)' },
           ],
-          // 250ms ≈ when the slam lands; farther bubbles ripple later
+          // stagger
           { duration: 450, delay: 250 + d * 0.4, easing: 'ease' },
         );
       });

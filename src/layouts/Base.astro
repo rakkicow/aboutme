@@ -14,12 +14,10 @@ const {
   description = 'Rakshita Gupta is a Computer Engineering Technology student at Purdue. Hardware-meets-software builder, designer, and 3D modeler.',
 } = Astro.props;
 
-// Absolute, self-referencing canonical so Google treats this page as the
-// primary URL for the name — the resume PDFs were outranking it.
+// canonical
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://rakshita.me').href;
 
-// Person schema ties the name "Rakshita Gupta" to the homepage rather than to
-// the standalone resume PDFs.
+// schema
 const personSchema = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -67,7 +65,7 @@ const personSchema = {
     <title>{title}</title>
     <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
-    {/* Inline theme bootstrap — runs before paint to avoid flash */}
+    {/* theme */}
     <script is:inline>
       (() => {
         try {
@@ -94,9 +92,7 @@ const personSchema = {
 
       gsap.registerPlugin(ScrollTrigger);
 
-      // Lenis only on hover-capable pointers (desktop mouse/trackpad) and only when
-      // the user hasn't asked for reduced motion. On touch devices, native scroll
-      // is already smooth and Lenis is the single biggest scroll-frame cost.
+      // lenis
       const useLenis =
         window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
         !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -108,7 +104,7 @@ const personSchema = {
           smoothWheel: true,
           wheelMultiplier: 1,
           touchMultiplier: 1.5,
-          // The reel deck owns wheel gestures over it (flips cards, not the page)
+          // reel
           prevent: (node: Element) => !!(node.closest && node.closest('[data-reel-deck]')),
         });
 
@@ -116,12 +112,11 @@ const personSchema = {
         gsap.ticker.add((time) => lenis.raf(time * 1000));
         gsap.ticker.lagSmoothing(0);
 
-        // Modals (e.g. the web shelf) pause page scroll while open.
+        // modals
         (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
       }
 
-      // Reveal-on-scroll — IntersectionObserver is cheaper than wiring up a
-      // ScrollTrigger per element. Each fires once when it enters the viewport.
+      // reveal
       const revealEls = document.querySelectorAll('.reveal');
       if (revealEls.length && 'IntersectionObserver' in window) {
         const revealIO = new IntersectionObserver(
@@ -140,7 +135,7 @@ const personSchema = {
         revealEls.forEach((el) => el.setAttribute('data-shown', 'true'));
       }
 
-      // Magnetic effect on data-magnetic elements
+      // magnetic
       document.querySelectorAll<HTMLElement>('[data-magnetic]').forEach((el) => {
         const strength = Number(el.dataset.magnetic) || 0.25;
         let rect = el.getBoundingClientRect();
@@ -157,7 +152,7 @@ const personSchema = {
         el.addEventListener('mouseleave', onLeave);
       });
 
-      // Card 3D tilt
+      // tilt
       document.querySelectorAll<HTMLElement>('[data-tilt]').forEach((card) => {
         const max = 6;
         card.addEventListener('mousemove', (e) => {
@@ -177,8 +172,7 @@ const personSchema = {
         });
       });
 
-      // Nav scrolled state — passive scroll listener throttled to one rAF per
-      // frame; cheaper than ScrollTrigger.onUpdate firing every scroll tick.
+      // nav state
       const nav = document.querySelector<HTMLElement>('[data-nav]');
       if (nav) {
         let queued = false;
@@ -199,7 +193,7 @@ const personSchema = {
         );
       }
 
-      // Parallax on decorative elements
+      // parallax
       document.querySelectorAll<HTMLElement>('[data-parallax]').forEach((el) => {
         const speed = Number(el.dataset.parallax) || 0.2;
         gsap.to(el, {
@@ -214,7 +208,7 @@ const personSchema = {
         });
       });
 
-      // Text scramble effect (subtle — runs once on enter)
+      // scramble
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
       const scramble = (el: HTMLElement, target: string, duration = 900) => {
         const start = performance.now();

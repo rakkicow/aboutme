@@ -1,15 +1,10 @@
-// `weather` command — real conditions for wherever the visitor is, drawn as an
-// animated ASCII scene inside the terminal.
-//
-// Location comes from IP (geojs), not the browser Geolocation API: city-level
-// conditions come from Open-Meteo, which is keyless and CORS-open.
+// weather command
 
 type Scene = 'clear' | 'cloudy' | 'fog' | 'drizzle' | 'rain' | 'snow' | 'thunder' | 'wind';
 
 type Conditions = {
   place: string;
-  /** Carried so the full-screen link points at this exact spot rather than
-   *  whatever a fresh name search happens to return. */
+  /** exact spot */
   lat: number;
   lon: number;
   temp: number; // °C
@@ -17,17 +12,17 @@ type Conditions = {
   humidity: number;
   wind: number; // km/h
   isDay: boolean;
-  /** That city's own wall clock, e.g. "10:23 PM". */
+  /** local clock */
   time: string;
   code: number;
   label: string;
   scene: Scene;
   imperial: boolean;
-  /** Set when a condition search had to settle for the next best thing. */
+  /** fallback */
   fellBackFrom?: string;
 };
 
-// WMO weather codes → a human label and the scene we animate for it.
+// weather codes
 const WMO: Record<number, { label: string; scene: Scene }> = {
   0: { label: 'Clear sky', scene: 'clear' },
   1: { label: 'Mainly clear', scene: 'clear' },
@@ -83,7 +78,7 @@ const C = {
   pink: '#DC9BB5',
 };
 
-// Only one scene may animate at a time — a second `weather` call kills the first.
+// one at a time
 let stopActive: (() => void) | null = null;
 
 export function stopWeather() {
@@ -93,9 +88,7 @@ export function stopWeather() {
 
 const cToF = (c: number) => (c * 9) / 5 + 32;
 
-/** Reads the clock off the ISO string. Open-Meteo's `timezone=auto` already
- *  returns local wall-clock for that city, so parsing it as a Date would only
- *  drag the visitor's own offset back in. */
+/** local time */
 const localTime = (iso: string) => {
   const m = /T(\d{2}):(\d{2})/.exec(iso || '');
   if (!m) return '';
@@ -108,7 +101,7 @@ const esc = (s: unknown) =>
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;');
 
-// US states by postal code, so `augusta ga` lands in Georgia rather than Maine.
+// us states
 const US_STATES: Record<string, string> = {
   al: 'Alabama', ak: 'Alaska', az: 'Arizona', ar: 'Arkansas', ca: 'California',
   co: 'Colorado', ct: 'Connecticut', de: 'Delaware', fl: 'Florida', ga: 'Georgia',
@@ -135,17 +128,13 @@ function getStateAbbr(name: string): string {
   return name;
 }
 
-/**
- * Splits a trailing US state off a query — `augusta ga`, `augusta, ga` and
- * `augusta,ga` all become `{ name: 'augusta', state: 'Georgia' }`. A bare state
- * name is left alone, so `georgia` still searches for the country.
- */
+/** split state */
 function splitState(query: string): { name: string; state: string | null } {
   const cleaned = query.replace(/,/g, ' ').replace(/\s+/g, ' ').trim();
   const words = cleaned.split(' ');
   if (words.length < 2) return { name: cleaned, state: null };
 
-  // Longest match wins, so "kansas city ks" beats a stray "kansas".
+  // longest match
   for (let take = 3; take >= 1; take--) {
     if (words.length <= take) continue;
     const tail = words.slice(-take).join(' ').toLowerCase();
@@ -161,8 +150,7 @@ function splitState(query: string): { name: string; state: string | null } {
 async function locate(city: string): Promise<{ lat: number; lon: number; place: string; imperial: boolean }> {
   if (city) {
     const { name, state } = splitState(city);
-    // Ask for several candidates when a state is named, so we can pick the one
-    // that actually sits in it — the API orders purely by population.
+    // candidates
     const res = await fetch(
       `https://geocoding-api.open-meteo.com/v1/search?count=${state ? 20 : 1}&language=en&format=json&name=${encodeURIComponent(name)}`
     );
@@ -179,7 +167,7 @@ async function locate(city: string): Promise<{ lat: number; lon: number; place: 
       lat: hit.latitude,
       lon: hit.longitude,
       place: region ? `${hit.name}, ${region}` : hit.name,
-      // US, plus the handful of other places that never took to Celsius.
+      // imperial
       imperial: ['US', 'BS', 'KY', 'LR', 'PW', 'FM', 'MH'].includes(hit.country_code),
     };
   }
@@ -196,7 +184,7 @@ async function locate(city: string): Promise<{ lat: number; lon: number; place: 
   };
 }
 
-// Words you can type instead of a city. Everything maps onto a scene we draw.
+// aliases
 const CONDITIONS: Record<string, Scene> = {
   sunny: 'clear', sun: 'clear', clear: 'clear',
   cloudy: 'cloudy', cloud: 'cloudy', overcast: 'cloudy',
@@ -213,12 +201,10 @@ const SCENE_VERB: Record<Scene, string> = {
   snow: 'snowing', thunder: 'storming', wind: 'windy', fog: 'foggy'
 };
 
-/** The canonical word we print for each scene, in the help listing. */
+/** words */
 const CONDITION_WORDS = ['sunny', 'clear', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy'];
 
-// Cities scanned when you ask for a condition rather than a place. Spread over
-// both hemispheres and heavy on the tropics and the poles, because that is
-// where the storms and the snow actually are on any given day.
+// scan cities
 const SCAN: [string, number, number, boolean][] = [
   ['Reykjavik', 64.15, -21.94, false], ['Longyearbyen', 78.22, 15.65, false],
   ['Nuuk', 64.18, -51.72, false], ['Anchorage', 61.22, -149.9, true],
@@ -241,20 +227,18 @@ const SCAN: [string, number, number, boolean][] = [
   ['Chicago', 41.88, -87.63, true], ['New York', 40.71, -74.01, true],
   ['Miami', 25.77, -80.19, true], ['Vancouver', 49.28, -123.12, false],
   ['Honolulu', 21.31, -157.86, true], ['Fairbanks', 64.84, -147.72, true],
-  // Deep winter is always happening somewhere down here.
+  // winter
   ['McMurdo Station', -77.85, 166.67, false], ['Vostok Station', -78.46, 106.84, false],
   ['Concordia Station', -75.1, 123.33, false], ['Rothera Station', -67.57, -68.13, false],
   ['Summit Camp', 72.58, -38.46, false], ['Mount Washington', 44.27, -71.3, true],
-  // …and the thunder belts.
+  // thunder
   ['Maracaibo', 9.8, -71.55, false], ['Kampala', 0.31, 32.58, false],
   ['Bogor', -6.6, 106.8, false], ['Manaus', -3.12, -60.02, false],
   ['Kinshasa', -4.32, 15.31, false], ['Darwin', -12.46, 130.84, false],
   ['Panama City', 8.98, -79.52, false], ['Kuala Lumpur', 3.14, 101.69, false],
   ['Dhaka', 23.81, 90.41, false], ['Ho Chi Minh City', 10.82, 106.63, false],
   ['Cayenne', 4.92, -52.33, false], ['Colombo', 6.93, 79.86, false],
-  // …and the places the wind never lets up. Deliberately deep: a condition is
-  // only fun if pressing it twice can take you somewhere new, and wind needs
-  // both a clear sky and 30km/h, which few places manage at any one moment.
+  // wind
   ['Cape Horn', -55.98, -67.27, false], ['Torshavn', 62.01, -6.77, false],
   ['Stanley', -51.7, -57.85, false], ['Wick', 58.44, -3.09, false],
   ['Perth', -31.95, 115.86, false], ['Hobart', -42.88, 147.33, false],
@@ -267,7 +251,7 @@ const SCAN: [string, number, number, boolean][] = [
   ['Amarillo', 35.22, -101.83, true], ['Cheyenne', 41.14, -104.82, true],
   ['Dodge City', 37.75, -100.02, true], ['Casper', 42.85, -106.31, true],
   ['Wollongong', -34.42, 150.89, false], ['Napier', -39.49, 176.92, false],
-  // Broader tropical sweep, so storms and showers vary too.
+  // tropics
   ['Belem', -1.46, -48.5, false], ['Manaus North', -2.6, -60.7, false],
   ['Iquitos', -3.75, -73.25, false], ['Medellin', 6.24, -75.58, false],
   ['Havana', 23.11, -82.37, false], ['San Juan', 18.47, -66.11, true],
@@ -290,14 +274,12 @@ const GROUPS: Record<Scene, string> = {
 
 let lastCondPick: Partial<Record<Scene, string>> = {};
 
-// One world scan covers every condition, so cache it. Open-Meteo bills a bulk
-// request per location, and this list is long — re-scanning on every command
-// burns through the rate limit fast enough to start failing.
+// cache
 let scanCache: Conditions[] | null = null;
 let scanAt = 0;
 const SCAN_TTL = 10 * 60 * 1000;
 
-/** Finds a city somewhere on earth that is currently having `want`. */
+/** find city */
 async function fetchByCondition(want: Scene, arg: string): Promise<Conditions> {
   if (scanCache && Date.now() - scanAt < SCAN_TTL) return choosePick(scanCache, want, arg);
 
@@ -345,7 +327,7 @@ async function fetchByCondition(want: Scene, arg: string): Promise<Conditions> {
   return choosePick(readings, want, arg);
 }
 
-/** Picks a city for `want`, avoiding an immediate repeat of the last one. */
+/** pick city */
 function choosePick(readings: Conditions[], want: Scene, arg: string): Conditions {
   const targetGroup = GROUPS[want];
   let pool = readings.filter((r) => {
@@ -392,7 +374,7 @@ async function fetchConditions(city: string): Promise<Conditions> {
   const known = WMO[code] ?? { label: 'Unknown', scene: 'cloudy' as Scene };
   const wind = Number(cur.wind_speed_10m) || 0;
 
-  // A calm-but-windy day is more interesting as wind than as another cloud loop.
+  // windy
   const scene: Scene = wind >= 30 && (known.scene === 'clear' || known.scene === 'cloudy') ? 'wind' : known.scene;
 
   return {
@@ -412,7 +394,7 @@ async function fetchConditions(city: string): Promise<Conditions> {
   };
 }
 
-/** Character grid the scene renders into, serialized to colored spans per row. */
+/** grid */
 class Grid {
   chars: string[];
   colors: string[];
@@ -435,9 +417,7 @@ class Grid {
   text(x: number, y: number, s: string, color: string) {
     for (let i = 0; i < s.length; i++) this.put(x + i, y, s[i], color);
   }
-  /** Runs of same-colored characters collapse into one span, so a frame is a
-   *  few dozen DOM nodes instead of one per cell. Built into an array and
-   *  joined once — this runs every frame, so it stays allocation-light. */
+  /** to html */
   html() {
     const parts: string[] = [];
     for (let y = 0; y < this.h; y++) {
@@ -462,8 +442,7 @@ class Grid {
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 
-/** Escaping for a scene run. The glyph set is fixed and only ever contains one
- *  character that needs escaping, so skip the regex work in the common case. */
+/** escape */
 function escRun(s: string) {
   return s.indexOf('>') === -1 ? s : s.replace(/>/g, '&gt;');
 }
@@ -475,7 +454,7 @@ type Cloud = { x: number; y: number; w: number; speed: number; color: string };
 type Streak = { x: number; y: number; vx: number; len: number };
 type Leafy = { x: number; y: number; vx: number; phase: number };
 
-/** Builds and runs the animation. Returns a stop function. */
+/** animate */
 function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () => void {
   const g = new Grid(w, h);
   const groundY = h - 1;
@@ -488,13 +467,13 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
   const streaks: Streak[] = [];
   const leaves: Leafy[] = [];
   const stars: { x: number; y: number; phase: number }[] = [];
-  const pile = new Array(w).fill(0); // snow depth per column
+  const pile = new Array(w).fill(0); // snow depth
 
   let bolt: { pts: [number, number][]; life: number } | null = null;
   let boltAt = rand(1200, 3500);
   let flash = 0;
 
-  // Wind pushes precipitation sideways; a stormy scene always feels blustery.
+  // wind
   const windPush = Math.max(-0.9, Math.min(0.9, (cond.wind / 60) * (scene === 'thunder' ? 1.6 : 1)));
 
   const cloudCount = scene === 'clear' ? 0 : scene === 'cloudy' || scene === 'wind' ? 3 : 4;
@@ -548,7 +527,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
   }
 
   const drawCloud = (c: Cloud) => {
-    // Puffy top edge, flat-ish base — reads as a cloud at this resolution.
+    // cloud
     const left = Math.round(c.x);
     const top = Math.round(c.y);
     for (let i = 0; i < c.w; i++) {
@@ -565,10 +544,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
     g.put(cx, cy, '*', C.sun);
     g.text(cx - 1, cy + 1, '/|\\', C.ray);
 
-    // Rays breathe on a slow cycle, and the diagonals run the cycle inverted —
-    // so the corners reach out exactly as the straight rays pull in, and the
-    // sun never sits still. They start flush against the disc (3 out
-    // horizontally, 2 vertically) so there is no gap between it and its light.
+    // rays
     const wave = Math.sin(t / 700);
     const straightReach = Math.round(2 + 2 * wave);
     for (let r = 0; r <= straightReach; r++) {
@@ -578,8 +554,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       g.put(cx, cy - 2 - r, '|', dim);
       g.put(cx, cy + 2 + r, '|', dim);
     }
-    // Opposite phase to the straight rays, but never below 1 — with the inner
-    // `\|/` that keeps every diagonal at two slashes even at its shortest.
+    // diagonals
     const diagReach = Math.max(1, Math.round(2 - 1.5 * wave));
     for (let r = 0; r < diagReach; r++) {
       const d = 2 + r;
@@ -591,16 +566,13 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
     }
   };
 
-  // Crescent = a disc with a second disc bitten out of its right side. Drawn as
-  // an outline: a cell is inked only when it is lit but has an unlit neighbour,
-  // and the glyph follows the slope of the arc at that point.
+  // crescent
   const drawMoon = (cx: number, cy: number) => {
     const R = Math.max(3, Math.min(5, Math.floor(h / 4)));
-    // A shallow bite reads as a blob — offset it well left of the disc centre
-    // so the lit sliver stays thin and tapers to points at both horns.
+    // bite
     const biteDx = R * 0.5;
     const biteR = R * 0.95;
-    // Terminal cells are roughly twice as tall as they are wide, so squash x.
+    // squash
     const lit = (dx: number, dy: number) => {
       const x = dx / 2;
       return x * x + dy * dy <= R * R && (x - biteDx) ** 2 + dy * dy > biteR * biteR;
@@ -610,12 +582,10 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
         if (!lit(dx, dy)) continue;
         const edge = !lit(dx - 1, dy) || !lit(dx + 1, dy) || !lit(dx, dy - 1) || !lit(dx, dy + 1);
         if (!edge) {
-          g.put(cx + dx, cy + dy, '#', C.moon); // lit face
+          g.put(cx + dx, cy + dy, '#', C.moon); // lit
           continue;
         }
-        // The rim follows two different circles — the disc on the outside and
-        // the bite on the inside. Measure the angle against whichever arc this
-        // cell actually sits on, or the inner edge gets the outer edge's slope.
+        // rim
         const x = dx / 2;
         const onBite = Math.abs(Math.hypot(x - biteDx, dy) - biteR) < Math.abs(Math.hypot(x, dy) - R);
         const a = (Math.atan2(dy, onBite ? x - biteDx : x) * 180) / Math.PI;
@@ -624,8 +594,8 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
         if (abs <= 25) ch = ')';
         else if (abs >= 155) ch = '(';
         else if (abs > 65 && abs < 115) ch = '_';
-        else if (a > 0) ch = a < 90 ? '\\' : '/'; // upper half
-        else ch = a > -90 ? '/' : '\\'; // lower half
+        else if (a > 0) ch = a < 90 ? '\\' : '/'; // upper
+        else ch = a > -90 ? '/' : '\\'; // lower
         g.put(cx + dx, cy + dy, ch, C.moon);
       }
     }
@@ -649,7 +619,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
 
   const frame = (now: number) => {
     if (stopped) return;
-    // Detached by `clear`, `exit`, or the scrollback trim — stop burning frames.
+    // detached
     if (!document.body.contains(pre)) return stop();
 
     const dt = Math.min(0.1, (now - last) / 1000);
@@ -659,7 +629,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
 
     if (flash > 0) flash -= dt * 1000;
 
-    // ── Sky ──
+    // sky
     for (const s of stars) {
       const tw = Math.sin(t / 420 + s.phase);
       if (tw > 0.1) g.put(s.x, s.y, tw > 0.75 ? '*' : tw > 0.4 ? '+' : '.', tw > 0.75 ? C.moon : C.star);
@@ -672,7 +642,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       else drawMoon(cx, cy);
     }
 
-    // ── Clouds ──
+    // clouds
     for (const c of clouds) {
       c.x += c.speed * dt;
       if (c.speed > 0 && c.x > w) c.x = -c.w;
@@ -680,7 +650,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       drawCloud(c);
     }
 
-    // ── Fog ──
+    // fog
     if (scene === 'fog') {
       for (let band = 0; band < 5; band++) {
         const y = 2 + band * Math.max(1, Math.floor((h - 4) / 5));
@@ -693,7 +663,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       }
     }
 
-    // ── Wind ──
+    // wind streaks
     for (const s of streaks) {
       s.x += s.vx * dt;
       if (s.x - s.len > w) {
@@ -717,12 +687,12 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       g.put(l.x, l.y + Math.sin(l.phase / 2) * 1.2, spin, C.leaf);
     }
 
-    // ── Rain / drizzle / storm ──
+    // rain
     for (const d of drops) {
       d.y += d.vy * dt;
       d.x += windPush * d.vy * dt * 0.5;
       if (d.y > groundY) {
-        // Only the near, fat drops throw a visible splash.
+        // splash
         if (d.near && scene !== 'drizzle' && Math.random() > 0.55) splashes.push({ x: d.x, y: groundY, life: 260 });
         Object.assign(d, spawnDrop(false), { y: rand(-3, 1) });
         continue;
@@ -751,7 +721,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       }
     }
 
-    // ── Snow ──
+    // snow
     for (const f of flakes) {
       f.y += f.vy * dt;
       f.phase += dt * 1.6;
@@ -759,8 +729,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       const col = Math.round(f.x);
       const landed = col >= 0 && col < w && f.y >= groundY - pile[col];
       if (landed || f.y > groundY) {
-        // Cap the drift so it never swallows the scene, and let it settle
-        // toward neighbours so the surface stays believable.
+        // drift
         if (col >= 0 && col < w && pile[col] < Math.min(3, h - 6)) {
           const l = pile[col - 1] ?? pile[col];
           const r = pile[col + 1] ?? pile[col];
@@ -779,7 +748,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       for (let i = 0; i < d; i++) g.put(x, groundY - i, i === d - 1 ? '~' : '#', C.drift);
     }
 
-    // ── Lightning ──
+    // lightning
     if (scene === 'thunder') {
       boltAt -= dt * 1000;
       if (boltAt <= 0) {
@@ -791,7 +760,7 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
         bolt.life -= dt * 1000;
         if (bolt.life <= 0) bolt = null;
         else {
-          // Flicker: the bolt blinks out briefly mid-life, like the real thing.
+          // flicker
           const on = bolt.life > 240 || (bolt.life < 190 && bolt.life > 120) || bolt.life < 70;
           if (on) {
             for (let i = 1; i < bolt.pts.length; i++) {
@@ -804,11 +773,10 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
       }
     }
 
-    // ── Ground ──
+    // ground
     for (let x = 0; x < w; x++) if (!pile[x]) g.put(x, groundY, x % 2 ? '_' : '.', C.ground);
 
-    // Reparsing identical markup is the single most expensive thing this loop
-    // can do, and a mostly-still scene produces the same frame repeatedly.
+    // skip repaint
     const html = g.html();
     if (html !== lastHtml) {
       lastHtml = html;
@@ -832,22 +800,20 @@ function animate(pre: HTMLElement, cond: Conditions, w: number, h: number): () =
   return stop;
 }
 
-// Cities the `try weather …` hint rotates through, so the argument form is
-// discoverable without the help text having to spell it out. Deliberately
-// spread across climates — half of these are having very different days.
+// hint cities
 const HINT_CITIES = [
   'tokyo', 'reykjavik', 'cairo', 'oslo', 'mumbai', 'lima', 'nairobi',
   'seoul', 'dublin', 'quito', 'kathmandu', 'marrakesh', 'ushuaia',
   'helsinki', 'hanoi', 'bogota', 'lisbon', 'tbilisi', 'honolulu', 'anchorage',
 ];
 
-/** Swaps the city in the hint every 2s, cross-fading between names. */
+/** cycle hint */
 function cycleCityHint(el: HTMLElement | null) {
   if (!el) return;
   let i = Math.floor(Math.random() * HINT_CITIES.length);
   el.textContent = HINT_CITIES[i];
   const timer = setInterval(() => {
-    // Self-cleaning: the readout is gone once the terminal is cleared or exited.
+    // cleanup
     if (!document.body.contains(el)) return clearInterval(timer);
     el.style.opacity = '0';
     setTimeout(() => {
@@ -859,18 +825,15 @@ function cycleCityHint(el: HTMLElement | null) {
   }, 2000);
 }
 
-/**
- * Renders the `weather` command into `out`. `city` is optional — empty means
- * "wherever the visitor is".
- */
+/** render weather */
 export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: string) {
   stopWeather();
 
   const arg = city.trim().toLowerCase();
 
-  // `weather help` — the subcommand listing.
+  // help
   if (arg === 'help' || arg === '--help' || arg === '-h') {
-    // Same shape as the top-level `help`: "- <name>: <what it does>".
+    // format
     const pink = (s: string) => `<span style="color:${C.pink}">${s}</span>`;
     out.innerHTML =
       `Commands:<br/>` +
@@ -952,8 +915,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
             lon: String(cond.lon),
             name: cond.place,
             imp: cond.imperial ? '1' : '0',
-            // Night is known here, so the page can open already dark instead
-            // of painting light and then transitioning.
+            // dark
             n: cond.isDay ? '0' : '1',
           })}" class="wx-fullscreen" target="_blank" rel="noopener" style="flex:0 0 auto;">see more</a>
         </div>
@@ -961,8 +923,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
           <span title="Weather data by Open-Meteo">weather</span> · try <span style="color:${C.pink}">weather <span class="wx-city" style="transition:opacity 0.35s ease;">tokyo</span></span>
         </div>`;
 
-      // Click the temperature to swap units. Each city still opens in whatever
-      // its own country uses.
+      // swap units
       const tempEl = out.querySelector<HTMLElement>('.wx-temp');
       const feelsEl = out.querySelector<HTMLElement>('.wx-feels');
       if (tempEl && feelsEl) {
@@ -982,12 +943,7 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
       if (!pre) return;
       cycleCityHint(out.querySelector<HTMLElement>('.wx-city'));
 
-      /**
-       * Measure, don't guess. With the scene emptied, everything else in the
-       * readout collapses to its real height, so whatever is left over is
-       * exactly what the scene may occupy — which keeps it to one screen at
-       * any window size instead of pushing the header out of view.
-       */
+      /** measure */
       const measure = () => {
         pre.innerHTML = '';
         pre.style.height = '0px';
@@ -1003,12 +959,10 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
         pre.style.height = '';
 
         const promptEl = document.getElementById('term-prompt-line');
-        const chromeH = out.getBoundingClientRect().height; // header + readout + hint
+        const chromeH = out.getBoundingClientRect().height; // chrome
         const promptH = promptEl ? promptEl.getBoundingClientRect().height : 0;
 
-        // clientHeight includes the body's own padding, and getBoundingClientRect
-        // excludes the prompt's margin — miss either and the prompt line ends up
-        // clipped against the bottom of the window.
+        // padding
         const bodyStyle = getComputedStyle(termBody);
         const padY = parseFloat(bodyStyle.paddingTop) + parseFloat(bodyStyle.paddingBottom);
         const promptStyle = promptEl ? getComputedStyle(promptEl) : null;
@@ -1028,12 +982,11 @@ export function renderWeather(out: HTMLElement, termBody: HTMLElement, city: str
         const { w, h } = measure();
         stopWeather();
         stopActive = animate(pre, cond, w, h);
-        termBody.scrollTop = 0; // the scene fits, so there is nothing to scroll to
+        termBody.scrollTop = 0; // no scroll
       };
       mount();
 
-      // Re-fit on resize and when the terminal enters or leaves full screen.
-      // Both listeners retire themselves once the readout is gone.
+      // refit
       let debounce = 0;
       const relayout = () => {
         if (!document.body.contains(pre)) {

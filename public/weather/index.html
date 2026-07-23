@@ -8,8 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Weather">
 <meta name="description" content="A live 24/7 weather card">
 
-<!-- Sun by default; the script swaps this for the condition once it knows one,
-     so the tab never sits on the generic site icon while loading. -->
+<!-- favicon -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Ctext%20y%3D%2250%22%20font-size%3D%2252%22%3E%E2%98%80%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E" />
 
 <meta property="og:type" content="website" />
@@ -29,9 +28,7 @@
 
 <title>Weather - Ria Gupta</title>
 <script>
-  // The web shelf embeds this page in an iframe. Flag that before anything
-  // paints so the card can render smaller in a preview tile without touching
-  // how it looks when the page is visited directly.
+  // embedded
   if (window.self !== window.top) document.documentElement.classList.add('embedded');
 </script>
 <style>
@@ -49,16 +46,13 @@ html {
   background: #fff;
 }
 
-/* Nothing on this page may ever scroll sideways. The zoomed overlay canvases
-   are fixed-position and deliberately larger than the viewport, so they get
-   clipped here rather than growing the page. */
+/* no scroll */
 html, body {
   overflow-x: hidden;
   max-width: 100%;
 }
 
-/* The page's colour now lives entirely in the .sky-layer panes below, so these
-   stay transparent and nothing repaints when the sky changes. */
+/* transparent */
 body {
   background: transparent;
 }
@@ -76,7 +70,7 @@ body {
   transition: opacity var(--sky-fade, 1.4s) ease;
   will-change: opacity;
 }
-/* Daylight: the three original gradients, stacked in one pane. */
+/* day */
 #sky-day {
   opacity: 1;
   background:
@@ -99,7 +93,7 @@ body {
     linear-gradient(0deg, rgba(20, 30, 70, 0.55), rgba(10, 14, 26, 0)),
     #0A0E1A;
 }
-/* Stack layers to prevent transparent holes during crossfades */
+/* stack */
 body.dusk #sky-dusk { opacity: 1; }
 body.night #sky-dusk { opacity: 1; }
 body.night #sky-night { opacity: 1; }
@@ -121,7 +115,7 @@ body.night #sky-night { opacity: 1; }
   overflow-x: hidden;
   overflow-y: auto;
   position: relative;
-  z-index: 1; /* above the fixed sky panes */
+  z-index: 1; /* above sky */
   background: transparent;
 }
 
@@ -151,8 +145,7 @@ nav li a:hover {
 nav li a.active {
   color: #4444ff;
 }
-/* Nothing on the map is doing that right now — say so on the button itself
-   rather than quietly showing a different sky. */
+/* not found */
 nav li a.notfound,
 body.night nav li a.notfound {
   color: #e0524f !important;
@@ -168,8 +161,7 @@ body.night nav li a.notfound {
 #card {
   box-shadow: 9px 7px 40px -6px rgba(0, 0, 0, 0.25);
   overflow: hidden;
-  /* Shrinks to fit a narrow window instead of pushing the page sideways. The
-     engine re-measures the card on resize, so the scene follows it down. */
+  /* responsive */
   width: min(300px, calc(100vw - 48px));
   padding: 0;
   height: min(400px, calc((100vw - 48px) * 4 / 3));
@@ -243,7 +235,7 @@ body.night nav li a.notfound {
   background-color: #C4CBD6;
 }
 
-/* Location line + live badge, sitting above the temperature */
+/* place */
 #card .details #place {
   font-size: 13px;
   letter-spacing: 0.08em;
@@ -259,8 +251,7 @@ body.night nav li a.notfound {
 #card .details #place.shown {
   opacity: 1;
 }
-/* The place name links out to weather.com, but it should read as part of the
-   card, not as a stock blue hyperlink. */
+/* place link */
 #card .details #place a {
   color: inherit;
   text-decoration: none;
@@ -282,12 +273,11 @@ body.night nav li a.notfound {
   opacity: 0.35;
 }
 
-/* The date has to survive "Wednesday 21 September" without wrapping, so the
-   day name is abbreviated and the line is pinned to one row. */
+/* date */
 #card .details #date {
   white-space: nowrap;
 }
-/* That city's own wall clock, not the visitor's */
+/* local time */
 #card .details #localtime {
   white-space: nowrap;
   font-size: 13px;
@@ -296,7 +286,7 @@ body.night nav li a.notfound {
   margin-bottom: 4px;
 }
 
-/* Search — type a city and the card flies to it */
+/* search */
 #search {
   position: relative;
   margin: 18px 20px 0 20px;
@@ -305,7 +295,7 @@ body.night nav li a.notfound {
   align-items: center;
   max-width: calc(100% - 40px);
 }
-/* Home — jumps back to the visitor's own city from wherever they wandered to */
+/* home */
 #home {
   display: flex;
   align-items: center;
@@ -335,7 +325,7 @@ body.night nav li a.notfound {
   stroke-linejoin: round;
 }
 
-/* Zen — same circular affordance as home, on the other side of the field */
+/* zen */
 #zen {
   display: flex;
   align-items: center;
@@ -365,26 +355,18 @@ body.night nav li a.notfound {
   stroke-linejoin: round;
 }
 
-/* ── Zen mode ──────────────────────────────────────────────────────────────
-   Everything but the sky gets out of the way. The animation keeps running and
-   refreshing underneath; a click on the background brings the UI back. */
+/* zen mode */
 body.zen nav,
 body.zen #search {
   opacity: 0;
   pointer-events: none;
 }
-/* A literal zoom: the card and both overlay canvases scale by the same factor
-   about the same point, so the scene is pixel-for-pixel the regular view, just
-   larger. Nothing is re-laid-out, so nothing drifts or clips.
-
-   The scale lands on #card-zoom rather than #card because the lightning tween
-   writes an inline transform onto #card, which would win over this. */
+/* zoom */
 #card-zoom {
   transform: scale(1);
   transform-origin: 50% 50%;
 }
-/* Shelf preview only. A uniform scale keeps the scene pixel-identical to the
-   real page — the engine's geometry is untouched, so nothing drifts. */
+/* preview */
 html.embedded #card-zoom {
   transform: scale(0.68);
 }
@@ -435,16 +417,12 @@ nav, #search {
 #search input::placeholder {
   color: #999;
 }
-/* ── City autocomplete ─────────────────────────────────────────────────────
-   Liquid glass: a translucent pane that blurs and lifts whatever is behind
-   it, with a bright inner rim so it reads as a physical sheet rather than a
-   flat panel. Suggestions come from the same geocoder the search uses. */
+/* autocomplete */
 #city-wrap {
   position: relative;
   display: flex;
 }
-/* Inline completion. Sits exactly over the input, repeating what you typed in
-   transparent text so the faded remainder lines up with the real caret. */
+/* ghost */
 #ghost {
   position: absolute;
   inset: 0;
@@ -530,8 +508,7 @@ body.night #suggest li.active {
   color: #FFFFFF;
 }
 
-/* Sits under the row rather than in it — as a flex item it stole width and
-   shunted the search bar off centre whenever a lookup failed. */
+/* error */
 #search .err {
   position: absolute;
   top: calc(100% + 9px);
@@ -582,11 +559,7 @@ body.night #search .err { color: #ff8b84; }
   pointer-events: none;
 }
 
-/* ── Dusk ──────────────────────────────────────────────────────────────────
-   Going straight from a pale afternoon to midnight is a hard cut, so the
-   change routes through a sunset: the page warms to orange, then to violet,
-   then settles into night. Every surface transitions on the same curve, and
-   the `dusk` stage below is held briefly on the way through. */
+/* dusk */
 body,
 body .background,
 body .container,
@@ -609,17 +582,14 @@ body.dusk .weather #cloud1 { fill: #8F6675; }
 body.dusk .weather #cloud2 { fill: #7A5566; }
 body.dusk .weather #cloud3 { fill: #664354; }
 
-/* ── Night ─────────────────────────────────────────────────────────────────
-   Driven by the rendered city's own sunset, not the visitor's clock — look up
-   Reykjavik at 2am and you get Reykjavik's night. Everything shifts together:
-   page, card, controls, orb and the loading curtain. */
+/* night */
 #moon { display: none; }
 body.night #sun, body.sunrise #sun { display: none; }
 body.night #moon, body.sunrise #moon { display: block; }
-/* !important because #sunburst carries an inline fill from the original markup */
+/* override */
 body.night #sunburst, body.sunrise #sunburst { fill: url(#SVGID_moon_) !important; }
 
-/* Card faces, one per mood, all pushed down into night */
+/* night cards */
 body.night .weather { background-color: #1B2438; }
 body.night .thunder .weather { background-color: #171B26; }
 body.night .rain .weather { background-color: #19212F; }
@@ -630,7 +600,7 @@ body.night .weather #inner {
   background: linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0) 100%);
 }
 
-/* Clouds read as silhouettes at night rather than white puffs */
+/* night clouds */
 body.night .weather #cloud1 { fill: #39445C; }
 body.night .weather #cloud2 { fill: #2E384D; }
 body.night .weather #cloud3 { fill: #242C3E; }
@@ -643,7 +613,7 @@ body.night #card .details { color: #A8B4CC; }
 body.night .thunder #card .details { color: #C9D3E6; }
 body.night #card .details #place a:hover { color: #8FB4FF; }
 
-/* The clear-sky button becomes a moon at night (weather-icons wi-night-clear) */
+/* moon icon */
 body.night #button-sun .wi-day-sunny:before { content: "\f02e"; }
 
 body.night nav li a { color: #5A6684; }
@@ -669,7 +639,7 @@ body.night #search input:focus {
   box-shadow: 0 0 0 3px rgba(143, 180, 255, 0.16);
 }
 
-/* The loading curtain matches whatever the page is about to become */
+/* loader */
 body.night #loader {
   background:
     linear-gradient(240deg, rgba(70, 40, 90, 0.5), rgba(10, 14, 26, 0)),
@@ -688,10 +658,7 @@ body.night #loader.wx-snow li::after {
   background: linear-gradient(180deg, #dce8f8 0%, #b9cbe4 100%);
 }
 
-/* ── Loading curtain ───────────────────────────────────────────────────────
-   Same bouncing-bars loader as the /ig, /li … redirect pages. It starts in a
-   neutral slate, then takes on the colour of the sky it just fetched — so the
-   loader tells you the weather a beat before the card does. */
+/* loading curtain */
 #loader {
   --wx-rgb: 150, 158, 170;
   position: fixed;
@@ -700,8 +667,7 @@ body.night #loader.wx-snow li::after {
   display: flex;
   align-items: center;
   justify-content: center;
-  /* The same gradient stack the page itself sits on, so the curtain reads as
-     the page holding its breath rather than a separate white screen. */
+  /* gradient */
   background:
     linear-gradient(240deg, rgba(150, 50, 50, 0.3), rgba(0, 0, 200, 0)),
     linear-gradient(120deg, rgba(50, 150, 100, 0.2), rgba(0, 0, 100, 0)),
@@ -709,8 +675,7 @@ body.night #loader.wx-snow li::after {
     #eee;
   transition: opacity 0.5s ease, visibility 0.5s ease;
 }
-/* The bars stay invisible until the weather is known, so they only ever
-   appear already wearing the right colour and animation. */
+/* hidden */
 #loader ul, #loader .glow {
   opacity: 0;
   transition: opacity 0.5s ease;
@@ -759,8 +724,7 @@ body.night #loader.wx-snow li::after {
   animation: loaderBar 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite alternate;
   transition: background 0.6s ease, box-shadow 0.6s ease;
 }
-/* Negative delay so the wave is already mid-stride on the first frame — no
-   load-in jitter while every bar sits at the same height. */
+/* offset delay */
 #loader li:nth-child(odd) { animation-delay: -0.8s; }
 #loader li:nth-child(even) { animation-delay: 0s; }
 
@@ -769,7 +733,7 @@ body.night #loader.wx-snow li::after {
   to { height: 80px; }
 }
 
-/* Storms rattle the whole rig, and the bars strobe like distant lightning. */
+/* storm */
 #loader.storm ul {
   animation: loaderShake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) infinite;
 }
@@ -792,7 +756,7 @@ body.night #loader.wx-snow li::after {
   92% { filter: none; }
 }
 
-/* Wind — the whole rig leans right and shivers, bracing against a gust. */
+/* wind */
 #loader.wx-wind ul {
   animation: loaderLean 1.9s ease-in-out infinite;
   transform-origin: 50% 100%;
@@ -812,7 +776,7 @@ body.night #loader.wx-snow li::after {
   50% { margin-left: 8px; margin-right: 6px; }
 }
 
-/* Snow — a cap of settled snow rides the top of every bar. */
+/* snow */
 #loader.wx-snow li::after {
   content: '';
   position: absolute;
@@ -825,7 +789,7 @@ body.night #loader.wx-snow li::after {
   box-shadow: 0 1px 3px rgba(70, 100, 130, 0.18);
 }
 
-/* Rain — glassy bars with droplets running down the face of each one. */
+/* rain */
 #loader.wx-rain li {
   background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.05) 45%, rgba(255,255,255,0) 100%),
               linear-gradient(180deg, rgba(var(--wx-rgb), 0.95) 0%, rgba(var(--wx-rgb), 0.55) 100%);
@@ -866,9 +830,7 @@ body.night #loader.wx-snow li::after {
 </style>
 </head>
 <body translate="no">
-<!-- Sky layers. Crossfading three fixed panes by opacity keeps the sunset on
-     the compositor; transitioning the gradients themselves made the browser
-     re-interpolate and repaint every stacked layer each frame. -->
+<!-- sky layers -->
 <div id="sky-day" class="sky-layer" aria-hidden="true"></div>
 <div id="sky-dusk" class="sky-layer" aria-hidden="true"></div>
 <div id="sky-night" class="sky-layer" aria-hidden="true"></div>
@@ -883,7 +845,7 @@ body.night #loader.wx-snow li::after {
 <stop offset="0" style="stop-color:#FFDE17;stop-opacity:0.7" />
 <stop offset="1" style="stop-color:#FFF200;stop-opacity:0" />
 </radialGradient>
-<!-- Night version of the burst: cold moonlight instead of sunlight -->
+<!-- night burst -->
 <radialGradient id="SVGID_moon_" cx="0" cy="0" r="320.8304" gradientUnits="userSpaceOnUse">
 <stop offset="0" style="stop-color:#9FB6E8;stop-opacity:0.45" />
 <stop offset="1" style="stop-color:#5C7BC0;stop-opacity:0" />
@@ -914,14 +876,10 @@ body.night #loader.wx-snow li::after {
 <defs>
 <path id="leaf" d="M41.9,56.3l0.1-2.5c0,0,4.6-1.2,5.6-2.2c1-1,3.6-13,12-15.6c9.7-3.1,19.9-2,26.1-2.1c2.7,0-10,23.9-20.5,25 c-7.5,0.8-17.2-5.1-17.2-5.1L41.9,56.3z" />
 </defs>
-<!-- Sun and moon ride in the same group so every existing tween moves both;
-     CSS decides which one is actually visible. The moon is a single crescent
-     path: a circle arc out, then a wider arc back to bite the shape. -->
+<!-- orb -->
 <g id="orb">
 <circle id="sun" style="fill: #F7ED47" cx="0" cy="0" r="50" />
-<!-- The lit path is drawn at runtime from the real lunar phase; the dim disc
-     behind it is the earthlit remainder, so the moon still reads as a sphere
-     when it is only a sliver. -->
+<!-- moon -->
 <g id="moon">
 <circle id="moon-dark" cx="0" cy="0" r="50" style="fill: #8FA3CC; opacity: 0.18" />
 <path id="moon-lit" style="fill: #EAF0FF" d="" />
@@ -990,8 +948,7 @@ var innerSnowHolder = weatherContainer1.group();
 var innerLightningHolder = weatherContainer1.group();
 var leafMask = outerSVG.rect();
 var leaf = Snap.select('#leaf');
-// The orb group, not the sun itself — every position tween below drives both
-// the sun and the moon, and CSS picks which is showing.
+// orb
 var sun = Snap.select('#orb');
 var sunburst = Snap.select('#sunburst');
 var outerSplashHolder = outerSVG.group();
@@ -1088,8 +1045,7 @@ function init()
 
   // ☀️ set initial weather
 
-  // Neutral holding state — the live fetch swaps this the moment it lands,
-  // so the card never flashes a season it isn't.
+  // holding state
   TweenMax.set(sunburst.node, { opacity: 0 });
   changeWeather(weather[4]);
 }
@@ -1594,23 +1550,11 @@ function changeWeather(weather)
     </script>
 
 <script id="live-weather">
-/*
-
-🌍 Live conditions.
-
-The animation above is a hand-drawn set of five (now six) moods. This script
-picks the mood that matches the sky the visitor is actually standing under.
-
-Location comes from IP rather than the browser Geolocation API — city-level
-accuracy is all a weather card needs, and it costs the visitor no permission
-prompt on arrival. Conditions come from Open-Meteo, which is keyless and
-CORS-open, so this stays a fully static page.
-
-*/
+/* live conditions */
 
 (function () {
 
-  // WMO weather codes → the label we print and the mood we animate.
+  // weather codes
   var WMO = {
     0: ['Clear', 'sun'], 1: ['Mostly clear', 'sun'], 2: ['Partly cloudy', 'cloud'], 3: ['Overcast', 'cloud'],
     45: ['Fog', 'cloud'], 48: ['Rime fog', 'cloud'],
@@ -1624,17 +1568,15 @@ CORS-open, so this stays a fully static page.
     95: ['Storms', 'thunder'], 96: ['Storms, hail', 'thunder'], 99: ['Storms, hail', 'thunder']
   };
 
-  // The handful of countries that never took to Celsius.
+  // imperial
   var IMPERIAL = ['US', 'BS', 'KY', 'LR', 'PW', 'FM', 'MH'];
 
-  // Abbreviated so "Wednesday 21 September" can never wrap to a second line.
+  // days
   var DAYS = ['Sun.', 'Mon.', 'Tues.', 'Wed.', 'Thurs.', 'Fri.', 'Sat.'];
   var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June',
                 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  // Cities to scan when you press a mood button. Spread across both hemispheres
-  // and every climate band, so there is almost always somewhere on the list
-  // that is genuinely snowing / storming / fogged in right now.
+  // scan cities
   var SCAN = [
     ['Reykjavik', 64.15, -21.94, false, 'IS'], ['Longyearbyen', 78.22, 15.65, false, 'SJ'], ['Nuuk', 64.18, -51.72, false, 'GL'],
     ['Anchorage', 61.22, -149.9, true, 'US'], ['Oslo', 59.91, 10.75, false, 'NO'], ['Helsinki', 60.17, 24.94, false, 'FI'],
@@ -1654,23 +1596,21 @@ CORS-open, so this stays a fully static page.
     ['Chicago', 41.88, -87.63, true, 'US'], ['New York', 40.71, -74.01, true, 'US'], ['Miami', 25.77, -80.19, true, 'US'],
     ['Vancouver', 49.28, -123.12, false, 'CA'], ['Toronto', 43.65, -79.38, false, 'CA'], ['Honolulu', 21.31, -157.86, true, 'US'],
     ['Fairbanks', 64.84, -147.72, true, 'US'],
-    // Somewhere is always in deep winter. These keep the snow button honest
-    // in July, when the whole northern list is sunbathing.
+    // winter
     ['McMurdo Station', -77.85, 166.67, false, 'AQ'], ['Vostok Station', -78.46, 106.84, false, 'AQ'],
     ['Concordia Station', -75.1, 123.33, false, 'AQ'], ['Amundsen-Scott', -90, 0, false, 'AQ'],
     ['Rothera Station', -67.57, -68.13, false, 'AQ'], ['Casey Station', -66.28, 110.53, false, 'AQ'],
     ['Mawson Station', -67.6, 62.87, false, 'AQ'], ['Summit Camp', 72.58, -38.46, false, 'GL'],
     ['Mount Washington', 44.27, -71.3, true, 'US'], ['Sonnblick', 47.05, 12.96, false, 'AT'],
-    // The world's thunder belts — Lake Maracaibo alone storms ~300 nights a year.
+    // thunder
     ['Maracaibo', 9.8, -71.55, false, 'VE'], ['Kampala', 0.31, 32.58, false, 'UG'], ['Bogor', -6.6, 106.8, false, 'ID'],
     ['Manaus', -3.12, -60.02, false, 'BR'], ['Kinshasa', -4.32, 15.31, false, 'CD'], ['Darwin', -12.46, 130.84, false, 'AU'],
     ['Panama City', 8.98, -79.52, false, 'PA'], ['Kuala Lumpur', 3.14, 101.69, false, 'MY'], ['Caracas', 10.48, -66.9, false, 'VE'],
-    // …and the places the wind never lets up.
+    // wind
     ['Cape Horn', -55.98, -67.27, false, 'CL'], ['Torshavn', 62.01, -6.77, false, 'FO'], ['Stanley', -51.7, -57.85, false, 'FK'],
     ['Perth', -31.95, 115.86, false, 'AU'], ['Hobart', -42.88, 147.33, false, 'AU'], ['Nuuk North', 69.22, -51.1, false, 'GL'],
     ['Wick', 58.44, -3.09, false, 'GB'],
-    // A wide sweep of the tropics. Convective storms are always firing
-    // somewhere along this band, which is what keeps the storm button honest.
+    // tropics
     ['Belem', -1.46, -48.5, false, 'BR'], ['Iquitos', -3.75, -73.25, false, 'PE'], ['Santa Cruz', -17.78, -63.18, false, 'BO'],
     ['Asuncion', -25.28, -57.64, false, 'PY'], ['Cuiaba', -15.6, -56.1, false, 'BR'], ['Cayenne', 4.92, -52.33, false, 'GF'],
     ['Georgetown', 6.8, -58.16, false, 'GY'], ['San Juan', 18.47, -66.11, false, 'PR'], ['Havana', 23.11, -82.37, false, 'CU'],
@@ -1693,8 +1633,8 @@ CORS-open, so this stays a fully static page.
   var $cityInput = $('#city');
   var $cityErr = $('#city-err');
 
-  var currentQuery = ''; // the city we are currently showing; '' means "the visitor's own"
-  var scanCache = null;  // last world scan, so repeat button presses are instant
+  var currentQuery = ''; // current city
+  var scanCache = null;  // cache
   var scanAt = 0;
 
   function byType(type) {
@@ -1704,8 +1644,7 @@ CORS-open, so this stays a fully static page.
     return weather[weather.length - 1];
   }
 
-  /* ⏳ The loading curtain takes the colour of whatever sky we just fetched,
-     holds for a beat so you actually see it, then lifts. Storms shake. */
+  /* loader colors */
   var LOADER_RGB = {
     sun: '255, 199, 0',
     cloud: '150, 158, 170',
@@ -1715,11 +1654,9 @@ CORS-open, so this stays a fully static page.
     wind: '120, 200, 160'
   };
 
-  var LOADER_HOLD = 1600; // how long the bars stay up once they've faded in
+  var LOADER_HOLD = 1600; // hold
 
-  /* The curtain runs blank until the sky is known. Only then do the bars fade
-     in — already the right colour, already doing the right animation — hold
-     for a beat, and lift. No neutral phase, no recolouring mid-flight. */
+  /* reveal */
   function revealLoader(type, isNight) {
     var el = document.getElementById('loader');
     if (!el || el.getAttribute('data-done')) return;
@@ -1732,9 +1669,7 @@ CORS-open, so this stays a fully static page.
     el.classList.add('wx-' + type);
     if (type === 'thunder') el.classList.add('storm');
 
-    // A short timeout rather than requestAnimationFrame: rAF is frozen in a
-    // backgrounded tab, which would leave the curtain up forever for anyone
-    // who opens this in a tab they aren't looking at yet.
+    // timeout
     setTimeout(function () {
       el.classList.add('in');
       setTimeout(function () { el.classList.add('out'); }, LOADER_HOLD);
@@ -1744,14 +1679,14 @@ CORS-open, so this stays a fully static page.
     }, 30);
   }
 
-  // Never trap the page behind the curtain, whatever goes wrong upstream.
+  // safety
   setTimeout(function () { revealLoader('cloud'); }, 8000);
   setTimeout(function () {
     var el = document.getElementById('loader');
     if (el && el.parentNode) el.parentNode.removeChild(el);
   }, 12000);
 
-  // 🔖 The tab icon becomes the sky you're looking at.
+  // favicon
   var FAVICON = {
     sun: '☀️', cloud: '☁️', rain: '🌧️', snow: '❄️', thunder: '⛈️', wind: '🌬️'
   };
@@ -1770,11 +1705,7 @@ CORS-open, so this stays a fully static page.
     link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
   }
 
-  /* 🌙 Night is decided by the rendered city's own sunset, not the visitor's
-     clock — look up Reykjavik at 2am and you get Reykjavik's sky. All three
-     timestamps come back as local wall-clock for that spot, so they compare
-     directly. Above the arctic circle the sun may never set, in which case
-     there is no sunrise/sunset pair and we defer to Open-Meteo's is_day. */
+  /* night check */
   function isNight(cur, daily) {
     var sunrise = daily && daily.sunrise && daily.sunrise[0];
     var sunset = daily && daily.sunset && daily.sunset[0];
@@ -1786,16 +1717,7 @@ CORS-open, so this stays a fully static page.
     return now < up || now >= down;
   }
 
-  /* Light ⇄ night plays as an actual sunset rather than a cut.
-
-     The orb sinks to the bottom edge of the card while the sky warms through
-     orange and violet; only once it has landed does night take hold, and the
-     other body rises back to the middle. The colour transition is longer than
-     the sink so the warm stage is on screen the whole way down.
-
-     The orb only moves when it is the thing you can see — on a rainy or
-     overcast card the engine parks it above the card, and dragging it into
-     view would be worse than not animating at all. */
+  /* sunset */
     var SINK_MS = 1400;
     var RISE_MS = 1400;
     var duskTimer = null;
@@ -1811,7 +1733,7 @@ CORS-open, so this stays a fully static page.
       clearTimeout(riseTimer);
 
       if (!nightSettled) {
-        // First reading of the session: arrive already in the right state.
+        // first read
         nightSettled = true;
         $b.toggleClass('night', on);
         return;
@@ -1820,14 +1742,13 @@ CORS-open, so this stays a fully static page.
       var orb = document.getElementById('orb');
       var sunburstEl = document.getElementById('sunburst');
       var visible = typeof currentWeather !== 'undefined' && currentWeather.type === 'sun';
-      // r=50, plus 10 margin so it completely hides below the card's bottom edge.
+      // hide
       var restY = sizes.card.height + 60;
       var midY = sizes.card.height / 2;
     var burstRestY = restY + sizes.card.offset.top;
     var burstMidY = midY + sizes.card.offset.top;
 
-    // Colour ramp and descent share one duration, so the sky finishes warming
-    // at the exact moment the sun touches the horizon.
+    // timing
     document.documentElement.style.setProperty('--sky-fade', (SINK_MS / 1000) + 's');
     var wasNight = $b.hasClass('night');
     $b.addClass('dusk').removeClass('night');
@@ -1841,7 +1762,7 @@ CORS-open, so this stays a fully static page.
     duskTimer = setTimeout(function () {
       document.documentElement.style.setProperty('--sky-fade', (RISE_MS / 1000) + 's');
       $b.removeClass('dusk sunrise').toggleClass('night', on);
-      // Whatever is now showing climbs back up out of the horizon.
+      // rise
       if (visible) {
         if (orb) TweenMax.fromTo(orb, RISE_MS / 1000, { y: restY }, { y: midY, ease: Back.easeOut, overwrite: 'auto' });
         if (sunburstEl) TweenMax.fromTo(sunburstEl, RISE_MS / 1000, { y: burstRestY }, { y: burstMidY, ease: Back.easeOut, overwrite: 'auto' });
@@ -1849,20 +1770,14 @@ CORS-open, so this stays a fully static page.
     }, SINK_MS);
   }
 
-  /* 🌒 Real lunar phase.
-
-     Age is measured from a known new moon and folded over the synodic month.
-     The lit shape is then two arcs: the limb on the illuminated side, and the
-     terminator — a half-ellipse whose width tracks cos(phase). It bulges away
-     from the lit side when gibbous and into it when crescent, which is what
-     turns the same two arcs into every phase. */
+  /* lunar phase */
   var SYNODIC = 29.530588853;
-  var NEW_MOON = Date.UTC(2000, 0, 6, 18, 14); // 2000 Jan 6, first new moon
+  var NEW_MOON = Date.UTC(2000, 0, 6, 18, 14); // new moon
 
   function moonPhase(when) {
     var age = ((when - NEW_MOON) / 86400000) % SYNODIC;
     if (age < 0) age += SYNODIC;
-    return age / SYNODIC; // 0 new · 0.25 first quarter · 0.5 full · 0.75 last
+    return age / SYNODIC; // phase
   }
 
   function phaseName(p) {
@@ -1884,7 +1799,7 @@ CORS-open, so this stays a fully static page.
     var k = Math.cos(2 * Math.PI * p);       // +1 new … -1 full
     var illum = (1 - k) / 2;                 // 0 … 1 fraction lit
     var waxing = p < 0.5;                    // lit limb on the right
-    // Keep a sliver at new moon rather than vanishing entirely.
+    // sliver
     var rx = Math.min(R * 0.985, R * Math.abs(k));
 
     var limbSweep = waxing ? 1 : 0;
@@ -1899,9 +1814,7 @@ CORS-open, so this stays a fully static page.
     if (t) t.textContent = phaseName(p) + ' · ' + Math.round(illum * 100) + '% lit';
   }
 
-  /* Read the clock straight off the ISO string. `timezone=auto` already gives
-     local wall-clock for that city, so parsing it into a Date would only drag
-     the visitor's own offset back in. */
+  /* local time */
   function localTime(iso) {
     var m = /T(\d{2}):(\d{2})/.exec(iso || '');
     if (!m) return '';
@@ -1909,11 +1822,7 @@ CORS-open, so this stays a fully static page.
     return (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'PM' : 'AM');
   }
 
-  /* Set the opening state before anything paints, with the fade suppressed so
-     it is simply *already* dark rather than turning dark. A deep link from the
-     terminal states the answer outright; otherwise the visitor's own clock is
-     a good enough guess for their own city, and the real sunset corrects it a
-     few hundred milliseconds later. */
+  /* prime night */
   (function primeNight() {
     var hinted = new URLSearchParams(window.location.search).get('n');
     var dark = hinted !== null
@@ -1957,7 +1866,7 @@ CORS-open, so this stays a fully static page.
     return name;
   }
 
-  // 📍 Where is the visitor? Empty `city` means "ask their IP".
+  // locate
   function locate(city) {
     if (city) {
       return $.getJSON('https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=' +
@@ -1988,9 +1897,7 @@ CORS-open, so this stays a fully static page.
     });
   }
 
-  // `preset` short-circuits geocoding when the caller already resolved a place
-  // (picking a suggestion), so the city you clicked is the city you get rather
-  // than whatever a fresh search for that name returns first.
+  // preset
   function fetchWeather(city, preset) {
     return (preset ? $.Deferred().resolve(preset) : locate(city)).then(function (loc) {
       return $.getJSON('https://api.open-meteo.com/v1/forecast', {
@@ -2006,7 +1913,7 @@ CORS-open, so this stays a fully static page.
         var known = WMO[cur.weather_code] || ['Unknown', 'cloud'];
         var type = known[1];
 
-        // A blustery clear day is more fun as wind than as another still sky.
+        // windy
         if (cur.wind_speed_10m >= 30 && (type === 'sun' || type === 'cloud')) type = 'wind';
 
         return {
@@ -2018,8 +1925,7 @@ CORS-open, so this stays a fully static page.
           label: known[0],
           type: type,
           night: isNight(cur, data.daily),
-          // `timezone=auto` hands back local wall-clock time for that spot,
-          // so the date reads correctly even for a city ten hours away.
+          // local time
           time: cur.time
         };
       });
@@ -2027,7 +1933,7 @@ CORS-open, so this stays a fully static page.
   }
 
   var lastReading = null;
-  var unitOverride = null; // null = use whatever that city uses; else 'F' or 'C'
+  var unitOverride = null; // units
 
   function paintTemp(reading) {
     var useF = unitOverride ? unitOverride === 'F' : reading.imperial;
@@ -2035,8 +1941,7 @@ CORS-open, so this stays a fully static page.
     $temp.html(deg + '<span>&deg;' + (useF ? 'F' : 'C') + '</span>');
   }
 
-  // Click the temperature to swap units. Each new city starts in its own
-  // local convention again.
+  // swap units
   $temp.on('click', function () {
     if (!lastReading) return;
     var showingF = unitOverride ? unitOverride === 'F' : lastReading.imperial;
@@ -2044,7 +1949,7 @@ CORS-open, so this stays a fully static page.
     paintTemp(lastReading);
   });
 
-  // 🎨 Push a reading into the card and animate to its mood.
+  // render
   function render(reading) {
     lastReading = reading;
     unitOverride = null;
@@ -2087,8 +1992,7 @@ CORS-open, so this stays a fully static page.
 
     $details.removeClass('loading');
 
-    // Print the specific label ("Heavy rain") rather than the mood's generic
-    // name ("Rain") — the engine reads `.name` when it animates the summary in.
+    // label
     var mood = byType(reading.type);
     mood.name = reading.label;
     changeWeather(mood);
@@ -2101,9 +2005,7 @@ CORS-open, so this stays a fully static page.
       currentQuery = city;
       render(reading);
       setError('');
-      // The curtain belongs to whatever the page opened on — your own sky
-      // normally, or the city a ?q= link pointed at. Later navigation happens
-      // behind an already-lifted curtain.
+      // curtain
       if (isInitial) revealLoader(reading.type, reading.night);
     }, function (why) {
       $details.removeClass('loading');
@@ -2113,9 +2015,7 @@ CORS-open, so this stays a fully static page.
     });
   }
 
-  /* 🌐 One request, fifty-odd cities. Open-Meteo accepts comma-separated
-     coordinate lists and answers with an array in the same order, so a whole
-     world scan costs a single round trip. Cached for ten minutes. */
+  /* world scan */
   function scanWorld() {
     if (scanCache && Date.now() - scanAt < 600000) return $.Deferred().resolve(scanCache);
     return $.getJSON('https://api.open-meteo.com/v1/forecast', {
@@ -2137,9 +2037,9 @@ CORS-open, so this stays a fully static page.
           place: SCAN[i][0],
           lat: SCAN[i][1],
           lon: SCAN[i][2],
-          imperial: !!SCAN[i][3], // Use the imperial flag from the SCAN array
+          imperial: !!SCAN[i][3], // imperial
           countryCode: SCAN[i][4] || '',
-          countryName: SCAN[i][4] === 'US' ? 'United States' : (SCAN[i][4] || ''), // Fallback if no countryName
+          countryName: SCAN[i][4] === 'US' ? 'United States' : (SCAN[i][4] || ''), // fallback
           celsius: cur.temperature_2m,
           label: known[0],
           type: type,
@@ -2152,29 +2052,24 @@ CORS-open, so this stays a fully static page.
     });
   }
 
-  /* 🖱 Pressing a mood button doesn't fake the weather — it goes and finds a
-     city that is genuinely having it right now. The engine's own click handler
-     animates the mood; this fills the card with a real place to match. */
-  var lastPick = {}; // per mood, so the same button never repeats a city back to back
+  /* mood button */
+  var lastPick = {}; // last pick
 
-  /* Exact matches only. Handing back a merely-similar sky would quietly
-     contradict the button you pressed; the button says so instead. */
+  /* exact match */
   function pickFor(readings, type) {
     var pool = readings.filter(function (r) { return r.type === type; });
     if (!pool.length) return null;
-    // Drop the city this button showed last time, so repeat presses travel.
+    // no repeat
     var fresh = pool.filter(function (r) { return r.place !== lastPick[type]; });
     if (fresh.length) pool = fresh;
     return pool[Math.floor(Math.random() * pool.length)];
   }
 
-  /* Flash the pressed button red and shake it, then put the card back the way
-     it was — the engine's own click handler has already animated to the mood
-     we could not actually find a city for. */
+  /* reject */
   function rejectButton(el, fallback) {
     var $el = $(el);
     $el.removeClass('notfound');
-    void el.offsetWidth; // restart the animation if it is pressed twice
+    void el.offsetWidth; // restart
     $el.addClass('notfound');
     setTimeout(function () { $el.removeClass('notfound'); }, 900);
     if (fallback) render(fallback);
@@ -2204,19 +2099,13 @@ CORS-open, so this stays a fully static page.
     });
   });
 
-  /* 🧘 Zen mode. The card grows, everything else fades, and the animation keeps
-     running and refreshing. Snap SVG sizes its canvases from measured pixels,
-     so nudge onResize across the whole growth transition rather than once at
-     the end — otherwise the rain falls outside the card for half a second. */
-  /* Applied as inline styles rather than a class: GSAP is also writing
-     transforms around here, and inline is the only layer guaranteed to win. */
+  /* zen */
   function setZen(on) {
     var zoom = document.getElementById('card-zoom');
     var outer = document.getElementById('outer');
     var back = document.getElementById('back');
 
-    // Only measure on the way in from an unzoomed card. Measuring while
-    // already scaled reads the scaled box back and collapses the zoom to 1x.
+    // measure
     if (on && !$('body').hasClass('zen')) {
       var box = document.getElementById('card').getBoundingClientRect();
       var scale = Math.min(
@@ -2239,8 +2128,7 @@ CORS-open, so this stays a fully static page.
     $('body').toggleClass('zen', on);
   }
 
-  // A resize invalidates the measured zoom, so drop back to the normal view
-  // rather than hold a stale scale.
+  // resize
   $(window).on('resize', function () {
     if ($('body').hasClass('zen')) setZen(false);
   });
@@ -2251,7 +2139,7 @@ CORS-open, so this stays a fully static page.
     setZen(true);
   });
 
-  // Any click on the background lifts it; the card itself is the artwork.
+  // click out
   $(document).on('click', function (e) {
     if (!$('body').hasClass('zen')) return;
     if ($(e.target).closest('#card').length) return;
@@ -2262,15 +2150,14 @@ CORS-open, so this stays a fully static page.
     if (e.which === 27 && $('body').hasClass('zen')) setZen(false);
   });
 
-  // 🏠 Back to wherever the visitor actually is.
+  // home
   $('#home').on('click', function () {
     $cityInput.val('');
     load('');
   });
 
-  // 🔎 City search — Enter loads it, and the city sticks in the URL so the
-  // view is linkable.
-  /* ── Autocomplete ─────────────────────────────────────────────────────── */
+  // search
+  /* autocomplete */
   var $suggest = $('#suggest');
   var hits = [];
   var activeIdx = -1;
@@ -2286,7 +2173,7 @@ CORS-open, so this stays a fully static page.
     $cityInput.attr('aria-expanded', 'false');
   }
 
-  /** The completion only shows when the top hit actually extends what's typed. */
+  /** ghost */
   function ghostTarget() {
     var val = $cityInput.val();
     var first = hits[0];
@@ -2317,7 +2204,7 @@ CORS-open, so this stays a fully static page.
       $('<li>', { role: 'option' })
         .append($('<span>').text(h.name))
         .append($('<span class="region">').text(h.region))
-        // mousedown, not click: the input's blur would tear the list down first.
+        // mousedown
         .on('mousedown', function (e) { e.preventDefault(); choose(i); })
         .appendTo($suggest);
     });
@@ -2335,13 +2222,7 @@ CORS-open, so this stays a fully static page.
     load(h.name, false, false, h.loc);
   }
 
-  /* Clicking the field opens the panel straight away with a spread of places
-     to try, rather than making you guess and type before anything appears.
-     Coordinates are carried so picking one skips geocoding entirely. */
-  /* Well-known cities held locally. The geocoder returns nothing for a single
-     character, so the first keystroke matches against this instead — that's
-     what makes a completion appear the moment you start typing. From two
-     characters on, live results replace these. */
+  /* local cities */
   var LOCAL = [
     ['Amsterdam','Netherlands',52.37,4.90,0,'NL','Netherlands'], ['Athens','Greece',37.98,23.73,0,'GR','Greece'],
     ['Atlanta','Georgia',33.75,-84.39,1,'US','United States'], ['Auckland','New Zealand',-36.85,174.76,0,'NZ','New Zealand'],
@@ -2418,8 +2299,7 @@ CORS-open, so this stays a fully static page.
     clearTimeout(suggestTimer);
     if (!q.length) return showStarters();
 
-    // Answer from the local list straight away so the completion appears on
-    // the first keystroke; the network result overwrites this a moment later.
+    // local first
     var local = localMatches(q);
     if (local.length) {
       hits = local;
@@ -2427,13 +2307,13 @@ CORS-open, so this stays a fully static page.
     } else {
       paintGhost();
     }
-    if (q.length < 2) return; // the geocoder needs at least two characters
-    // Debounced so a fast typist doesn't fire a request per keystroke.
+    if (q.length < 2) return; // min length
+    // debounce
     suggestTimer = setTimeout(function () {
       $.getJSON('https://geocoding-api.open-meteo.com/v1/search', {
         name: q, count: 5, language: 'en', format: 'json'
       }).then(function (data) {
-        // The field may have moved on while this was in flight.
+        // stale
         if ($cityInput.val().trim() !== q) return;
         hits = (data && data.results ? data.results : []).map(function (r) {
           var region = r.country_code === 'US' && r.admin1 ? getStateAbbr(r.admin1) : r.country;
@@ -2451,7 +2331,7 @@ CORS-open, so this stays a fully static page.
           };
         });
         if (hits.length) renderSuggest();
-      }, function () { /* keep whatever the local list already showed */ });
+      }, function () { /* ignore */ });
     }, 180);
   });
 
@@ -2460,7 +2340,7 @@ CORS-open, so this stays a fully static page.
   $cityInput.on('keydown', function (e) {
     if (e.which === 27) return closeSuggest(); // Esc
 
-    // Tab accepts the faded completion rather than leaving the field.
+    // tab
     if (e.which === 9) {
       var full = ghostTarget();
       if (!full) return;
@@ -2480,21 +2360,14 @@ CORS-open, so this stays a fully static page.
     }
 
     if (e.which !== 13) return;
-    if (activeIdx >= 0) return choose(activeIdx); // Enter takes the highlighted city
+    if (activeIdx >= 0) return choose(activeIdx); // enter
     var q = $cityInput.val().trim();
     $cityInput.blur();
     closeSuggest();
     load(q);
   });
 
-  /* A deep link (the terminal's "see more") opens on that place,
-     curtain and all, then the parameters are stripped so a refresh still
-     resets to home.
-
-     Coordinates are preferred over a name: the terminal's city list holds
-     exact points, and re-geocoding the label would quietly land somewhere
-     else — searching "Cape Horn" finds one in California long before the
-     one off Chile. */
+  /* deep link */
   var params = new URLSearchParams(window.location.search);
   var deepLat = parseFloat(params.get('lat'));
   var deepLon = parseFloat(params.get('lon'));
@@ -2520,14 +2393,12 @@ CORS-open, so this stays a fully static page.
     load(deepLink, false, true);
   }
 
-  // On mobile, start the page in hidden UI mode until the background is tapped, 
-  // UNLESS it was accessed via the terminal (which sets query params).
+  // mobile
   if (window.innerWidth <= 768 && !accessedViaTerminal) {
     setTimeout(function() { setZen(true); }, 10);
   }
 
-  // Conditions drift slowly; a refresh every 10 minutes is plenty, and only
-  // while the tab is actually being looked at.
+  // refresh
   setInterval(function () {
     if (!document.hidden && !$live.hasClass('manual')) load(currentQuery, true);
   }, 600000);

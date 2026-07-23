@@ -8,7 +8,7 @@
   aria-label="Toggle dark mode"
   data-cursor-hover
 >
-  {/* Line-icon set (default) — sun in dark mode, moon in light mode */}
+  {/* icons */}
   <span class="theme-icons theme-icons--svg">
     <svg class="hidden h-4 w-4 dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="12" cy="12" r="4" />
@@ -18,7 +18,7 @@
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </svg>
   </span>
-  {/* Emoji set — revealed alongside the 🍔 once the mobile menu has been opened */}
+  {/* emoji */}
   <span class="theme-icons theme-icons--emoji" aria-hidden="true">
     <span class="hidden dark:inline">☀️</span>
     <span class="dark:hidden">🌙</span>
@@ -35,7 +35,7 @@
     font-size: 1rem;
     line-height: 1;
   }
-  /* Flip line-icons → emoji once the menu's been opened (see Nav's data flag) */
+  /* flip */
   :global(html[data-menu-revealed]) .theme-icons--svg { display: none; }
   :global(html[data-menu-revealed]) .theme-icons--emoji { display: grid; }
 </style>
@@ -49,7 +49,7 @@
       try {
         localStorage.setItem('rg-theme', isDark ? 'dark' : 'light');
       } catch {}
-      // Ripple cue: animate the toggle scale
+      // ripple
       btn.animate(
         [
           { transform: 'rotate(0deg) scale(1)' },

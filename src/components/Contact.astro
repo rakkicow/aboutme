@@ -59,7 +59,7 @@ const handles = [
 <section id="contact" class="relative flex min-h-[100svh] flex-col justify-center py-10 sm:py-20">
   <div class="container-x">
     <div class="relative overflow-hidden rounded-[28px] sm:rounded-[36px] border p-6 sm:p-16 lg:p-24" style="border-color: var(--hair); background: var(--surface);">
-      {/* Inner mesh */}
+      {/* mesh */}
       <div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
         <div class="absolute -left-20 -top-20 h-[40rem] w-[40rem] rounded-full animate-mesh-drift" style="background: radial-gradient(circle, rgba(255,144,67,0.55), rgba(255,144,67,0) 60%); filter: blur(80px);"></div>
         <div class="absolute -right-32 bottom-0 h-[40rem] w-[40rem] rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(220,155,181,0.6), rgba(220,155,181,0) 65%); filter: blur(90px);"></div>
@@ -116,7 +116,7 @@ const handles = [
                 class="group relative block overflow-hidden rounded-2xl border p-4 sm:p-5 backdrop-blur transition-all duration-500 hover:-translate-y-0.5"
                 style="border-color: var(--hair); background: var(--surface-soft); box-shadow: 0 1px 0 rgba(255,255,255,0.15) inset;"
               >
-                {/* Hover glow */}
+                {/* glow */}
                 <span class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style="background: radial-gradient(120% 80% at 50% 100%, rgba(220,155,181,0.25), transparent 60%);"></span>
 
                 <p class="relative flex items-center gap-1.5 whitespace-nowrap text-[10px] uppercase tracking-[0.14em]" style="color: var(--ink-faint);">
@@ -137,7 +137,7 @@ const handles = [
                     ></span>
                   )}
                 </p>
-                {/* Brand logo instead of a link string — never truncates on narrow screens */}
+                {/* logo */}
                 <p class="relative mt-2 flex items-center justify-center sm:justify-between pr-0 sm:pr-7 group-hover:text-ember-700 dark:group-hover:text-cow-300" style="color: var(--ink-soft);">
                   <span class="flex items-center gap-3">
                     <span class="inline-flex h-6 w-6 items-center justify-center">
@@ -168,7 +168,7 @@ const handles = [
                 </p>
               </a>
 
-              {/* Copy button — absolute top-right, escapes the parent <a> */}
+              {/* copy button */}
               <button
                 type="button"
                 data-copy={h.copy}
@@ -191,7 +191,7 @@ const handles = [
   </div>
 
   <style>
-    /* Email pill + copy share a single rounded chip — copy reads as part of the same control. */
+    /* email pill */
     .contact-mail-group {
       background: rgba(255, 122, 30, 0.18);
       box-shadow: 0 8px 24px -10px rgba(255, 122, 30, 0.45);

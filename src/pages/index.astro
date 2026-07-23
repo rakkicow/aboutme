@@ -5,14 +5,13 @@ import Marquee from '~/components/Marquee.astro';
 import About from '~/components/About.astro';
 import Work from '~/components/Work.astro';
 import Reel from '~/components/Reel.astro';
-// import InTheWorks from '~/components/InTheWorks.astro'; // temporarily disabled — revisit later
+// import InTheWorks from '~/components/InTheWorks.astro'; // disabled
 import Experience from '~/components/Experience.astro';
 import Contact from '~/components/Contact.astro';
 ---
 
 <Base>
-  {/* Hero band — together hero + marquee fill the first viewport at any width,
-       so the marquee always parks at the bottom edge and About never peeks. */}
+  {/* hero */}
   <div class="flex min-h-[100svh] flex-col pb-4 sm:pb-6">
     <Hero />
     <Marquee />
@@ -20,7 +19,7 @@ import Contact from '~/components/Contact.astro';
   <About />
   <Work />
   <Reel />
-  {/* <InTheWorks /> temporarily disabled — revisit later */}
+  {/* disabled */}
   <Experience />
   <Contact />
 </Base>

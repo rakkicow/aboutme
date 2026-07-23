@@ -1,7 +1,5 @@
 ---
-// Terminal card — cow-themed neofetch.
-// Left column: big ASCII cow (cowsay shape, no speech-bubble slashes).
-// Right column: live system info — uptime counts from Fri 2026-05-29 02:00 local.
+// terminal card
 export interface Props {
   isStandalone?: boolean;
 }
@@ -12,20 +10,19 @@ const { isStandalone = false } = Astro.props;
 <div class="pointer-events-none absolute inset-0 -z-0 overflow-hidden rounded-[28px]">
   <div class="absolute inset-0" style="background: linear-gradient(165deg, #2E3A52 0%, #232E44 50%, #1A2235 100%);"></div>
 
-  {/* Pink + green ambient glows */}
   <div class="absolute -top-20 -right-12 h-72 w-72 rounded-full animate-mesh-drift" style="background: radial-gradient(circle, rgba(220,155,181,0.7), transparent 60%); filter: blur(60px);"></div>
   <div class="absolute -bottom-24 -left-10 h-72 w-72 rounded-full animate-mesh-drift-2" style="background: radial-gradient(circle, rgba(57,255,20,0.18), transparent 65%); filter: blur(80px);"></div>
   <div class="absolute right-1/4 top-1/2 h-48 w-48 rounded-full animate-mesh-drift-3" style="background: radial-gradient(circle, rgba(184,91,130,0.45), transparent 65%); filter: blur(50px);"></div>
 
-  {/* Grid — centred by background-position, so it never shifts on resize */}
+  {/* grid */}
   <div class="card-grid absolute inset-0 opacity-[0.08]" style="--grid-cell: 32px;" aria-hidden="true"></div>
 </div>
 )}
 
-{/* Terminal window */}
+{/* terminal window */}
 <div class={isStandalone ? "w-full h-full" : "-mx-2 w-[calc(100%+16px)] sm:mx-0 sm:w-full"} style="container-type: inline-size;">
 <div class={`term-window relative flex w-full flex-col overflow-hidden transition-all duration-300 ease-out ${isStandalone ? 'bg-black h-[100svh]' : 'bg-[#0E1620]/95 backdrop-blur-sm rounded-2xl border border-cow-300/20 shadow-2xl cursor-pointer hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-cow-300/40'}`} data-standalone={isStandalone ? "true" : "false"}>
-  {/* Title bar */}
+  {/* title bar */}
   <div class="flex items-center justify-between border-b border-cow-300/15 bg-white/[0.04] px-3 py-2">
     <div class="group flex items-center gap-1.5">
       <span id="term-close-btn" class="relative flex h-3 w-3 cursor-pointer items-center justify-center rounded-full bg-[#FF5F57]" title="Exit Interactive Mode">
@@ -48,16 +45,14 @@ const { isStandalone = false } = Astro.props;
     <span class="w-10"></span>
   </div>
 
-  {/* Body */}
+  {/* body */}
   <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45] overflow-y-auto overflow-x-hidden scrollbar-hide">
     <div id="term-history">
       <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
 
-    {/* Two-column grid — cow centered in the left column, sysinfo right */}
+    {/* columns */}
     <div class="term-grid mt-1.5 grid grid-cols-[max-content_1fr] gap-x-3 items-center">
-      {/* ASCII cow — pre is centered horizontally and vertically inside the
-          left column. Monospace + preserved whitespace keeps the lines
-          aligned to each other. */}
+      {/* cow */}
       <pre class="term-cow justify-self-center px-2 leading-[1.1]" style="color:#DC9BB5; text-shadow: 0 0 8px rgba(220,155,181,0.25);">
 \|/          (__)    
      `\------(oo)
@@ -66,7 +61,7 @@ const { isStandalone = false } = Astro.props;
    \|/
 </pre>
 
-      {/* System info — pink keys, green values */}
+      {/* info */}
       <pre class="leading-[1.45]" style="text-shadow: 0 0 8px rgba(57,255,20,0.15);"><span style="color:#39FF14;">ria</span><span style="color:#7CE57C;">@</span><span style="color:#39FF14;">rakshita.me</span>
 <span style="color:#7CE57C;">─────────────────</span>
 <span style="color:#DC9BB5;">OS</span><span style="color:#7CE57C;">: macOS</span>
@@ -78,7 +73,7 @@ const { isStandalone = false } = Astro.props;
 <span style="color:#DC9BB5;">Cow</span><span style="color:#7CE57C;">: </span><span style="color:#DC9BB5;">🐄 essential</span></pre>
     </div>
 
-    {/* Now playing — stays hidden until the Spotify worker responds */}
+    {/* now playing */}
     <div class="np-row mt-2" data-np-row>
       <span class="shrink-0" data-np-label style="color:#DC9BB5;">Playing</span><span class="shrink-0" style="color:#7CE57C;">:&nbsp;</span>
       <span class="np-wave" data-np-wave aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></span>
@@ -87,14 +82,13 @@ const { isStandalone = false } = Astro.props;
 
     </div>
 
-    {/* Interactive output appended here */}
+    {/* output */}
     <div id="term-interactive-output"></div>
 
-    {/* Prompt with typer */}
+    {/* prompt */}
     <div class="mt-2 text-cow-300 flex items-center cursor-text" id="term-prompt-line">
       <span class="shrink-0">~/</span> <span class="text-cow-400 shrink-0 mx-1.5">$</span> 
-      {/* white-space:pre — this span mirrors the real input to push the caret
-          along, and without it a trailing space collapses and the caret stalls. */}
+      {/* spacer */}
       <span class="typer shrink-0" id="auto-typer" style="color:#39FF14; white-space:pre;"></span>
       <div class="relative flex-1 m-0 flex items-center">
         <span class="inline-block h-3 w-[7px] shrink-0 animate-caret absolute left-0 pointer-events-none" id="term-caret" style="background:#39FF14;"></span>
@@ -105,14 +99,13 @@ const { isStandalone = false } = Astro.props;
     </div>
   </div>
 
-  {/* Scanline */}
+  {/* scanline */}
   <div class="pointer-events-none absolute inset-0" style="background: linear-gradient(180deg, transparent 0%, rgba(57,255,20,0.04) 50%, transparent 100%); background-size: 100% 4px;"></div>
 </div>
 </div>
 
 <style>
-  /* Terminal text tracks the card width (container query) so the neofetch
-     output never overflows the window in the 3-column grid. */
+  /* sizing */
   .term-window:not([data-standalone="true"]) {
     min-height: 62.5cqw;
   }
@@ -125,14 +118,12 @@ const { isStandalone = false } = Astro.props;
   .term-cow {
     font-size: 1.08em;
   }
-  /* The sysinfo block is unwrappable <pre> text, and the weather line is the
-     longest of them. Let its grid cell shrink and clip instead of letting the
-     line dictate how wide the card has to be. */
+  /* clip */
   .term-grid > pre:last-child {
     min-width: 0;
     overflow: hidden;
   }
-  /* Narrow cards: stack the cow above the sysinfo and trim the title bar */
+  /* narrow */
   @container (max-width: 400px) {
     .term-grid {
       grid-template-columns: 1fr;
@@ -144,7 +135,7 @@ const { isStandalone = false } = Astro.props;
     }
   }
 
-  /* Now playing row — hidden until the worker answers with a track */
+  /* now playing */
   .np-row {
     display: none;
     align-items: center;
@@ -162,7 +153,7 @@ const { isStandalone = false } = Astro.props;
   .np-text:hover {
     color: #39ff14 !important;
   }
-  /* The weather readout is a link to the full page, same as the track title */
+  /* weather link */
   .wx-line {
     text-decoration: none;
     cursor: pointer;
@@ -171,8 +162,7 @@ const { isStandalone = false } = Astro.props;
   .wx-line:hover {
     color: #39ff14 !important;
   }
-  /* Tiny equalizer, Dynamic Island style — five center-anchored bars, each
-     looping its own organic pattern so it reads like music, not a wave */
+  /* bars */
   .np-wave {
     display: inline-flex;
     align-items: center;
@@ -221,15 +211,15 @@ const { isStandalone = false } = Astro.props;
     60% { height: 90%; }
     85% { height: 45%; }
   }
-  /* Paused (showing "Last Played") — no waveform */
+  /* paused */
   .np-wave[data-paused] {
     display: none;
   }
 </style>
 
 <script>
-  // Live uptime — counts up from Fri 2026-05-29 02:00:00 local time
-  const epoch = new Date(2026, 4, 29, 2, 0, 0).getTime(); // month is 0-indexed
+  // uptime
+  const epoch = new Date(2026, 4, 29, 2, 0, 0).getTime(); // month starts at 0
   const uptimeEls = document.querySelectorAll<HTMLElement>('[data-uptime]');
   const resEls = document.querySelectorAll<HTMLElement>('[data-resolution]');
 
@@ -260,18 +250,17 @@ const { isStandalone = false } = Astro.props;
 
   if (uptimeEls.length) {
     tickUptime();
-    setInterval(tickUptime, 30000); // refresh every 30s
+    setInterval(tickUptime, 30000); // refresh
   }
   if (resEls.length) {
     updateRes();
     window.addEventListener('resize', updateRes);
   }
 
-  // Weather line — this panel is *my* machine, so it reports my sky rather than
-  // the visitor's. Open-Meteo is keyless and CORS-open, so it stays a static page.
+  // weather
   const wxEls = document.querySelectorAll<HTMLElement>('[data-weather]');
   if (wxEls.length) {
-    // WMO weather code → emoji. Second entry is the night-time face where it differs.
+    // emoji
     const wxEmoji = (code: number, isDay: boolean): string => {
       if (code === 0) return isDay ? '☀️' : '🌙';
       if (code <= 2) return isDay ? '🌤️' : '☁️';
@@ -297,23 +286,20 @@ const { isStandalone = false } = Astro.props;
         const text = `${Math.round(cur.temperature_2m)}°${wxEmoji(Number(cur.weather_code), cur.is_day === 1)} in W. Lafayette, IN`;
         wxEls.forEach((el) => (el.textContent = text));
       } catch {
-        /* offline — the placeholder stays */
+        /* offline */
       }
     };
     loadWeather();
-    setInterval(loadWeather, 900000); // every 15 min
+    setInterval(loadWeather, 900000); // 15 min
   }
 
-  // Now playing — straight from Last.fm (user.getrecenttracks marks the live
-  // track with @attr.nowplaying). The API key is read-only and meant for
-  // client-side use; leave either constant empty to keep the row hidden.
+  // now playing
   const LASTFM_USER = 'monicow';
   const LASTFM_API_KEY = 'dbfa4fc22fc71c3ff51db00e997de815';
 
   const npRows = document.querySelectorAll<HTMLElement>('[data-np-row]');
 
-  // Pull the 3 dominant colors out of the album art (tiny canvas sample,
-  // saturation-weighted buckets, lightened enough to read on the dark bg).
+  // colors
   const extractColors = (img: HTMLImageElement): string[] => {
     const size = 24;
     const canvas = document.createElement('canvas');
@@ -326,7 +312,7 @@ const { isStandalone = false } = Astro.props;
     try {
       data = ctx.getImageData(0, 0, size, size).data;
     } catch {
-      return []; // CORS-tainted canvas — keep the default green
+      return []; // cors blocked
     }
     const buckets = new Map<number, { r: number; g: number; b: number; n: number; score: number }>();
     for (let i = 0; i < data.length; i += 4) {
@@ -349,7 +335,7 @@ const { isStandalone = false } = Astro.props;
     }
     return picked.map((p) => {
       const mx = Math.max(p.r, p.g, p.b, 1);
-      const s = mx < 120 ? 120 / mx : 1; // lift very dark colors so they glow on the terminal
+      const s = mx < 120 ? 120 / mx : 1; // brighten
       return `rgb(${(p.r * s) | 0}, ${(p.g * s) | 0}, ${(p.b * s) | 0})`;
     });
   };
@@ -394,11 +380,11 @@ const { isStandalone = false } = Astro.props;
           if (link && t.url) link.href = t.url;
         });
 
-        // Tint the waveform with the album art's palette (once per track)
+        // bar colors
         type LfmImage = { size: string; '#text': string };
         const art = (t.image as LfmImage[] | undefined)?.find((i) => i.size === 'medium')?.['#text'] || '';
 
-        // Globally expose track data for the terminal game
+        // expose track
         window._currentTrack = {
           name: t.name,
           artist: t.artist?.['#text'] ?? '',
@@ -428,22 +414,22 @@ const { isStandalone = false } = Astro.props;
           applyWaveColors([]);
           window.dispatchEvent(new CustomEvent('trackupdate'));
         } else {
-          // Track is the same, but maybe name/playing status changed
+          // same track
           window.dispatchEvent(new CustomEvent('trackupdate'));
         }
       } catch {
-        /* Last.fm unreachable — row stays as-is */
+        /* failed */
       }
     };
     updateNowPlaying();
-    // Poll often enough to feel live, and refresh the moment the tab is refocused.
+    // poll
     setInterval(updateNowPlaying, 12000);
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) updateNowPlaying();
     });
   }
 
-  // Typing prompt loop — only runs while the terminal is on-screen
+  // typing
   const commands = [
     'npm run dev',
     'git status',
@@ -483,7 +469,7 @@ const { isStandalone = false } = Astro.props;
       new Promise<void>((resolve) => {
         const start = performance.now();
         const check = () => {
-          if (!onScreen || interactive) return resolve(); // bail early when off-screen or user interacts
+          if (!onScreen || interactive) return resolve(); // stop
           if (performance.now() - start >= ms) return resolve();
           requestAnimationFrame(check);
         };
@@ -526,7 +512,7 @@ const { isStandalone = false } = Astro.props;
     }, { rootMargin: '100px' });
     io.observe(typerEls[0]);
 
-    // Gamification Logic - Lazy Loaded!
+    // game
     if (termWindow && termForm && termInput) {
       const termHistory = document.getElementById('term-history') as HTMLElement;
       let gameLoaded = false;
@@ -534,25 +520,25 @@ const { isStandalone = false } = Astro.props;
       const activateTerminal = async () => {
         if (!interactive) {
           interactive = true;
-          // Lock the current height in pixels so the game doesn't stretch the grid!
+          // lock height
           if (!document.fullscreenElement) {
             termWindow.style.height = termWindow.getBoundingClientRect().height + 'px';
           }
-          // Keep autoTyper visible to mirror text!
-          autoTyper.textContent = ''; // clear any partially typed text
+          // keep typer
+          autoTyper.textContent = ''; // clear
           if (termHistory) termHistory.style.display = 'none';
           termForm.classList.remove('hidden');
           termForm.classList.add('flex');
           termInput.focus();
           
-          // Initial greeting
+          // greeting
           const msg = document.createElement('div');
           msg.className = 'mt-1 mb-2 opacity-80';
           msg.innerHTML = '<span style="color:#FEBC2E">Terminal overridden.</span> Manual input enabled.<br/>Type <span style="color:#39FF14">help</span> to view commands.';
           interactiveOutput.appendChild(msg);
           termBody.scrollTop = termBody.scrollHeight;
 
-          // Dynamically fetch the game engine ONLY when the user interacts
+          // load game
           if (!gameLoaded) {
             gameLoaded = true;
             try {
@@ -560,9 +546,9 @@ const { isStandalone = false } = Astro.props;
               const { initGame } = await import('../lib/terminalPlus.ts');
               initGame(termForm, termInput, interactiveOutput, termBody, termCaret, () => {
 
-                // The onExit callback
+                // on exit
                 interactive = false;
-                termWindow.style.height = ''; // release the lock
+                termWindow.style.height = ''; // unlock
                 autoTyper.style.display = 'inline';
                 if (termHistory) termHistory.style.display = 'block';
                 termForm.classList.add('hidden');
@@ -581,11 +567,11 @@ const { isStandalone = false } = Astro.props;
       };
 
       termWindow.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent the parent ProjectCard from opening the web shelf
+        e.stopPropagation(); // stop click
         activateTerminal();
       });
 
-      // Intercept clicks on the neofetch track link
+      // track link
       const npLinks = document.querySelectorAll('[data-np-link]');
       npLinks.forEach(link => {
         link.addEventListener('click', async (e) => {
@@ -600,9 +586,7 @@ const { isStandalone = false } = Astro.props;
         });
       });
 
-      // Same for the weather readout: it drops into the terminal's own weather
-      // view rather than leaving the page. The full site is one click further,
-      // behind "see more".
+      // weather link
       document.querySelectorAll('[data-weather-link]').forEach(link => {
         link.addEventListener('click', async (e) => {
           e.preventDefault();
@@ -680,7 +664,7 @@ const { isStandalone = false } = Astro.props;
           }
         }
         
-        // Force the whatsong engine to dynamically recalculate the available space
+        // resize
         setTimeout(() => {
           if ((window as any)._runTerminalCommand) {
             const out = document.getElementById('term-interactive-output');

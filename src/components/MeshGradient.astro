@@ -1,6 +1,5 @@
 ---
-// Single mesh container — colors driven by CSS variables that swap with .dark.
-// No class-switching shenanigans, no risk of "wrong mesh showing".
+// mesh
 ---
 
 <div class="pointer-events-none absolute inset-0 -z-10 overflow-hidden mesh-root">
@@ -11,15 +10,15 @@
   <div class="mesh-blob mesh-blob-3 animate-mesh-drift-3 will-change-transform"></div>
   <div class="mesh-blob mesh-blob-4 animate-mesh-drift will-change-transform" style="animation-delay: -8s;"></div>
 
-  {/* Grain */}
+  {/* grain */}
   <div class="absolute inset-0 mesh-grain"></div>
 
-  {/* Fade into canvas at the bottom */}
+  {/* fade */}
   <div class="absolute inset-x-0 bottom-0 h-40" style="background: linear-gradient(to bottom, transparent, var(--canvas));"></div>
 </div>
 
 <style>
-  /* Light mode mesh palette */
+  /* light */
   .mesh-root {
     --m-base: radial-gradient(120% 80% at 50% 0%, #FFF4EE 0%, #FAFAFA 60%, #FAFAFA 100%);
     --m-blob-1: rgba(255, 144, 67, 0.85);
@@ -32,7 +31,7 @@
     --m-grain-vals: '0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0';
   }
 
-  /* Dark mode mesh palette */
+  /* dark */
   :global(.dark) .mesh-root {
     --m-base: radial-gradient(120% 80% at 50% 0%, #1A2138 0%, #0A0E1A 65%, #0A0E1A 100%);
     --m-blob-1: rgba(255, 144, 67, 0.42);

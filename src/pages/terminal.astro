@@ -60,10 +60,10 @@ import CardTerminal from '~/components/CardTerminal.astro';
       .cursor-fx { display: none; }
       @media (hover: hover) and (pointer: fine) {
         .cursor-fx { display: block; }
-        /* Globally hide all native cursors to prevent glitches */
+        /* hide cursor */
         * { cursor: none !important; }
       }
-      /* Scale the terminal caret proportionally to the much larger standalone text */
+      /* caret */
       #term-caret {
         height: 1.25em !important;
         width: 1ch !important;
@@ -110,17 +110,17 @@ import CardTerminal from '~/components/CardTerminal.astro';
           cursor.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
         }, { passive: true });
 
-        // Event delegation for morphing cursor on hoverable elements
+        // cursor
         document.body.addEventListener('mouseover', (e) => {
           const target = e.target as HTMLElement;
           if (target.closest('input, .cursor-text, #term-prompt-line')) {
-            // Morph into a text I-beam
+            // i-beam
             cursor.style.width = '4px';
             cursor.style.height = '24px';
             cursor.style.borderRadius = '2px';
-            dot.style.opacity = '0'; // Hide the inner dot for I-beam
+            dot.style.opacity = '0'; // hide dot
           } else if (target.closest('a, button, [data-cursor-hover], .cursor-pointer')) {
-            // Enlarge for links/buttons
+            // enlarge
             cursor.style.width = '64px';
             cursor.style.height = '64px';
             cursor.style.borderRadius = '50%';
@@ -130,7 +130,7 @@ import CardTerminal from '~/components/CardTerminal.astro';
         document.body.addEventListener('mouseout', (e) => {
           const target = e.target as HTMLElement;
           if (target.closest('input, .cursor-text, #term-prompt-line, a, button, [data-cursor-hover], .cursor-pointer')) {
-            // Restore default green dot
+            // restore
             cursor.style.width = '32px';
             cursor.style.height = '32px';
             cursor.style.borderRadius = '50%';

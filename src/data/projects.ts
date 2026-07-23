@@ -7,7 +7,7 @@ export type Project = {
   blurb: string;
   stack: string[];
   links: { label: string; href: string }[];
-  // Theme for the whole card (full-bleed background + text colors)
+  // card theme
   theme: 'bubbles' | 'camera' | 'terminal';
 };
 
@@ -58,15 +58,15 @@ export const featured: Project[] = [
 
 
 export type ReelEntry = {
-  id: string;                                       // platform ID (yt watch id, drive file id, vimeo id…)
-  source?: 'youtube' | 'drive' | 'external';       // defaults to 'youtube'
-  href?: string;                                    // required when source = 'external'
-  thumbnail?: string;                               // overrides the auto-derived thumbnail URL
-  aspect?: string;                                  // CSS aspect-ratio for the frame; defaults to '16 / 9'. Set for cinematic clips so the player fills the frame instead of letterboxing.
+  id: string;                                       // platform id
+  source?: 'youtube' | 'drive' | 'external';       // default youtube
+  href?: string;                                    // external only
+  thumbnail?: string;                               // override
+  aspect?: string;                                  // aspect ratio
   title: string;
   caption: string;
   pill?: string;
-  stats?: string[];                                 // award/placement chips shown above the caption
+  stats?: string[];                                 // chips
 };
 
 export const reel: ReelEntry[] = [
@@ -75,8 +75,7 @@ export const reel: ReelEntry[] = [
     source: 'drive',
     href: 'https://drive.google.com/file/d/1WjkRAewY03_Shn76FJ-l01LQtaEzAh5f/view',
     thumbnail: '/assets/usfna-poster.jpg',
-    // Cinematic 2.37:1 — poster fills the frame; opens the full clip in a new tab.
-    // (Drive's inline /preview player renders broken at phone-sized heights.)
+    // cinematic
     aspect: '1280 / 539',
     title: 'AugustaENT — Ultrasound-Guided Fine-Needle Aspiration',
     caption: 'Guided USFNA walkthrough for new AugustaENT patients',
@@ -131,7 +130,7 @@ export type WebShelfEntry = {
   year: string;
   liveUrl: string;
   href: string;
-  shot: string; // static screenshot (public/assets/shelf) — no live iframes, keeps memory sane
+  shot: string; // screenshot
 };
 
 export const webShelf: WebShelfEntry[] = [
@@ -187,7 +186,7 @@ export type WorksItem = {
   hint: string;
 };
 
-// Renamed from "Household" — these are projects currently in flight / awaiting writeups.
+// in progress
 export const inTheWorks: WorksItem[] = [
   {
     title: 'Hardware audio equalizer',

@@ -9,24 +9,20 @@ export function initGame(
   let inGame = false;
   let destructing = false;
 
-  // Everything tab-completable. `sudo rm -rf /` is deliberately absent — it
-  // should only ever be found by someone who already had the idea.
+  // commands
   const COMMANDS = ['help', 'whatsong', 'weather', 'walloftext', 'hack', 'clear', 'exit'];
 
-  // Second-level completions, so `weather ` + Tab cycles the conditions the
-  // same way a real shell cycles a command's arguments.
+  // weather args
   const WEATHER_ARGS = [
     'help', 'sunny', 'clear', 'cloudy', 'rainy', 'drizzly', 'snowy', 'stormy', 'windy', 'foggy',
   ];
 
-  // Shell history. Newest last; `histPos === history.length` means "not
-  // browsing", i.e. the live input line.
+  // history
   const history: string[] = [];
   let histPos = 0;
-  let draft = ''; // what was typed before arrowing up, restored on the way back down
+  let draft = ''; // draft
 
-  // Tab-completion menu state. `tabHits` is non-empty only while the user is
-  // cycling, so a fresh Tab always recomputes from what is actually typed.
+  // tab menu
   let tabHits: string[] = [];
   let tabIdx = 0;
   const resetTabCycle = () => {
@@ -34,7 +30,7 @@ export function initGame(
     tabIdx = 0;
   };
 
-  // Last.fm track metadata is third-party text — escape before it touches innerHTML.
+  // escape
   const esc = (s: unknown) =>
     String(s ?? '')
       .replace(/&/g, '&amp;')
@@ -43,7 +39,7 @@ export function initGame(
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
 
-  // Only let through URLs we'd actually navigate to — blocks javascript:/data: hrefs.
+  // safe url
   const safeUrl = (u: unknown) => {
     const raw = String(u ?? '').trim();
     if (!raw) return 'https://last.fm';
@@ -51,7 +47,7 @@ export function initGame(
       const parsed = new URL(raw, window.location.origin);
       if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return esc(parsed.href);
     } catch {
-      /* malformed — fall through */
+      /* malformed */
     }
     return 'https://last.fm';
   };
@@ -63,9 +59,7 @@ export function initGame(
       return;
     }
     
-    // Prevent redundant re-renders of the exact same song. `lastTrack` is only
-    // committed once the art actually renders, so a failed load can still retry;
-    // `pendingTrack` stops duplicate in-flight loads in the meantime.
+    // dedupe
     const trackKey = track.name + track.artUrl;
     if (outContainer.dataset.lastTrack === trackKey) return;
     if (outContainer.dataset.pendingTrack === trackKey) return;
@@ -78,18 +72,18 @@ export function initGame(
     img.onload = () => {
       delete outContainer.dataset.pendingTrack;
       outContainer.dataset.lastTrack = trackKey;
-      // Read the dynamically scaling font size of the terminal!
+      // font size
       const rootSize = parseFloat(getComputedStyle(outContainer).fontSize) || 11;
-      const charH = rootSize * 0.5; // Bumped to 0.5em font size
-      const charW = rootSize * 0.425; // 0.5em * 0.85 (0.6 base width + 0.25 letter-spacing) = 0.425
+      const charH = rootSize * 0.5; // char height
+      const charW = rootSize * 0.425; // char width
       
       let w = 28;
       let h = 24;
       
       const termBody = outContainer.closest('.term-body') as HTMLElement;
       if (termBody) {
-         const availH = termBody.clientHeight - (rootSize * 15); // buffer for title, lyrics, and input
-         const availW = termBody.clientWidth - (rootSize * 4); // buffer for padding
+         const availH = termBody.clientHeight - (rootSize * 15); // buffer
+         const availW = termBody.clientWidth - (rootSize * 4); // buffer
          
          if (availH > 50 && availW > 50) {
            const maxHChars = Math.floor(availH / charH);
@@ -113,7 +107,7 @@ export function initGame(
       ctx.drawImage(img, 0, 0, w, h);
       const data = ctx.getImageData(0, 0, w, h).data;
       
-      // Density chars from dark to light
+      // density
       const chars = ['@', '%', '#', '*', '+', '=', '-', ':', '.', ' '];
       
       let asciiHtml = '<div style="font-size:0.5em; line-height:1em; letter-spacing:0.25em; font-weight:900; font-family:monospace; margin-bottom:1.2em; margin-top:0.4em;">';
@@ -121,12 +115,12 @@ export function initGame(
         for (let x = 0; x < w; x++) {
           const i = (y * w + x) * 4;
           const r = data[i], g = data[i+1], b = data[i+2];
-          // Calculate luminance
+          // luminance
           const bright = (0.299 * r + 0.587 * g + 0.114 * b);
           const charIdx = Math.floor((bright / 255) * (chars.length - 1));
           const char = chars[charIdx];
           
-          // Boost colors slightly so it glows on the dark terminal
+          // boost
           asciiHtml += `<span style="color:rgb(${Math.min(255, r+20)},${Math.min(255, g+20)},${Math.min(255, b+20)})">${char === ' ' ? '&nbsp;' : char}</span>`;
         }
         asciiHtml += '<br/>';
@@ -185,7 +179,7 @@ export function initGame(
                 
                 let currentIdx = 0;
                 const showNext = () => {
-                  if (!document.body.contains(outContainer)) return; // Stop memory leak if cleared!
+                  if (!document.body.contains(outContainer)) return; // cleanup
                   
                   let count = 1;
                   const isNarrow = window.innerWidth <= 450;
@@ -193,7 +187,7 @@ export function initGame(
                   if (!isNarrow && currentIdx + 1 < lines.length) {
                      const l1 = lines[currentIdx];
                      const l2 = lines[currentIdx + 1];
-                     // Heuristically decide if 2 lines fit perfectly in the terminal UI
+                     // fit check
                      if (l1.length + l2.length < 80 && l1.length < 45 && l2.length < 45) {
                         count = 2;
                      }
@@ -201,7 +195,7 @@ export function initGame(
                   
                   let snippet = lines.slice(currentIdx, currentIdx + count).join('\n');
                   
-                  // Calculate global reading estimate (slower, per user request)
+                  // timing
                   let duration = Math.max(3000, snippet.split(/\s+/).length * 400 + 1800);
                   
                   const fullSnippet = '"' + snippet + '"';
@@ -219,7 +213,7 @@ export function initGame(
                   lyricsDiv.innerHTML = html;
                   
                   currentIdx += count;
-                  if (currentIdx >= lines.length) currentIdx = 0; // Loop back to top
+                  if (currentIdx >= lines.length) currentIdx = 0; // loop
                   
                   (outContainer as any)._lyricsTimer = setTimeout(showNext, duration);
                 };
@@ -230,7 +224,7 @@ export function initGame(
             }
           })
           .catch(err => {
-             // Silently hide lyrics if the fetch fails, hangs, or is aborted
+             // ignore
           });
       }
       
@@ -256,16 +250,15 @@ export function initGame(
 
   const autoTyper = document.getElementById('auto-typer');
   termInput.addEventListener('input', () => {
-    // Mirror the text into the typer so the caret naturally gets pushed!
+    // mirror
     if (autoTyper) autoTyper.textContent = termInput.value;
   });
 
-  // Keep the mirrored typer in sync when we set the value programmatically
-  // (history recall, tab completion) — plain assignment fires no input event.
+  // sync typer
   const setInput = (value: string) => {
     termInput.value = value;
     if (autoTyper) autoTyper.textContent = value;
-    // Park the caret at the end, after the browser has applied the value.
+    // caret end
     requestAnimationFrame(() => {
       termInput.setSelectionRange(value.length, value.length);
     });
@@ -277,13 +270,13 @@ export function initGame(
       return;
     }
 
-    // ── History: ArrowUp walks back, ArrowDown walks forward to the draft ──
+    // history
     if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
       if (!history.length) return;
       e.preventDefault();
 
       if (e.key === 'ArrowUp') {
-        if (histPos === history.length) draft = termInput.value; // stash the live line
+        if (histPos === history.length) draft = termInput.value; // stash
         histPos = Math.max(0, histPos - 1);
         setInput(history[histPos]);
       } else {
@@ -293,11 +286,11 @@ export function initGame(
       return;
     }
 
-    // ── Tab completion ──
+    // tab
     if (e.key === 'Tab') {
       e.preventDefault();
 
-      // Already cycling? Tab again steps to the next candidate.
+      // cycle
       if (tabHits.length > 1 && termInput.value === tabHits[tabIdx]) {
         tabIdx = (tabIdx + 1) % tabHits.length;
         setInput(tabHits[tabIdx]);
@@ -308,7 +301,7 @@ export function initGame(
       const typed = raw.trim().toLowerCase();
       if (!typed) return;
 
-      // Completing an argument to `weather` rather than a command name.
+      // weather arg
       const wx = /^weather\s+(.*)$/.exec(raw.toLowerCase());
       let hits: string[];
       if (wx || /^weather$/.test(typed)) {
@@ -325,13 +318,11 @@ export function initGame(
         return;
       }
 
-      // More than one match: list them once, then hand the first candidate over
-      // so repeated Tab walks the menu instead of stalling on the prefix.
+      // list matches
       const listing = document.createElement('div');
       listing.className = 'mb-1 opacity-70';
       listing.style.color = '#7CE57C';
-      // Show just the varying part, so an argument menu doesn't repeat
-      // "weather" nine times.
+      // varying part
       listing.textContent = hits.map((h) => h.replace(/^weather /, '')).join('   ');
       interactiveOutput.appendChild(listing);
       termBody.scrollTop = termBody.scrollHeight;
@@ -342,21 +333,21 @@ export function initGame(
       return;
     }
 
-    // Any other key means the user has moved on — start the menu fresh next time.
+    // reset
     resetTabCycle();
   });
 
   termForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    if (destructing) return; // input is dead once the countdown starts
+    if (destructing) return; // dead
 
     const rawCmd = termInput.value;
-    // Collapse runs of whitespace so `sudo   rm  -rf  /` still matches.
+    // normalize
     const cmd = rawCmd.trim().toLowerCase().replace(/\s+/g, ' ');
     termInput.value = '';
     if (autoTyper) autoTyper.textContent = '';
 
-    // Record history, skipping blanks and immediate repeats.
+    // history
     if (cmd && history[history.length - 1] !== rawCmd.trim()) {
       history.push(rawCmd.trim());
     }
@@ -365,18 +356,18 @@ export function initGame(
 
 
 
-    // Echo command
+    // echo
     const echo = document.createElement('div');
     echo.className = 'text-cow-300 mt-1';
     echo.innerHTML = `~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">${rawCmd}</span>`;
     interactiveOutput.appendChild(echo);
 
-    // Process command
+    // process
     const out = document.createElement('div');
     out.className = 'mb-1';
     out.style.color = '#7CE57C';
 
-    // Matches `sudo rm -rf /`, `sudo rm -fr /`, and the `/*` variant.
+    // nuke
     const isNuke = /^sudo rm -(rf|fr) \/\*?$/.test(cmd);
 
     if (isNuke) {
@@ -415,18 +406,18 @@ export function initGame(
       interactiveOutput.innerHTML = '';
       out.innerHTML = '';
     } else if (cmd === 'whatsong') {
-      // Clear chat above
+      // clear
       interactiveOutput.innerHTML = '';
       out.className = 'mb-1 whatsong-view';
       updateWhatsongView(out);
 
 
     } else if (cmd === 'weather' || cmd.startsWith('weather ')) {
-      // The animated scene wants the whole window, same as whatsong.
+      // full window
       interactiveOutput.innerHTML = '';
       out.className = 'mb-1 weather-view';
       out.innerHTML = `<span style="color:#DC9BB5">Reading the sky…</span>`;
-      // Take the city off the raw input — `cmd` has already been lowercased.
+      // city arg
       const city = rawCmd.trim().replace(/\s+/g, ' ').slice('weather '.length).trim();
       import('./terminalWeather')
         .then(({ renderWeather }) => renderWeather(out, termBody, city))
@@ -441,15 +432,12 @@ export function initGame(
       out.innerHTML = `<span style="color:#39FF14">ACCESS GRANTED.</span><br/>You found the secret! A special cow has been deployed.`;
       inGame = false;
       
-      // The Special Cow Deployment:
-      // 1. Play the moo sound!
+      // moo sound
       const audio = new Audio('/assets/moo.mp3');
       audio.volume = 0.5;
-      audio.play().catch(() => {}); // Catch in case browser blocks autoplay
+      audio.play().catch(() => {}); // autoplay
       
-      // 2. Visual Easter Egg — a backdrop-filter overlay rather than a filter on
-      // <body>, because a filtered ancestor becomes the containing block for its
-      // fixed descendants and would tear the fixed nav loose for the duration.
+      // invert overlay
       const invertOverlay = document.createElement('div');
       invertOverlay.style.cssText = [
         'position:fixed',
@@ -468,7 +456,7 @@ export function initGame(
         setTimeout(() => invertOverlay.remove(), 500);
       }, 1500);
       
-      // 3. ASCII Art Cow Payload
+      // ascii cow
       const bigCow = document.createElement('pre');
       bigCow.className = 'mt-2 mb-2 leading-[1.1] font-bold';
       bigCow.style.color = '#FEBC2E';
@@ -499,19 +487,18 @@ export function initGame(
       interactiveOutput.appendChild(out);
     }
 
-    // Garbage collector: Remove old commands from the top to save space
-    // We keep a maximum of 12 elements (6 command prompt + output pairs)
+    // trim
     while (interactiveOutput.children.length > 12) {
       interactiveOutput.removeChild(interactiveOutput.firstChild!);
     }
 
-    // Scroll to bottom
+    // scroll
     setTimeout(() => {
       termBody.scrollTop = termBody.scrollHeight;
     }, 10);
   });
 
-  // Expose an imperative hook for external elements to trigger commands programmatically
+  // hook
   (window as any)._runTerminalCommand = (cmdString: string) => {
     termInput.value = cmdString;
     termForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));

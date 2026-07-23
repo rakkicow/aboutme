@@ -1,8 +1,5 @@
 ---
-// Neon cow — uses the user's reference cow image as a CSS mask.
-// Base color: var(--ink) (black in light, white in dark mode).
-// Hover: pink "ink" follows the cursor, lingers ~2.5s, painted on a canvas
-// that's masked to the cow shape so pink only appears on the cow lines.
+// neon cow
 const COW_SRC = '/assets/cow.png';
 ---
 
@@ -13,20 +10,20 @@ const COW_SRC = '/assets/cow.png';
   data-cursor-hover
   data-neon-cow
 >
-  {/* Moo bubble — solid pink chip, dark text */}
+  {/* moo bubble */}
   <span
     class="moo pointer-events-none absolute -top-4 left-4 -translate-y-full select-none rounded-2xl rounded-bl-md px-3.5 py-1.5 opacity-0 scale-90 transition-all duration-300 group-hover:opacity-100 group-hover:scale-100"
     style="background:#DC9BB5; color:#0F0F10; font-family:'Fraunces Variable', Fraunces, serif; font-style:italic; font-weight:600; font-size:15px; line-height:1; letter-spacing:-0.01em; box-shadow:0 10px 28px -8px rgba(220,155,181,0.55), 0 0 0 1px rgba(220,155,181,0.4) inset;"
   >moo!</span>
 
   <div class="cow-stage relative inline-block h-28 sm:h-32 lg:h-36 aspect-[5/4]">
-    {/* Base cow — solid color via mask, swaps with theme */}
+    {/* base cow */}
     <div
       class="cow-base absolute inset-0"
       style={`-webkit-mask: url(${COW_SRC}) center / contain no-repeat; mask: url(${COW_SRC}) center / contain no-repeat; background: var(--ink);`}
     ></div>
 
-    {/* Pink trail layer — canvas masked to cow shape */}
+    {/* trail */}
     <canvas
       class="cow-trail absolute inset-0 h-full w-full pointer-events-none"
       data-cow-canvas
@@ -53,10 +50,10 @@ const COW_SRC = '/assets/cow.png';
   }
   .neon-cow:hover .cow-base,
   .neon-cow[data-painting='true'] .cow-base {
-    /* Subtle dim of the base so the pink trail reads clearly */
+    /* dim */
     background: var(--ink-muted);
   }
-  /* Mobile: short-tap pulses the moo bubble */
+  /* tap */
   .neon-cow[data-moo='true'] .moo {
     opacity: 1;
     transform: translateY(-100%) scale(1);
@@ -64,8 +61,7 @@ const COW_SRC = '/assets/cow.png';
 </style>
 
 <script>
-  // Pink fluid trail — draws pink "splats" at the cursor on a canvas,
-  // each fading over ~2.5s. The CSS mask gates visibility to the cow shape only.
+  // pink trail
   document.querySelectorAll<HTMLElement>('[data-neon-cow]').forEach((host) => {
     const stage = host.querySelector<HTMLElement>('.cow-stage');
     const canvas = host.querySelector<HTMLCanvasElement>('[data-cow-canvas]');
@@ -104,7 +100,7 @@ const COW_SRC = '/assets/cow.png';
     host.addEventListener('mousemove', (e) => addDropAt(e.clientX, e.clientY));
     host.addEventListener('mouseleave', () => { lastDrop = 0; });
 
-    // Mobile: touch-drag paints, short tap shows the moo bubble briefly.
+    // touch
     let touchStartTime = 0;
     let touchStartX = 0;
     let touchStartY = 0;
@@ -143,7 +139,7 @@ const COW_SRC = '/assets/cow.png';
 
     const LIFESPAN = 2500;
 
-    // Gate the RAF loop on viewport visibility — no point painting an off-screen cow
+    // visibility
     let onScreen = false;
     let rafId: number | null = null;
 

@@ -11,7 +11,7 @@ interface Props {
 
 const { project, index } = Astro.props;
 
-// Per-theme typography + chrome
+// theme styles
 type ThemeStyles = {
   index: string;
   years: string;
@@ -64,18 +64,18 @@ const s = themes[project.theme];
   class="project-card group reveal card-lift relative overflow-hidden rounded-[28px] p-7 sm:p-9"
   style="box-shadow: var(--shadow-glow-sm);"
 >
-  {/* Themed full-bleed background */}
+  {/* background */}
   {project.theme === 'bubbles' && <CardBubbles />}
   {project.theme === 'camera' && <CardCamera />}
   {project.theme === 'terminal' && <CardTerminal />}
 
-  {/* Index + years */}
+  {/* index */}
   <div class={`relative flex items-start justify-between text-xs ${s.index}`}>
     <span class="font-mono">0{index + 1}</span>
     <span class={`text-right ${s.years}`}>{project.years}</span>
   </div>
 
-  {/* Title block */}
+  {/* title */}
   <div class="relative mt-8">
     <h3 class={`font-medium tracking-snug ${s.title} text-[28px] leading-[1.05] sm:text-[32px]`}>
       {project.title}
@@ -83,23 +83,22 @@ const s = themes[project.theme];
     <p class={`mt-2 text-sm ${s.tagline}`}>{project.tagline}</p>
   </div>
 
-  {/* Role chip */}
+  {/* role */}
   <div class="relative mt-4">
     <span class={`pill !${s.pill}`}>{project.role}</span>
   </div>
 
-  {/* Blurb */}
+  {/* blurb */}
   <p class={`relative mt-5 text-[15px] leading-relaxed ${s.blurb}`} set:html={project.blurb}></p>
 
-  {/* Stack pills */}
+  {/* stack */}
   <div class="relative mt-6 flex flex-wrap gap-1.5">
     {project.stack.map((t) => (
       <span class={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium ${s.pill}`}>{t}</span>
     ))}
   </div>
 
-  {/* Links — hash links (open the reel / shelf) render as a prominent, pulsing
-      CTA so they read as an action; everything else is a plain text link. */}
+  {/* links */}
   <div class="relative mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
     {project.links.map((l) => {
       const isCta = l.href.startsWith('#');
@@ -132,8 +131,7 @@ const s = themes[project.theme];
 </article>
 
 <script>
-  // CDI (camera) and Archive (terminal) cards open their modal when clicked
-  // anywhere — but real links/buttons inside still handle their own clicks.
+  // card click
   document.querySelectorAll<HTMLElement>('[data-card-open]').forEach((card) => {
     const sel = card.getAttribute('data-card-open');
     if (!sel) return;

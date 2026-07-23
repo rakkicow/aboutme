@@ -7,10 +7,10 @@ import { webShelf } from '~/data/projects';
   data-shelf-modal
   aria-label="Web shelf"
 >
-  {/* Backdrop — clicking it closes the shelf */}
+  {/* backdrop */}
   <div data-shelf-close class="absolute inset-0" style="background: rgba(10, 10, 16, 0.55); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);"></div>
 
-  {/* Panel wrapped in a shell so the close button floats just outside the corner */}
+  {/* panel */}
   <div class="relative w-full max-w-5xl">
     <button type="button" data-shelf-close class="shelf-arrow absolute -right-3 -top-3 z-30" aria-label="Close shelf">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" /></svg>
@@ -29,7 +29,7 @@ import { webShelf } from '~/data/projects';
         </p>
       </div>
 
-      {/* Arrow controls */}
+      {/* arrows */}
       <div class="flex items-end justify-end gap-2">
         <button type="button" data-shelf-prev class="shelf-arrow" aria-label="Scroll shelf left">
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" /></svg>
@@ -40,7 +40,7 @@ import { webShelf } from '~/data/projects';
       </div>
     </div>
 
-    {/* Horizontal scroll-snap shelf */}
+    {/* shelf */}
     <div
       data-shelf-track
       class="no-scrollbar mt-6 flex snap-x snap-mandatory gap-5 overflow-x-auto overflow-y-hidden scroll-smooth pb-2 pt-2"
@@ -54,7 +54,7 @@ import { webShelf } from '~/data/projects';
         class="group card-lift relative block snap-start shrink-0 w-[78vw] sm:w-[360px] lg:w-[400px] overflow-hidden rounded-2xl border"
         style="border-color: var(--hair); background: var(--surface); box-shadow: 0 1px 0 rgba(255,255,255,0.08) inset, 0 4px 16px -8px rgba(15,15,16,0.16);"
       >
-        {/* Mini browser window */}
+        {/* browser */}
         <div class="relative aspect-[16/10] w-full overflow-hidden border-b" style="border-color: var(--hair); background: var(--canvas);">
           <div class="absolute inset-x-0 top-0 z-10 flex items-center gap-1.5 border-b px-2.5 py-1.5 backdrop-blur" style="border-color: var(--hair); background: var(--surface-soft);">
             <span class="h-2 w-2 rounded-full bg-[#FF5F57]"></span>
@@ -63,9 +63,7 @@ import { webShelf } from '~/data/projects';
             <span class="ml-2 flex-1 truncate rounded-md px-2 py-0.5 text-[9px]" style="background: var(--hair); color: var(--ink-muted);">{s.liveUrl}</span>
           </div>
 
-          {/* Screenshot at rest; the live site fades in over it on hover.
-              Only the hovered card ever holds an iframe — that's what kept
-              memory (and the old flicker) in check. */}
+          {/* screenshot */}
           <div
             class="absolute inset-x-0 bottom-0 top-[28px] overflow-hidden"
             data-live-slot
@@ -106,9 +104,7 @@ import { webShelf } from '~/data/projects';
 </dialog>
 
 <style>
-  /* Native <dialog> in the top layer — immune to ancestor transforms, always
-     centered in the viewport. The dialog is a full-bleed transparent flex
-     container; the blur layer inside it doubles as the click-to-close target. */
+  /* dialog */
   dialog[data-shelf-modal] {
     position: fixed;
     inset: 0;
@@ -157,12 +153,7 @@ import { webShelf } from '~/data/projects';
 </style>
 
 <script>
-  // Live-on-hover previews. The screenshot stays underneath, the iframe fades
-  // in once its document has painted, and it's torn down shortly after the
-  // pointer leaves — so at most one sub-site is ever resident in memory.
-  // Only on hover-capable pointers: on touch there's no hover, and swiping
-  // would rapidly mount/unmount full-site iframes (flicker + broken layout),
-  // so mobile just shows the static screenshots.
+  // hover previews
   const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   if (canHover) document.querySelectorAll<HTMLElement>('[data-live-slot]').forEach((slot) => {
     const card = slot.closest('a');
@@ -202,15 +193,11 @@ import { webShelf } from '~/data/projects';
     card.addEventListener('focusout', scheduleUnmount);
   });
 
-  // Modal open/close — "See the shelf →" (any #web-shelf link) opens it;
-  // the X, the blur backdrop, or Escape (native dialog behavior) closes it.
-  // While open, page scroll is paused (Lenis stopped + body overflow hidden)
-  // so wheel gestures only move the shelf itself.
+  // modal
   const modal = document.querySelector<HTMLDialogElement>('[data-shelf-modal]');
   if (modal) {
     const lenis = () => (window as unknown as { __lenis?: { stop(): void; start(): void } }).__lenis;
-    // The dialog paints in the top layer, above everything outside it — so the
-    // custom cursor must live INSIDE the dialog while it's open to stay visible.
+    // cursor
     const cursorFx = ['cursor', 'cursor-dot']
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => !!el)
@@ -228,12 +215,12 @@ import { webShelf } from '~/data/projects';
     modal.querySelectorAll('[data-shelf-close]').forEach((el) => {
       el.addEventListener('click', () => modal.close());
     });
-    // Fires on modal.close() and on Escape alike.
+    // close
     modal.addEventListener('close', () => {
       document.body.style.overflow = '';
       lenis()?.start();
       cursorFx.forEach(({ el, home }) => home?.appendChild(el));
-      // Release any live preview still mounted
+      // cleanup
       modal.querySelectorAll('[data-live-slot] iframe').forEach((f) => f.remove());
     });
   }
@@ -252,8 +239,7 @@ import { webShelf } from '~/data/projects';
       track.scrollBy({ left: -step(), behavior: 'smooth' });
     });
 
-    // Wheel — advance exactly one card per gesture, no matter how far the
-    // trackpad is flicked (a cooldown swallows the rest of the momentum).
+    // wheel
     let wheelCooling = false;
     let wheelAcc = 0;
     track.addEventListener('wheel', (e) => {
@@ -271,7 +257,7 @@ import { webShelf } from '~/data/projects';
       }
     }, { passive: false });
 
-    // Drag-to-scrub
+    // drag
     let isDown = false;
     let startX = 0;
     let scrollLeft = 0;

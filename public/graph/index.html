@@ -115,7 +115,7 @@ let dataset = [
 [150, 30]];
 
 
-/*create svg element*/
+/*svg*/
 let svg = d3.
 select("body").
 append("svg").
@@ -147,7 +147,7 @@ axis().
 scale(xScale).
 orient("bottom");
 
-/*append x axis*/
+/*x axis*/
 svg.
 append("g").
 attr({
@@ -162,7 +162,7 @@ axis().
 scale(yScale).
 orient("left");
 
-/*append y axis*/
+/*y axis*/
 svg.
 append("g").
 attr({
@@ -171,14 +171,14 @@ attr({
 
 call(yAxis);
 
-/*define line*/
+/*line*/
 let lines = d3.svg.
 line().
 x(d => xScale(d[0])).
 y(d => yScale(d[1])).
 interpolate("monotone");
 
-/*append line*/
+/*line*/
 let path = svg.append("path").attr({
   d: lines(dataset),
   class: "lineChart" });
@@ -233,13 +233,13 @@ function dragged() {
 
 function dragended() {
   d3.select(this).classed("datapoint", true);
-  // get id of dragged point
+  // dragged id
   let id = d3.select(this).attr("id"),
-  // get new absolute position coordinates of the point
+  // new position
   xPos = d3.select(this).attr("cx"),
   yPos = h - d3.select(this).attr("cy");
 
-  // convert absolute position coordinates relative to scales
+  // to scale
   xPos = (xPos - padding) * (xMax / (w - padding * 2));
   yPos = (yPos - padding) * (yMax / (h - padding * 2));
   dataset[id][0] = xPos;

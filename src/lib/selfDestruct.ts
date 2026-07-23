@@ -1,17 +1,11 @@
-// `sudo rm -rf /` easter egg: a centred alarm that pulses like the iMessage
-// shout effect, a red wash over the page, a quiet siren, and after ten seconds
-// the whole site is replaced with the 404 you'd get if it really were gone.
-//
-// The red wash cycles at 1Hz. Anything at or above 3Hz is a photosensitive
-// seizure risk and this covers the full viewport, so the rate is deliberate.
-// prefers-reduced-motion drops the pulsing to a static tint.
+// self destruct
 
 const COUNTDOWN_SECONDS = 10;
 
 const reduceMotion = () =>
   window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 
-/** Two-tone siren, synthesized so there's no audio file to ship. Kept quiet. */
+/** siren */
 function startSiren(): () => void {
   let ctx: AudioContext;
   try {
@@ -21,7 +15,7 @@ function startSiren(): () => void {
   }
 
   const gain = ctx.createGain();
-  gain.gain.value = 0.045; // this fires without warning — keep it gentle
+  gain.gain.value = 0.045; // quiet
   gain.connect(ctx.destination);
 
   const osc = ctx.createOscillator();
@@ -42,12 +36,12 @@ function startSiren(): () => void {
       osc.stop(ctx.currentTime + 0.3);
       setTimeout(() => ctx.close().catch(() => {}), 500);
     } catch {
-      /* already torn down */
+      /* torn down */
     }
   };
 }
 
-/** The fake GitHub Pages 404, plus the refresh button that undoes all of this. */
+/** dead site */
 function renderDeadSite() {
   const page = document.createElement('div');
   page.id = 'rg-404';
@@ -71,13 +65,13 @@ function renderDeadSite() {
       #rg-404 h2 { font-size: 17px; font-weight: 700; margin: 0 0 1.6em; }
       #rg-404 p { font-size: 17px; line-height: 1.6; margin: 0 0 1.2em; max-width: 62ch; }
       #rg-404 code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.92em; }
-      /* Sad face, BSOD-style — thin to match the 404 above it. */
+      /* sad face */
       #rg-404 .sad {
         font-size: clamp(56px, 10vw, 96px); font-weight: 200;
         line-height: 1; margin-bottom: 0.5em; color: inherit; opacity: 0.85;
       }
 
-      /* Icon-only reload button in the site's ember orange. */
+      /* reload */
       #rg-404 .refresh {
         margin-top: 2.4em; display: inline-flex; align-items: center; justify-content: center;
         width: 56px; height: 56px; padding: 0;
@@ -96,7 +90,7 @@ function renderDeadSite() {
       #rg-404 .refresh[disabled] svg { animation: rgSpin 0.7s linear infinite; }
       @keyframes rgSpin { to { transform: rotate(360deg) } }
 
-      /* The cow gets the last word. */
+      /* cow */
       #rg-404 .says {
         margin-top: 3.2em; display: flex; align-items: center;
         justify-content: center; gap: 14px;
@@ -106,7 +100,7 @@ function renderDeadSite() {
         font-size: clamp(17px, 2.4vw, 22px); font-weight: 500;
         padding: 12px 20px; border-radius: 16px; white-space: nowrap;
       }
-      /* Tail pointing right, at the cow. */
+      /* tail */
       #rg-404 .bubble::after {
         content: ''; position: absolute; right: -9px; top: 50%;
         transform: translateY(-50%);
@@ -115,10 +109,7 @@ function renderDeadSite() {
       }
       #rg-404 .cow { font-size: clamp(46px, 8vw, 76px); line-height: 1; }
 
-      /* The site hides the system cursor in global.css and paints its own at
-         z-index 60. This overlay sits far above that, so the custom cursor is
-         buried and nothing is visible. Hand the real one back. The ID selector
-         outranks the global "body *" rule; !important covers .cursor-fx. */
+      /* cursor */
       #rg-404, #rg-404 * { cursor: auto; }
       #rg-404 .refresh { cursor: pointer; }
       html.rg-dead .cursor-fx { display: none !important; }
@@ -150,12 +141,7 @@ function renderDeadSite() {
   const btn = page.querySelector<HTMLButtonElement>('.refresh')!;
 
   btn.addEventListener('click', () => {
-    // Full navigation back to the homepage, not an in-place teardown — the
-    // terminal was left mid-session and the page is scrolled down to it.
-    // replace() keeps the destroyed state out of history, so Back doesn't
-    // land on a 404 that no longer means anything.
-    // Disabling swaps the icon to a spinner via CSS — don't touch textContent
-    // here, that would wipe the inline SVG.
+    // reload
     btn.disabled = true;
     btn.setAttribute('aria-label', 'Reloading…');
     if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -168,10 +154,7 @@ function renderDeadSite() {
   btn.focus();
 }
 
-/**
- * Runs the sequence. `onTick` reports the seconds remaining so the terminal
- * can print its own countdown alongside the on-screen one.
- */
+/** run */
 export function selfDestruct(onTick: (secondsLeft: number) => void) {
   const soft = reduceMotion();
   const stopSiren = startSiren();
@@ -186,7 +169,7 @@ export function selfDestruct(onTick: (secondsLeft: number) => void) {
         position: fixed; inset: 0; z-index: 2147483646; pointer-events: none;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
       }
-      /* Red wash over the page, 1Hz. */
+      /* wash */
       #rg-alarm .wash {
         position: absolute; inset: 0;
         background: radial-gradient(circle at 50% 50%, rgba(255,0,0,0.10), rgba(255,0,0,0.45));
@@ -200,7 +183,7 @@ export function selfDestruct(onTick: (secondsLeft: number) => void) {
         transform-origin: center center;
         filter: drop-shadow(0 0 34px rgba(255, 40, 40, 0.85));
       }
-      /* Same wobble as the hero shout effect, looped for the countdown. */
+      /* wobble */
       #rg-alarm.live .siren { animation: rgShout 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; }
       @keyframes rgShout {
         0%   { transform: scale(1); }
@@ -214,8 +197,7 @@ export function selfDestruct(onTick: (secondsLeft: number) => void) {
         100% { transform: scale(1); }
       }
 
-      /* Same cursor problem as the 404 overlay — the wash covers the site's
-         custom cursor, so show the real one for the duration of the countdown. */
+      /* cursor */
       html.rg-alarming, html.rg-alarming body, html.rg-alarming body * { cursor: auto; }
       html.rg-alarming .cursor-fx { display: none !important; }
 
