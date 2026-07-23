@@ -391,6 +391,63 @@ export function initGame(
           destructing = false;
           out.innerHTML += `<br/><span style="color:#FF5F57">...the payload failed to load. Lucky.</span>`;
         });
+    } else if (inGame) {
+      if (cmd === 'cow') {
+        out.innerHTML = `<span style="color:#39FF14">ACCESS GRANTED.</span><br/>You found the secret! A special cow has been deployed.`;
+        inGame = false;
+        
+        // moo sound
+        const audio = new Audio('/assets/moo.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(() => {}); // autoplay
+        
+        // invert overlay
+        const invertOverlay = document.createElement('div');
+        invertOverlay.style.cssText = [
+          'position:fixed',
+          'inset:0',
+          'z-index:9999',
+          'pointer-events:none',
+          'backdrop-filter:invert(1) hue-rotate(180deg)',
+          '-webkit-backdrop-filter:invert(1) hue-rotate(180deg)',
+          'opacity:0',
+          'transition:opacity 0.5s ease'
+        ].join(';');
+        document.body.appendChild(invertOverlay);
+        requestAnimationFrame(() => { invertOverlay.style.opacity = '1'; });
+        setTimeout(() => {
+          invertOverlay.style.opacity = '0';
+          setTimeout(() => invertOverlay.remove(), 500);
+        }, 1500);
+        
+        // ascii cow
+        const bigCow = document.createElement('pre');
+        bigCow.className = 'mt-2 mb-2 leading-[1.1] font-bold';
+        bigCow.style.color = '#FEBC2E';
+        bigCow.textContent = `          ---------------------
+          < YOU FOUND ME! MOO! >
+          --------------------
+                   //
+  \\|/          (__)    
+       \`\\------(oo)
+         ||    (__)
+         ||w--||     \\|/
+     \\|/`;
+        out.appendChild(bigCow);
+
+      } else if (cmd === 'moo') {
+        out.innerHTML = `<span style="color:#FEBC2E">Close, but I'm looking for the animal, not the sound!</span>`;
+      } else if (cmd === 'clear') {
+        interactiveOutput.innerHTML = '';
+        out.innerHTML = '';
+        inGame = false;
+      } else if (cmd === 'exit' || cmd === 'neofetch') {
+        inGame = false;
+        out.textContent = '';
+        onExit();
+      } else {
+        out.innerHTML = `<span style="color:#FF5F57">ACCESS DENIED. Incorrect password.</span>`;
+      }
     } else if (cmd === 'rm -rf /' || cmd === 'rm -fr /') {
       out.innerHTML = `<span style="color:#FF5F57">rm: cannot remove '/': Permission denied</span><br/>Try again with <span style="color:#DC9BB5">sudo</span>. Or don't.`;
     } else if (cmd === 'moo') {
@@ -428,53 +485,6 @@ export function initGame(
     } else if (cmd === 'hack') {
       out.innerHTML = `<span style="color:#FF5F57">WARNING: UNAUTHORIZED ACCESS DETECTED.</span><br/>Initiating override sequence...<br/><br/>To bypass the firewall, type the password. Hint: it says "moo".`;
       inGame = true;
-    } else if (inGame && cmd === 'cow') {
-      out.innerHTML = `<span style="color:#39FF14">ACCESS GRANTED.</span><br/>You found the secret! A special cow has been deployed.`;
-      inGame = false;
-      
-      // moo sound
-      const audio = new Audio('/assets/moo.mp3');
-      audio.volume = 0.5;
-      audio.play().catch(() => {}); // autoplay
-      
-      // invert overlay
-      const invertOverlay = document.createElement('div');
-      invertOverlay.style.cssText = [
-        'position:fixed',
-        'inset:0',
-        'z-index:9999',
-        'pointer-events:none',
-        'backdrop-filter:invert(1) hue-rotate(180deg)',
-        '-webkit-backdrop-filter:invert(1) hue-rotate(180deg)',
-        'opacity:0',
-        'transition:opacity 0.5s ease'
-      ].join(';');
-      document.body.appendChild(invertOverlay);
-      requestAnimationFrame(() => { invertOverlay.style.opacity = '1'; });
-      setTimeout(() => {
-        invertOverlay.style.opacity = '0';
-        setTimeout(() => invertOverlay.remove(), 500);
-      }, 1500);
-      
-      // ascii cow
-      const bigCow = document.createElement('pre');
-      bigCow.className = 'mt-2 mb-2 leading-[1.1] font-bold';
-      bigCow.style.color = '#FEBC2E';
-      bigCow.textContent = `          ---------------------
-          < YOU FOUND ME! MOO! >
-          --------------------
-                   //
-  \\|/          (__)    
-       \`\\------(oo)
-         ||    (__)
-         ||w--||     \\|/
-     \\|/`;
-      out.appendChild(bigCow);
-
-    } else if (inGame && cmd === 'moo') {
-      out.innerHTML = `<span style="color:#FEBC2E">Close, but I'm looking for the animal, not the sound!</span>`;
-    } else if (inGame) {
-      out.innerHTML = `<span style="color:#FF5F57">ACCESS DENIED. Incorrect password.</span>`;
     } else if (cmd === 'exit' || cmd === 'neofetch') {
       inGame = false;
       out.textContent = '';
