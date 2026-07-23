@@ -46,7 +46,7 @@ const { isStandalone = false } = Astro.props;
   </div>
 
   {/* body */}
-  <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45] overflow-y-auto overflow-x-hidden scrollbar-hide">
+  <div class="term-body relative grow px-3 py-2.5 font-mono leading-[1.45] overflow-y-auto overflow-x-auto scrollbar-hide">
     <div id="term-history">
       <div class="text-cow-300">~/ <span class="text-cow-400">$</span> <span style="color:#39FF14;">neofetch</span></div>
 
@@ -113,7 +113,7 @@ const { isStandalone = false } = Astro.props;
     font-size: clamp(7.5px, 1.8cqw, 24px);
   }
   .term-window[data-standalone="true"] .term-body {
-    font-size: clamp(16px, 2.5vw, 36px);
+    font-size: clamp(13px, 2.5vw, 36px);
   }
   .term-cow {
     font-size: 1.08em;
@@ -121,16 +121,27 @@ const { isStandalone = false } = Astro.props;
   /* clip */
   .term-grid > pre:last-child {
     min-width: 0;
-    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: break-word;
   }
   /* narrow */
-  @container (max-width: 400px) {
+  @container (max-width: 550px) {
     .term-grid {
       grid-template-columns: 1fr;
-      row-gap: 6px;
+      row-gap: 12px;
       justify-items: start;
     }
     .term-title-extra {
+      display: none;
+    }
+  }
+  @media (max-width: 550px) {
+    .term-window[data-standalone="true"] .term-grid {
+      grid-template-columns: 1fr;
+      row-gap: 12px;
+      justify-items: start;
+    }
+    .term-window[data-standalone="true"] .term-title-extra {
       display: none;
     }
   }
