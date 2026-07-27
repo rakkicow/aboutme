@@ -37,6 +37,13 @@ export function getStaticPaths() {
       brand: 'resume'
     },
     {
+      keys: ['github', 'gh'],
+      url: 'https://github.com/rakkicow',
+      colorLight: '255, 255, 255',
+      colorDark: '255, 255, 255',
+      brand: 'github'
+    },
+    {
       keys: ['walloftext', 'wot'],
       url: 'https://www.yourworldoftext.com/~rakhicow/',
       colorLight: '172, 59, 97',
@@ -208,6 +215,21 @@ const { url, colorLight, colorDark, brand } = Astro.props;
       body[data-brand="instagram"] ul.list-bars li:nth-child(odd),
       html.dark body[data-brand="instagram"] ul.list-bars li:nth-child(odd) {
         animation-delay: -0.8s, 0s;
+      }
+
+      /* github — always black canvas, white bars, regardless of theme */
+      body[data-brand="github"],
+      html.dark body[data-brand="github"] {
+        background-color: #000000;
+      }
+
+      body[data-brand="github"] ul.list-bars li,
+      html.dark body[data-brand="github"] ul.list-bars li {
+        background: linear-gradient(180deg, #FFFFFF 0%, rgba(255, 255, 255, 0.75) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow:
+          0 4px 18px rgba(255, 255, 255, 0.25),
+          inset 0 1px 2px rgba(255, 255, 255, 0.9);
       }
 
       @keyframes animate {
