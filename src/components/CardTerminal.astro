@@ -105,7 +105,7 @@ const { isStandalone = false } = Astro.props;
 </div>
 
 <style>
-  /* emoji fallback — the mono stack has no color emoji face of its own */
+  /* emoji fallback */
   .term-body {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
       'Liberation Mono', 'Courier New', monospace, 'Apple Color Emoji',
@@ -279,8 +279,7 @@ const { isStandalone = false } = Astro.props;
   if (wxEls.length) {
     // emoji
     const wxEmoji = (code: number, isDay: boolean): string => {
-      // only emoji with universal font coverage — the U+1F32x weather set
-      // (🌤 🌦 🌧 🌫 🌨) renders as tofu in the mono stack.
+      // safe emoji only
       if (code === 0) return isDay ? '☀️' : '🌙';
       if (code <= 2) return isDay ? '⛅' : '☁️';
       if (code === 3) return '☁️';

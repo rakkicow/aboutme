@@ -10,9 +10,20 @@ export default defineConfig({
   integrations: [
     tailwind({ applyBaseStyles: false }),
     sitemap({
-      // The vanity redirects (/ig, /rv, …) and the OG render target are all
-      // noindex — listing them here would contradict that. Homepage only.
-      filter: (page) => page === 'https://rakshita.me/',
+      // indexable only
+      // customPages filtered too
+      filter: (page) =>
+        [
+          'https://rakshita.me',
+          'https://rakshita.me/terminal',
+          'https://rakshita.me/weather',
+          'https://rakshita.me/RGupta-ResumeVis.pdf',
+        ].includes(page.replace(/\/$/, '')),
+      // static assets
+      customPages: [
+        'https://rakshita.me/weather',
+        'https://rakshita.me/RGupta-ResumeVis.pdf',
+      ],
     }),
   ],
   build: {

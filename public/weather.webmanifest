@@ -1,0 +1,31 @@
+{
+  "name": "Weather",
+  "short_name": "Weather",
+  "description": "A live 24/7 weather card",
+  "start_url": "/weather",
+  "scope": "/weather",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#BFC6EA",
+  "theme_color": "#BFC6EA",
+  "icons": [
+    {
+      "src": "/weather-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/weather-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/weather-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

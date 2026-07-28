@@ -26,6 +26,21 @@
 <meta name="twitter:image" content="https://rakshita.me/weather/og.png" />
 <link rel="canonical" href="https://rakshita.me/weather" />
 
+<!-- pwa -->
+<link rel="manifest" href="/weather.webmanifest" />
+<meta name="theme-color" content="#BFC6EA" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="apple-touch-icon" href="/weather-apple-touch.png" />
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/weather-sw.js', { scope: '/weather' }).catch(() => {});
+    });
+  }
+</script>
+
 <title>Weather - Ria Gupta</title>
 <script>
   // embedded

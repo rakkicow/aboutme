@@ -7,8 +7,32 @@ import CardTerminal from '~/components/CardTerminal.astro';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Terminal</title>
+    <title>Terminal | Rakshita Gupta</title>
+    <meta
+      name="description"
+      content="An interactive terminal in the browser: live weather, now playing, and a few things worth typing. Built by Rakshita Gupta."
+    />
+    <link rel="canonical" href="https://rakshita.me/terminal" />
+    <meta property="og:title" content="Terminal | Rakshita Gupta" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://rakshita.me/terminal" />
     <link rel="icon" type="image/png" href="/terminal-favicon.png" />
+
+    {/* pwa */}
+    <link rel="manifest" href="/terminal.webmanifest" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="terminal" />
+    <link rel="apple-touch-icon" href="/terminal-apple-touch.png" />
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/terminal-sw.js', { scope: '/terminal' }).catch(() => {});
+        });
+      }
+    </script>
     <style is:global>
       #loader {
         --brand-rgb: 57, 255, 20;
