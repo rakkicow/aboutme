@@ -26,8 +26,9 @@ const loop = [...items, ...items, ...items];
       const gradient = isEmoji ? '' : i % 4 === 0 ? 'text-gradient-pink' : i % 3 === 0 ? 'text-gradient' : '';
       const inlineStyle = isEmoji ? '' : (i % 4 !== 0 && i % 3 !== 0 ? 'color: var(--ink-soft);' : '');
       return (
-        <span class="mx-6 inline-flex shrink-0 items-center gap-6 text-3xl font-medium leading-[1.4] sm:text-4xl">
-          <span class={`font-display inline-block pb-1.5 ${gradient}`} style={inlineStyle}>{item}</span>
+        <span class="inline-flex shrink-0 items-center text-3xl font-medium leading-[1.4] sm:text-4xl">
+          {/* even gaps both sides */}
+          <span class={`font-display mx-9 inline-block pb-1.5 ${gradient}`} style={inlineStyle}>{item}</span>
           <span class="inline-block h-2 w-2 rounded-full bg-cow-300"></span>
         </span>
       );
