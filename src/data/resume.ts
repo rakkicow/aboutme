@@ -22,8 +22,8 @@ Outside class I tinker — circuits, enclosures, small web builds for family and
 };
 
 // resume pdfs
-export const resumeVisualPdf = '/RGupta%20-%20ResumeVis.pdf';
-export const resumeFullPdf = '/RGupta%20-%20ResumeFull.pdf';
+export const resumeVisualPdf = '/RGupta-ResumeVis.pdf';
+export const resumeFullPdf = '/RGupta-ResumeFull.pdf';
 
 // coursework
 export const coursework: { code: string; name: string; grade?: string }[] = [
