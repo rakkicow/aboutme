@@ -4,7 +4,7 @@
 
 (414) 526-2678 · rakgupta@purdue.edu · [rakshita.me](https://rakshita.me)
 
-[Visual résumé](https://rakshita.me/ResumeVis) · [Full résumé](https://rakshita.me/ResumeFull) · [LinkedIn](https://www.linkedin.com/in/rakshita-gupta-4571a7251)
+[Visual résumé](https://rakshita.me/ResumeVis) · [Full résumé](https://rakshita.me/ResumeFull) · [LinkedIn](https://www.linkedin.com/in/rakhicow/)
 
 ---
 

@@ -10,7 +10,7 @@ export const bio = {
   location: 'West Lafayette, Indiana',
   email: 'rakgupta@purdue.edu',
   phone: '(414) 526-2678',
-  linkedin: 'https://www.linkedin.com/in/rakshita-gupta-4571a7251',
+  linkedin: 'https://www.linkedin.com/in/rakhicow/',
   github: 'https://github.com/rakkicow',
   youtube: 'https://www.youtube.com/c/cdiofficial',
   summary: 'I make the moves up as I go.',
