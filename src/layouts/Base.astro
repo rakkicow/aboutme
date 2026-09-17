@@ -3,6 +3,7 @@ import '~/styles/global.css';
 import Nav from '~/components/Nav.astro';
 import Footer from '~/components/Footer.astro';
 import Cursor from '~/components/Cursor.astro';
+import Analytics from '~/components/Analytics.astro';
 
 interface Props {
   title?: string;
@@ -80,6 +81,7 @@ const personSchema = {
         } catch {}
       })();
     </script>
+    <Analytics />
   </head>
   <body class="relative overflow-x-hidden">
     <Cursor />

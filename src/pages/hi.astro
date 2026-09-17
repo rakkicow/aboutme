@@ -4,6 +4,7 @@
 import '~/styles/global.css';
 import Monogram from '~/components/Monogram.astro';
 import { bio, resumeFullPdf } from '~/data/resume';
+import Analytics from '~/components/Analytics.astro';
 
 const title = 'Ria Gupta · Links';
 const description =
@@ -121,6 +122,7 @@ const links: { label: string; href: string; icon: IconName; meta?: string }[] = 
         }
       </style>
     </noscript>
+    <Analytics />
   </head>
   <body class="hub-page">
     <div class="hub">

@@ -1,0 +1,12 @@
+---
+// clarity — home, /hi, link stubs
+// prod only, no dev noise
+const CLARITY_ID = 'yjy5h2lkta';
+---
+
+{import.meta.env.PROD && CLARITY_ID && (
+  <script
+    is:inline
+    set:html={`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${CLARITY_ID}");`}
+  />
+)}
